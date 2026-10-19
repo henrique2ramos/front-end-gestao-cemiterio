@@ -26,7 +26,7 @@ const getToken = () => localStorage.getItem('memorialAdminToken') || '';
 const isAbsoluteUrl = (src) => /^(https?:)?\/\//i.test(src) || src.startsWith('data:');
 const resolveOnce = (src) => (!src || isAbsoluteUrl(src) ? src : resolveImageUrl(src));
 
-export default function AdminFalecidos() {
+export default function AdminFalecidos({ onLogout }) {
     const [falecidos, setFalecidos] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -227,7 +227,7 @@ export default function AdminFalecidos() {
 
     return (
         <div className={styles.adminLayout}>
-            <AdminSidebar />
+            <AdminSidebar onLogout={onLogout} />
 
             <main className={styles.mainContent}>
                 <div className={styles.container}>

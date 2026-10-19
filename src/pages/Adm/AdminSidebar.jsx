@@ -1,71 +1,71 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
-    LayoutDashboard, Users, Map as MapIcon, Home, ChevronRight, ChevronLeft,
+    LayoutDashboard, Users, Map as MapIcon, LogOut, ChevronRight, ChevronLeft, Church,
 } from 'lucide-react';
 import styles from './AdminSidebar.module.css';
 
 const MENU = [
-    {
-        itens: [
-            { to: '/admin', label: 'Inicio', icon: LayoutDashboard, end: true },
-            { to: '/admin/falecidos', label: 'Falecidos', icon: Users },
-            { to: '/admin/quadraslotes', label: 'Quadras e Lotes', icon: MapIcon },
-        ],
-    },
+    { to: '/admin', label: 'Início', icon: LayoutDashboard, end: true },
+    { to: '/admin/falecidos', label: 'Falecidos', icon: Users },
+    { to: '/admin/quadraslotes', label: 'Quadras e Lotes', icon: MapIcon },
 ];
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ onLogout }) {
     const [isOpen, setIsOpen] = useState(false);
     const navigate = useNavigate();
 
-    const toggleSidebar = () => setIsOpen(!isOpen);
     const closeOnMobile = () => setIsOpen(false);
+    const handleLogout = () => {
+        onLogout();
+        closeOnMobile();
+        navigate('/login', { replace: true });
+    };
 
     return (
         <>
-            {isOpen && <div className={styles.overlay} onClick={toggleSidebar}></div>}
+            {isOpen && <button type="button" className={styles.overlay} onClick={closeOnMobile} aria-label="Fechar menu" />}
 
             <aside className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}>
-
-                <button className={styles.trayToggle} onClick={toggleSidebar}>
-                    {isOpen ? <ChevronLeft size={24} /> : <ChevronRight size={24} />}
+                <button
+                    type="button"
+                    className={styles.trayToggle}
+                    onClick={() => setIsOpen((current) => !current)}
+                    aria-label={isOpen ? 'Fechar menu' : 'Abrir menu'}
+                    aria-expanded={isOpen}
+                >
+                    {isOpen ? <ChevronLeft size={21} /> : <ChevronRight size={21} />}
                 </button>
 
-                <div className={styles.sidebarHeader}>
-                    <h2>Adm Menu</h2>
-                </div>
+                <NavLink to="/admin" className={styles.sidebarHeader} onClick={closeOnMobile}>
+                    <span className={styles.brandMark} aria-hidden="true">
+                        <Church size={35} strokeWidth={1.7} />
+                    </span>
+                    <span className={styles.brandText}>
+                        <span>Painel Administrativo</span>
+                    </span>
+                </NavLink>
 
-                <nav className={styles.sidebarNav}>
-                    {MENU.map((grupo) => (
-                        <div key={grupo.titulo} className={styles.navGroup}>
-                            <span className={styles.navGroupTitle}>{grupo.titulo}</span>
-
-                            {grupo.itens.map(({ to, label, icon: Icon, end, soon }) =>
-                                soon ? (
-                                    <span key={to} className={`${styles.navItem} ${styles.navItemSoon}`} aria-disabled="true">
-                                        <Icon size={20} /> {label}
-                                        <small className={styles.soonTag}>Em breve</small>
-                                    </span>
-                                ) : (
-                                    <NavLink
-                                        key={to}
-                                        to={to}
-                                        end={end}
-                                        onClick={closeOnMobile}
-                                        className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}
-                                    >
-                                        <Icon size={20} /> {label}
-                                    </NavLink>
-                                )
-                            )}
-                        </div>
+                <div className={styles.navLabel}>Menu principal</div>
+                <nav className={styles.sidebarNav} aria-label="Menu administrativo">
+                    {MENU.map(({ to, label, icon: Icon, end }) => (
+                        <NavLink
+                            key={to}
+                            to={to}
+                            end={end}
+                            onClick={closeOnMobile}
+                            className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}
+                        >
+                            <Icon size={19} strokeWidth={1.9} />
+                            <span>{label}</span>
+                        </NavLink>
                     ))}
                 </nav>
 
                 <div className={styles.sidebarFooter}>
-                    <button className={styles.navItem} onClick={() => navigate('/')}>
-                        <Home size={20} /> Voltar ao início
+                    <button type="button" className={styles.navItem} onClick={handleLogout}>
+                        <LogOut size={19} strokeWidth={1.9} />
+                        <span>Sair</span>
                     </button>
                 </div>
             </aside>
