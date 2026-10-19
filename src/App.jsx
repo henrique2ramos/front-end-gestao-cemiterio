@@ -78,7 +78,7 @@ function App() {
           path="admin"
           element={(
             <AdminRoute isAuthenticated={isAuthenticated}>
-              <AdminDashboard />
+              <AdminDashboard onLogout={handleLogout} />
             </AdminRoute>
           )}
         />
@@ -86,7 +86,7 @@ function App() {
           path="admin/falecidos"
           element={(
             <AdminRoute isAuthenticated={isAuthenticated}>
-              <AdminFalecidos />
+              <AdminFalecidos onLogout={handleLogout} />
             </AdminRoute>
           )}
         />
@@ -94,7 +94,7 @@ function App() {
           path="admin/quadraslotes"
           element={(
             <AdminRoute isAuthenticated={isAuthenticated}>
-              <AdminQuadrasLotes />
+              <AdminQuadrasLotes onLogout={handleLogout} />
             </AdminRoute>
           )}
         />

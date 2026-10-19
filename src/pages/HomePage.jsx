@@ -91,7 +91,7 @@ export default function HomePage() {
         <div className={styles.integratedContent}>
           <div className={styles.integratedHeader}>
             <h1 className={styles.heroTitle}>
-              <span className={styles.heroTitlePrefix}>Falecido Municipal</span>
+              <span className={styles.heroTitlePrefix}>Cemitério Municipal</span>
               <span className={styles.heroLineStrong}>São Miguel</span>
             </h1>
             <p className={styles.heroSubtitle}>

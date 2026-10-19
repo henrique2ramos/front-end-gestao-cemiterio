@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import styles from './HelpPage.module.css';
 
 const CONTATO = {
-    telefone: '(00) 0000-0000',
+    telefone: '(83) 3277-1234',
     horario: 'Segunda a sexta, das 8h às 17h',
     endereco: 'Endereço do atendimento, Pirpirituba',
 };
