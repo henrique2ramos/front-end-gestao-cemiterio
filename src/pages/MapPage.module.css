@@ -1,0 +1,513 @@
+.page {
+    min-height: 100vh;
+    background: #f3f0ee;
+    color: #44474e;
+    font-family: 'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+}
+
+/* ---------------- TOPO ---------------- */
+.heroBanner {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding: 80px 24px 72px;
+    text-align: center;
+    color: #ffffff;
+    background:
+        radial-gradient(ellipse 52% 95% at 4% 0%, rgba(255, 255, 255, 0.14), transparent 68%),
+        radial-gradient(ellipse 48% 78% at 96% 100%, rgba(7, 70, 144, 0.2), transparent 72%),
+        #1565c0;
+}
+
+.heroBanner::before {
+    content: '';
+    position: absolute;
+    z-index: 0;
+    width: min(55vw, 700px);
+    height: min(55vw, 700px);
+    right: -18%;
+    top: -60%;
+    border: 1px solid rgba(255, 255, 255, 0.13);
+    border-radius: 46% 54% 62% 38% / 42% 40% 60% 58%;
+    background: rgba(255, 255, 255, 0.045);
+    transform: rotate(-22deg);
+}
+
+.heroContent {
+    position: relative;
+    z-index: 1;
+    max-width: 680px;
+    margin: 0 auto;
+}
+
+.heroLabel {
+    display: block;
+    margin-bottom: 14px;
+    color: #ffd283;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+}
+
+.heroBanner h1 {
+    margin: 0;
+    color: #ffd283;
+    font-family: 'Cormorant Garamond', 'Georgia', serif;
+    font-size: clamp(2.8rem, 6vw, 4.4rem);
+    font-weight: 600;
+    line-height: 1.05;
+}
+
+.heroBanner h1::after {
+    content: '';
+    display: block;
+    width: 110px;
+    height: 2px;
+    margin: 22px auto 0;
+    background: linear-gradient(90deg, transparent, #ffd283, transparent);
+}
+
+.heroBanner p {
+    max-width: 560px;
+    margin: 24px auto 0;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.08rem;
+    line-height: 1.75;
+}
+
+/* ---------------- LAYOUT ---------------- */
+.main {
+    padding: 48px 24px 88px;
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 380px;
+    gap: 32px;
+    align-items: start;
+    max-width: 1240px;
+    margin: 0 auto;
+}
+
+/* ---------------- MAPA ---------------- */
+.mapWrapper {
+    width: 100%;
+    max-width: calc(82vh * var(--ratio, 1.6) + 20px);
+    margin: 0 auto;
+    padding: 10px;
+    border-radius: 3px;
+    background: #fffefd;
+    box-shadow:
+        0 1px 2px rgba(60, 40, 20, 0.08),
+        0 14px 40px rgba(40, 30, 20, 0.12);
+}
+
+.map {
+    position: relative;
+    width: 100%;
+    aspect-ratio: var(--ratio, 1.6);
+    overflow: hidden;
+    border-radius: 2px;
+    background: #e9ecef;
+    touch-action: pan-y;
+}
+
+.map.zoomed {
+    cursor: grab;
+    touch-action: none;
+}
+
+.map.grabbing {
+    cursor: grabbing;
+}
+
+.layer {
+    position: absolute;
+    inset: 0;
+    transform-origin: center;
+    transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+    user-select: none;
+}
+
+.noTransition {
+    transition: none;
+}
+
+.layer img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+}
+
+.mapOverlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 34, 68, 0.06);
+    pointer-events: none;
+}
+
+/* modo ?calibrar */
+.calibrar {
+    position: absolute;
+    left: 12px;
+    bottom: 12px;
+    z-index: 10;
+    padding: 8px 12px;
+    border-radius: 6px;
+    color: #ffffff;
+    background: rgba(0, 20, 50, 0.85);
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+/* ---------------- CONTROLES ---------------- */
+.mapControls {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mapControls button {
+    display: flex;
+    width: 44px;
+    height: 44px;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 10px;
+    color: #1565c0;
+    background: #ffffff;
+    box-shadow: 0 4px 14px rgba(0, 20, 50, 0.18);
+    cursor: pointer;
+    transition: background 0.2s, opacity 0.2s;
+}
+
+.mapControls button:hover:not(:disabled) {
+    background: #fffaf0;
+    color: #775a19;
+}
+
+.mapControls button:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+/* ---------------- PINOS ---------------- */
+.sectorPin {
+    position: absolute;
+    display: flex;
+    width: 40px;
+    height: 40px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    color: #ffffff;
+    background: #b8860b;
+    font-family: 'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0, 20, 50, 0.4);
+    /* --inv mantém o pino do mesmo tamanho mesmo com zoom */
+    transform: translate(-50%, -50%) scale(calc(var(--inv, 1) * var(--hover, 1)));
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.sectorPin:hover {
+    --hover: 1.15;
+    z-index: 20;
+    background: #9a6f08;
+}
+
+.sectorActive {
+    --hover: 1.2;
+    z-index: 20;
+    background: #1565c0;
+    box-shadow: 0 8px 24px rgba(0, 32, 70, 0.5);
+}
+
+.sectorActive:hover {
+    background: #1565c0;
+}
+
+.sectorTooltip {
+    position: absolute;
+    bottom: calc(100% + 12px);
+    left: 50%;
+    padding: 9px 14px;
+    border-radius: 6px;
+    color: #ffffff;
+    background: #0b2a55;
+    text-align: left;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-50%);
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+}
+
+.sectorTooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -6px;
+    border: 6px solid transparent;
+    border-top-color: #0b2a55;
+}
+
+.sectorTooltip strong {
+    display: block;
+    margin-bottom: 2px;
+    font-size: 0.9rem;
+}
+
+.sectorTooltip span {
+    display: block;
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 0.78rem;
+    font-weight: 500;
+}
+
+.sectorPin:hover .sectorTooltip,
+.sectorPin:focus-visible .sectorTooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* ---------------- PAINEL (folha de papel) ---------------- */
+.panel {
+    position: sticky;
+    top: 96px;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    padding: 36px 32px 32px;
+    border-radius: 3px;
+    background: #fffefd;
+    box-shadow:
+        0 1px 2px rgba(60, 40, 20, 0.08),
+        0 14px 40px rgba(40, 30, 20, 0.12);
+}
+
+.panelLabel {
+    display: block;
+    margin-bottom: 8px;
+    color: #775a19;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+.panelTitle {
+    margin: 0 0 10px;
+    color: #002046;
+    font-family: 'Cormorant Garamond', 'Georgia', serif;
+    font-size: 2rem;
+    font-weight: 600;
+    line-height: 1.15;
+}
+
+.panelSub {
+    margin: 0 0 8px;
+    line-height: 1.7;
+}
+
+.groupTitle {
+    margin: 26px 0 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e4dfdb;
+    color: #775a19;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+/* lista de quadras */
+.sectorList {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.sectorList li {
+    border-bottom: 1px dashed #e4dfdb;
+}
+
+.sectorList li:last-child {
+    border-bottom: 0;
+}
+
+.sectorList button {
+    display: flex;
+    width: 100%;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 4px;
+    border: none;
+    background: transparent;
+    color: #002046;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.sectorList button:hover {
+    background: #fffaf0;
+}
+
+.sectorList span {
+    color: #6b6e75;
+    font-size: 0.88rem;
+}
+
+/* grade de lotes */
+.lots {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+    gap: 6px;
+}
+
+.lot {
+    display: flex;
+    height: 38px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #e4dfdb;
+    border-radius: 6px;
+    color: #9a9da4;
+    background: #ffffff;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.lotTaken {
+    border-color: #1565c0;
+    color: #ffffff;
+    background: #1565c0;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+}
+
+.lotTaken:hover {
+    background: #0d477e;
+    transform: translateY(-1px);
+}
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-top: 14px;
+    color: #6b6e75;
+    font-size: 0.82rem;
+}
+
+.legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.legend i {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+}
+
+.legendTaken {
+    background: #1565c0;
+}
+
+.legendFree {
+    border: 1px solid #cfc9c4;
+    background: #ffffff;
+}
+
+/* pessoas */
+.people {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.people li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px dashed #e4dfdb;
+}
+
+.people li:last-child {
+    border-bottom: 0;
+}
+
+.people a {
+    color: #002046;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.people a:hover {
+    color: #1565c0;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.people span {
+    flex-shrink: 0;
+    color: #775a19;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.emptyMsg {
+    margin: 0;
+    padding: 8px 0;
+    color: #6b6e75;
+    font-style: italic;
+    line-height: 1.6;
+}
+
+/* ---------------- RESPONSIVO ---------------- */
+@media (max-width: 1024px) {
+    .layout {
+        grid-template-columns: 1fr;
+    }
+
+    .panel {
+        position: static;
+        max-height: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .heroBanner {
+        padding: 60px 20px 60px;
+    }
+
+    .main {
+        padding: 32px 14px 64px;
+    }
+
+    .panel {
+        padding: 28px 22px;
+    }
+}

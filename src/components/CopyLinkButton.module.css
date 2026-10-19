@@ -1,0 +1,36 @@
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-sizing: border-box;
+    min-height: 44px;
+    padding: 0 24px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    background: #eef3f9;
+    color: #003366;
+}
+
+.button:hover:not(:disabled) {
+    background: #dce7f4;
+}
+
+.button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.copiado {
+    background: #e7f5ec;
+    color: #1b6b38;
+}
+
+.copiado:hover:not(:disabled) {
+    background: #d3ebdc;
+}

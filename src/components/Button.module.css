@@ -1,0 +1,85 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  gap: 8px;
+  border-radius: 20px;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+}
+
+.icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Sizes */
+.small {
+  padding: 10px 24px;
+  font-size: 0.85rem;
+}
+
+.medium {
+  padding: 12px 24px;
+  font-size: 0.9rem;
+}
+
+.large {
+  padding: 16px 32px;
+  font-size: 1rem;
+}
+
+/* Variants */
+.primary {
+  background: #1565c0;
+  color: white;
+  border: 1px solid #1565c0;
+}
+
+.primary:hover {
+  background: #0d477e;
+  border-color: #0d477e;
+}
+
+.secondary {
+  background: transparent;
+  color: var(--gray-700);
+  border: 1px solid var(--gray-300);
+}
+
+.secondary:hover {
+  background: var(--gray-100);
+  border-color: var(--gray-400);
+}
+
+.ghost {
+  background: transparent;
+  color: var(--gray-700);
+  border: 1px solid transparent;
+}
+
+.ghost:hover {
+  background: var(--gray-100);
+}
+
+.accent {
+  background: var(--gold-500);
+  color: white;
+  border: 1px solid var(--gold-500);
+}
+
+.accent:hover {
+  background: var(--gold-600);
+  border-color: var(--gold-600);
+}
+
+.fullWidth {
+  width: 100%;
+}

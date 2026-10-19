@@ -1,0 +1,35 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 48px 24px;
+    color: #888888;
+}
+
+.spinner {
+    display: block;
+    border-style: solid;
+    border-color: rgba(0, 102, 204, 0.18);
+    border-top-color: #0066cc;
+    border-radius: 50%;
+    animation: girar 0.8s linear infinite;
+}
+
+.label {
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+@keyframes girar {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .spinner {
+        animation-duration: 2.4s;
+    }
+}

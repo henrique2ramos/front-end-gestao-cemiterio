@@ -1,0 +1,320 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  background: #fbf9f8;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+}
+
+.card {
+  width: min(100%, 460px);
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 32, 70, 0.08);
+  border-radius: 24px;
+  padding: 40px 32px;
+  box-shadow: 0 20px 45px rgba(0, 32, 70, 0.08);
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+
+.brandBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+
+.brandIcon {
+  width: calc(100% + 64px);
+  height: 90px;
+  margin: -40px -32px 0;
+  background: #1565c0;
+  display: grid;
+  place-items: center;
+}
+
+.brandIcon img {
+  width: 145px;
+  height: 95px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+.brandText {
+  text-align: center;
+}
+
+.eyebrow {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #5d738f;
+  margin-bottom: 6px;
+  font-family: 'Segoe UI', 'Arial', sans-serif;
+}
+
+.brandText h1 {
+  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+  font-size: 2rem;
+  line-height: 1.2;
+  color: #1b1c19;
+  font-weight: 700;
+  font-family: 'Segoe UI', 'Arial', sans-serif;
+}
+
+.intro {
+  text-align: center;
+  margin: 18px 0 24px;
+}
+
+.intro p {
+  color: #5c6470;
+  font-size: 0.98rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fieldHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.fieldLabel {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #44474e;
+}
+
+.linkText {
+  font-size: 0.82rem;
+  color: #002046;
+  font-weight: 600;
+}
+
+.inputWrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  height: 50px;
+  border: 1px solid #d8dde3;
+  border-radius: 14px;
+  background: #faf9f4;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.inputWrapper:focus-within {
+  border-color: #002046;
+  box-shadow: 0 0 0 4px rgba(0, 32, 70, 0.08);
+}
+
+.inputIcon {
+  color: #6b7686;
+  flex-shrink: 0;
+}
+
+.inputWrapper input {
+  flex: 1;
+  height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #1b1c19;
+}
+
+.checkboxRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #57606a;
+  font-size: 0.92rem;
+  cursor: pointer;
+}
+
+.checkboxRow input {
+  width: 16px;
+  height: 16px;
+  accent-color: #002046;
+}
+
+.submitButton {
+  margin-top: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 50px;
+  border-radius: 999px;
+  background: #002046;
+  color: #ffffff;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: 0 10px 24px rgba(0, 32, 70, 0.16);
+}
+
+.submitButton:hover {
+  background: #1b365d;
+  transform: translateY(-1px);
+}
+
+.supportBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 24px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: #dde0e6;
+  color: #5d6772;
+}
+
+.supportIcon {
+  color: #002046;
+}
+
+.backLink {
+  display: inline-flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 18px;
+  color: #002046;
+  font-weight: 600;
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(6, 18, 31, 0.52);
+  backdrop-filter: blur(4px);
+}
+
+.modalCard {
+  position: relative;
+  width: min(100%, 420px);
+  background: linear-gradient(180deg, #ffffff 0%, #f7f9fc 100%);
+  border: 1px solid rgba(0, 32, 70, 0.08);
+  border-radius: 24px;
+  box-shadow: 0 24px 70px rgba(7, 22, 38, 0.22);
+  padding: 32px 28px 24px;
+  text-align: center;
+  animation: modalFadeIn 200ms ease;
+}
+
+.modalCloseButton {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: #edf3ff;
+  color: #1e3c5f;
+  cursor: pointer;
+}
+
+.modalIconWrap {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fff1e8 0%, #ffe4d3 100%);
+  display: grid;
+  place-items: center;
+}
+
+.modalIcon {
+  color: #d96a2a;
+}
+
+.modalCard h2 {
+  margin: 0 0 8px;
+  color: #11263d;
+  font-size: 1.5rem;
+  font-family: 'Segoe UI', 'Arial', sans-serif;
+}
+
+.modalCard p {
+  margin: 0 0 18px;
+  color: #5a6471;
+  line-height: 1.6;
+  font-family: 'Segoe UI', 'Arial', sans-serif;
+}
+
+.modalButton {
+  width: 100%;
+  height: 48px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #0d3d6b 0%, #0b5bb4 100%);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 12px 28px rgba(11, 91, 180, 0.2);
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 640px) {
+  .card {
+    padding: 28px 20px;
+  }
+
+  .brandText h1 {
+    font-size: 1.4rem;
+  }
+
+  .brandBlock {
+    margin-bottom: 8px;
+  }
+
+  .brandIcon {
+    width: calc(100% + 40px);
+    margin: -28px -20px 0;
+  }
+}
+
+.submitButton,
+.modalButton {
+  background: #1565c0;
+}
+
+.submitButton:hover {
+  background: #0d477e;
+}

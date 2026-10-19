@@ -1,0 +1,344 @@
+.page {
+  min-height: 100vh;
+  background: #f3f0ee;
+  color: #44474e;
+  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+}
+
+/* ---------------- TOPO (azul institucional) ---------------- */
+.hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: 80px 24px 80px;
+  text-align: center;
+  color: #ffffff;
+  background:
+    radial-gradient(ellipse 50% 90% at 8% 0%, rgba(255, 255, 255, 0.14), transparent 70%),
+    radial-gradient(ellipse 45% 80% at 95% 100%, rgba(7, 70, 144, 0.25), transparent 72%),
+    #1565c0;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  width: min(55vw, 700px);
+  height: min(55vw, 700px);
+  right: -18%;
+  top: -60%;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 46% 54% 62% 38% / 42% 40% 60% 58%;
+  background: rgba(255, 255, 255, 0.045);
+  transform: rotate(-22deg);
+}
+
+.heroContent {
+  position: relative;
+  z-index: 1;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.heroLabel {
+  display: block;
+  margin-bottom: 14px;
+  color: #ffd283;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.heroTitle {
+  margin: 0;
+  color: #ffd283;
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: clamp(2.8rem, 6vw, 4.4rem);
+  font-weight: 600;
+  line-height: 1.05;
+}
+
+.heroTitle::after {
+  content: '';
+  display: block;
+  width: 110px;
+  height: 2px;
+  margin: 22px auto 0;
+  background: linear-gradient(90deg, transparent, #ffd283, transparent);
+}
+
+.heroText {
+  max-width: 560px;
+  margin: 24px auto 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.08rem;
+  line-height: 1.75;
+}
+
+/* ---------------- LAYOUT ---------------- */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 32px;
+  align-items: start;
+  max-width: 1040px;
+  margin: 56px auto 0;
+  padding: 0 24px 96px;
+  position: relative;
+  z-index: 1;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+/* ---------------- A FOLHA ---------------- */
+.sheet {
+  padding: 48px 52px 40px;
+  background: #fffefd;
+  border-radius: 3px;
+  box-shadow:
+    0 1px 2px rgba(60, 40, 20, 0.08),
+    0 14px 40px rgba(40, 30, 20, 0.12);
+}
+
+.sheetTitle {
+  margin: 0 0 12px;
+  color: #002046;
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: clamp(1.9rem, 3.2vw, 2.4rem);
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.sheetIntro {
+  margin: 0 0 12px;
+  max-width: 560px;
+  line-height: 1.75;
+}
+
+.group {
+  padding-top: 28px;
+}
+
+.groupTitle {
+  margin: 0 0 6px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e4dfdb;
+  color: #775a19;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.checklist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.checklist li {
+  border-bottom: 1px dashed #e4dfdb;
+}
+
+.checklist li:last-child {
+  border-bottom: 0;
+}
+
+.checklist label {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 4px;
+  color: #002046;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.checklist input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.box {
+  position: relative;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  border: 1.5px solid #b9a77c;
+  border-radius: 4px;
+  background: #ffffff;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.box::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 6px;
+  width: 5px;
+  height: 10px;
+  border: solid #ffffff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) scale(0);
+  transition: transform 0.18s;
+}
+
+.checklist input:checked + .box {
+  border-color: #1565c0;
+  background: #1565c0;
+}
+
+.checklist input:checked + .box::after {
+  transform: rotate(45deg) scale(1);
+}
+
+.checklist input:focus-visible + .box {
+  outline: 2px solid #1565c0;
+  outline-offset: 2px;
+}
+
+.done span:last-child {
+  color: #8a8d94;
+  text-decoration: line-through;
+  text-decoration-color: rgba(138, 141, 148, 0.6);
+}
+
+.sheetNote {
+  margin: 32px 0 0;
+  padding-top: 20px;
+  border-top: 1px solid #e4dfdb;
+  font-style: italic;
+  line-height: 1.7;
+}
+
+/* ---------------- DÚVIDAS ---------------- */
+.faqTitle {
+  margin: 0 0 16px;
+  color: #002046;
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: 1.7rem;
+  font-weight: 600;
+}
+
+.faqItem {
+  padding: 16px 0;
+  border-bottom: 1px solid #ddd8d4;
+}
+
+.faqItem summary {
+  position: relative;
+  padding-right: 28px;
+  color: #002046;
+  font-weight: 600;
+  line-height: 1.5;
+  cursor: pointer;
+  list-style: none;
+}
+
+.faqItem summary::-webkit-details-marker {
+  display: none;
+}
+
+.faqItem summary::after {
+  content: '+';
+  position: absolute;
+  top: 0;
+  right: 0;
+  color: #775a19;
+  font-size: 1.3rem;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.faqItem[open] summary::after {
+  content: '–';
+}
+
+.faqItem p {
+  margin: 10px 0 0;
+  line-height: 1.7;
+}
+
+.faqLinks {
+  display: flex;
+  gap: 20px;
+}
+
+.faqLinks a {
+  color: #1565c0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ---------------- LATERAL DE CONTATO ---------------- */
+.aside {
+  position: sticky;
+  top: 96px;
+  padding: 32px 28px;
+  border-radius: 3px;
+  color: #ffffff;
+  background: #1565c0;
+  box-shadow: 0 14px 40px rgba(0, 20, 50, 0.3);
+}
+
+.asideTitle {
+  margin: 0 0 10px;
+  color: #ffdea5;
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: 1.8rem;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.asideText {
+  margin: 0 0 20px;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.65;
+}
+
+.asideContact {
+  margin: 0;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  font-size: 0.95rem;
+  line-height: 1.9;
+}
+
+.asideContact strong {
+  color: #ffdea5;
+  font-size: 1.1rem;
+}
+
+/* ---------------- RESPONSIVO ---------------- */
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .aside {
+    position: static;
+    order: 2;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero {
+    padding: 60px 20px 60px;
+  }
+
+  .layout {
+    padding: 0 14px 72px;
+  }
+
+  .sheet {
+    padding: 32px 22px 28px;
+  }
+}

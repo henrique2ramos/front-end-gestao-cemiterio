@@ -1,0 +1,30 @@
+# Dependências e build
+/node_modules/
+/dist/
+/build/
+.vite/
+/coverage/
+
+# Variáveis de ambiente
+.env
+.env.*
+!.env.example
+
+# Logs, temporários e histórico local
+*.log
+.cache/
+.tmp/
+.temp/
+history/
+.history/
+
+# Configurações locais de ferramentas
+.agents/
+.claude/
+.windsurf/
+
+# Editor e sistema operacional
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
