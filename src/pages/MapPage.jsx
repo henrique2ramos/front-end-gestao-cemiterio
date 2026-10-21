@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { ZoomIn, ZoomOut, RotateCcw, ChevronLeft, ChevronRight, Search, ArrowLeft } from 'lucide-react';
 import { fetchFalecidos, fetchLotes, fetchQuadras, resolveImageUrl } from '../lib/api';
 import styles from './MapPage.module.css';
-import mapaImg from '../assets/mapaExemplo.jfif';
+import mapaImg from '../assets/mapaExemplo.jpg';
 import personPlaceholder from '../assets/person-placeholder.svg';
 
 const MAX_ZOOM = 3;
