@@ -142,6 +142,14 @@
     border-bottom: 1px solid #eaeaea;
 }
 
+.memorialToolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
 .searchBox {
     display: flex;
     align-items: center;
@@ -151,6 +159,53 @@
     padding: 10px 16px;
     border-radius: 8px;
     max-width: 320px;
+}
+
+.memorialToolbar .searchBox {
+    flex: 1 1 240px;
+}
+
+.categoryFilters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.categoryFilter {
+    min-height: 38px;
+    padding: 0 14px;
+    border: 1px solid #d1dbe7;
+    border-radius: 8px;
+    color: #38516f;
+    background: #ffffff;
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.categoryFilter:hover {
+    border-color: #7ea9d8;
+    background: #f5f9ff;
+}
+
+.categoryFilterActive {
+    border-color: #1565c0;
+    color: #ffffff;
+    background: #1565c0;
+}
+
+.categoryFilterActive:hover {
+    border-color: #0d477e;
+    color: #ffffff;
+    background: #0d477e;
+}
+
+.categoryFilter:focus-visible {
+    outline: 3px solid rgba(21, 101, 192, 0.3);
+    outline-offset: 2px;
 }
 
 .searchBox input {
@@ -871,6 +926,22 @@
     .formGrid {
         grid-template-columns: 1fr;
         gap: 16px;
+    }
+
+    .memorialToolbar {
+        align-items: stretch;
+    }
+
+    .memorialToolbar .searchBox {
+        max-width: none;
+    }
+
+    .categoryFilters {
+        width: 100%;
+    }
+
+    .categoryFilter {
+        flex: 1 1 auto;
     }
 
     .paginationContainer {

@@ -25,11 +25,18 @@ const getToken = () => localStorage.getItem('memorialAdminToken') || '';
 // Só resolve a URL se ainda não for absoluta, para não prefixar o domínio duas vezes
 const isAbsoluteUrl = (src) => /^(https?:)?\/\//i.test(src) || src.startsWith('data:');
 const resolveOnce = (src) => (!src || isAbsoluteUrl(src) ? src : resolveImageUrl(src));
+const getCategory = (tipo) => {
+    const normalizedType = tipo?.toLowerCase();
+    if (['historica', 'historico', 'historical'].includes(normalizedType)) return 'historicos';
+    if (['recente', 'recent'].includes(normalizedType)) return 'recentes';
+    return 'outros';
+};
 
 export default function AdminFalecidos({ onLogout }) {
     const [falecidos, setFalecidos] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [activeCategory, setActiveCategory] = useState('todos');
     const [currentPage, setCurrentPage] = useState(1);
 
     const [selectedImageFile, setSelectedImageFile] = useState(null);
@@ -79,14 +86,18 @@ export default function AdminFalecidos({ onLogout }) {
     }, []);
 
     // --- FILTRAGEM ---
-    const filteredMemoriais = falecidos.filter(falecido =>
-        typeof falecido.nome === 'string' &&
-        falecido.nome.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [searchTerm]);
+    const categoryCounts = {
+        todos: falecidos.length,
+        recentes: falecidos.filter((falecido) => getCategory(falecido.tipo) === 'recentes').length,
+        historicos: falecidos.filter((falecido) => getCategory(falecido.tipo) === 'historicos').length,
+    };
+    const filteredMemoriais = falecidos.filter((falecido) => {
+        const matchesCategory = activeCategory === 'todos'
+            || getCategory(falecido.tipo) === activeCategory;
+        const matchesSearch = typeof falecido.nome === 'string'
+            && falecido.nome.toLowerCase().includes(searchTerm.toLowerCase());
+        return matchesCategory && matchesSearch;
+    });
 
     // --- PAGINAÇÃO ---
     const totalPages = Math.max(1, Math.ceil(filteredMemoriais.length / ITEMS_PER_PAGE));
@@ -243,15 +254,38 @@ export default function AdminFalecidos({ onLogout }) {
                     </header>
 
                     <div className={styles.card}>
-                        <div className={styles.toolbar}>
+                        <div className={`${styles.toolbar} ${styles.memorialToolbar}`}>
                             <div className={styles.searchBox}>
                                 <Search size={18} className={styles.searchIcon} />
                                 <input
                                     type="text"
                                     placeholder="Buscar falecido..."
                                     value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    onChange={(e) => {
+                                        setSearchTerm(e.target.value);
+                                        setCurrentPage(1);
+                                    }}
                                 />
+                            </div>
+                            <div className={styles.categoryFilters} role="group" aria-label="Filtrar por categoria">
+                                {[
+                                    { id: 'todos', label: 'Todos' },
+                                    { id: 'recentes', label: 'Recentes' },
+                                    { id: 'historicos', label: 'Históricos' },
+                                ].map(({ id, label }) => (
+                                    <button
+                                        key={id}
+                                        type="button"
+                                        className={`${styles.categoryFilter} ${activeCategory === id ? styles.categoryFilterActive : ''}`}
+                                        aria-pressed={activeCategory === id}
+                                        onClick={() => {
+                                            setActiveCategory(id);
+                                            setCurrentPage(1);
+                                        }}
+                                    >
+                                        {label} ({categoryCounts[id]})
+                                    </button>
+                                ))}
                             </div>
                         </div>
 
@@ -292,8 +326,8 @@ export default function AdminFalecidos({ onLogout }) {
                                                         </span>
                                                     </td>
                                                     <td>
-                                                        <span className={`${styles.badge} ${falecido.tipo === 'historica' ? styles.badgeHist : styles.badgeRec}`}>
-                                                            {falecido.tipo === 'historica' ? 'Histórico' : 'Recente'}
+                                                        <span className={`${styles.badge} ${getCategory(falecido.tipo) === 'historicos' ? styles.badgeHist : styles.badgeRec}`}>
+                                                            {getCategory(falecido.tipo) === 'historicos' ? 'Histórico' : 'Recente'}
                                                         </span>
                                                     </td>
                                                     <td className={styles.actionsCell}>
