@@ -5,45 +5,80 @@ import {
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import AdminSidebar from './AdminSidebar';
-import { fetchFalecidos, resolveImageUrl } from '../../lib/api';
+import { fetchFalecidos, fetchLotes, fetchQuadras, resolveImageUrl } from '../../lib/api';
 import styles from './AdminDashboard.module.css';
 
 export default function AdminDashboard({ onLogout }) {
     const navigate = useNavigate();
     const [falecidos, setFalecidos] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isEstruturaLoading, setIsEstruturaLoading] = useState(true);
+    const [estruturaError, setEstruturaError] = useState('');
+    const [totaisEstrutura, setTotaisEstrutura] = useState(null);
 
     useEffect(() => {
+        let cancelado = false;
+
         async function loadMemoriais() {
             try {
                 const data = await fetchFalecidos();
-                setFalecidos(data);
+                if (!cancelado) setFalecidos(data);
             } catch (error) {
                 console.error('Erro ao buscar memóriais no dashboard:', error);
-                setFalecidos([]);
+                if (!cancelado) setFalecidos([]);
             } finally {
-                setIsLoading(false);
+                if (!cancelado) setIsLoading(false);
             }
         }
 
         loadMemoriais();
+
+        return () => { cancelado = true; };
+    }, []);
+
+    useEffect(() => {
+        let cancelado = false;
+
+        async function loadEstrutura() {
+            try {
+                const quadrasData = await fetchQuadras();
+                if (!Array.isArray(quadrasData)) {
+                    throw new Error('A API retornou um formato inválido para as quadras.');
+                }
+
+                const lotesPorQuadra = await Promise.all(
+                    quadrasData.map(async (quadra) => {
+                        const data = await fetchLotes(quadra.id);
+                        if (!Array.isArray(data)) {
+                            throw new Error(`A API retornou um formato inválido para os lotes da quadra ${quadra.nome}.`);
+                        }
+                        return data;
+                    })
+                );
+
+                if (!cancelado) {
+                    setTotaisEstrutura({
+                        quadras: quadrasData.length,
+                        lotes: lotesPorQuadra.reduce((total, lotes) => total + lotes.length, 0),
+                    });
+                }
+            } catch (error) {
+                console.error('Erro ao buscar quadras e lotes no dashboard:', error);
+                if (!cancelado) {
+                    setTotaisEstrutura(null);
+                    setEstruturaError('Não foi possível carregar os totais de quadras e lotes.');
+                }
+            } finally {
+                if (!cancelado) setIsEstruturaLoading(false);
+            }
+        }
+
+        loadEstrutura();
+
+        return () => { cancelado = true; };
     }, []);
 
     const ultimosCadastros = falecidos.slice(0, 3);
-    const localizacoes = falecidos.map((falecido) => {
-        const localizacao = falecido.localizacao || '';
-
-        return {
-            quadra: localizacao.match(/Quadra\s+([^,]+)/i)?.[1]?.trim().toUpperCase(),
-            lote: localizacao.match(/Lote\s+([^,]+)/i)?.[1]?.trim(),
-        };
-    });
-    const quadras = [...new Set(localizacoes.map(({ quadra }) => quadra).filter(Boolean))];
-    const lotes = [...new Set(
-        localizacoes
-            .filter(({ lote }) => lote)
-            .map(({ quadra, lote }) => quadra ? `${quadra}-${lote}` : lote)
-    )];
 
     return (
         <div className={styles.adminLayout}>
@@ -80,7 +115,7 @@ export default function AdminDashboard({ onLogout }) {
                                 <Map size={28} />
                             </div>
                             <div className={styles.statInfo}>
-                                <h3>{quadras.length}</h3>
+                                <h3>{isEstruturaLoading ? '…' : totaisEstrutura?.quadras ?? '—'}</h3>
                                 <p>Quadras Cadastradas</p>
                             </div>
                         </div>
@@ -89,11 +124,14 @@ export default function AdminDashboard({ onLogout }) {
                                 <MapPin size={28} />
                             </div>
                             <div className={styles.statInfo}>
-                                <h3>{lotes.length}</h3>
+                                <h3>{isEstruturaLoading ? '…' : totaisEstrutura?.lotes ?? '—'}</h3>
                                 <p>Lotes Cadastrados</p>
                             </div>
                         </div>
                     </div>
+                    {estruturaError && (
+                        <p className={styles.statsError} role="alert">{estruturaError}</p>
+                    )}
 
                     <div className={styles.dashboardGrid}>
                         <section className={styles.quickActions}>

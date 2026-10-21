@@ -1,19 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
-import { fetchFalecidos } from '../lib/api';
+import { fetchFalecidos, fetchLotes, fetchQuadras } from '../lib/api';
 import styles from './MapPage.module.css';
 import mapaImg from '../assets/mapaExemplo.png';
 
 const MAX_ZOOM = 3;
 
 const SECTORS = [
-    { id: 'A', name: 'Quadra A', total: 60, x: 73, y: 95 },
-    { id: 'B', name: 'Quadra B', total: 60, x: 62, y: 75 },
-    { id: 'C', name: 'Quadra C', total: 60, x: 55, y: 60 },
-    { id: 'D', name: 'Quadra D', total: 80, x: 49, y: 48 },
-    { id: 'E', name: 'Quadra E', total: 80, x: 42, y: 30 },
-    { id: 'F', name: 'Quadra F', total: 100, x: 35, y: 10 },
+    { id: 'A', name: 'Quadra A', x: 73, y: 95 },
+    { id: 'B', name: 'Quadra B', x: 62, y: 75 },
+    { id: 'C', name: 'Quadra C', x: 55, y: 60 },
+    { id: 'D', name: 'Quadra D', x: 49, y: 48 },
+    { id: 'E', name: 'Quadra E', x: 42, y: 30 },
+    { id: 'F', name: 'Quadra F', x: 35, y: 10 },
 ];
 
 const CONTAINER_RATIO = 1.6;
@@ -34,9 +34,18 @@ function parseLocal(texto) {
     return { quadra: quadra[1].toUpperCase(), lote: lote ? Number(lote[1]) : null };
 }
 
+function normalizeQuadraId(nome) {
+    return typeof nome === 'string'
+        ? nome.trim().replace(/^quadra\s*/i, '').toUpperCase()
+        : '';
+}
+
 export default function MapPage() {
     const [selected, setSelected] = useState(null);
     const [falecidos, setFalecidos] = useState([]);
+    const [lotesPorQuadra, setLotesPorQuadra] = useState({});
+    const [lotesLoading, setLotesLoading] = useState(true);
+    const [lotesError, setLotesError] = useState(false);
     const [zoom, setZoom] = useState(1);
     const [offset, setOffset] = useState({ x: 0, y: 0 });
     const [dragging, setDragging] = useState(false);
@@ -59,6 +68,44 @@ export default function MapPage() {
         return () => {
             isMounted = false;
         };
+    }, []);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        async function loadLotes() {
+            try {
+                const quadras = await fetchQuadras();
+                if (!Array.isArray(quadras)) {
+                    throw new Error('Formato inválido ao carregar quadras.');
+                }
+
+                const lotes = await Promise.all(
+                    SECTORS.map(async (sector) => {
+                        const quadra = quadras.find(
+                            (item) => normalizeQuadraId(item.nome) === sector.id
+                        );
+                        if (!quadra) return [sector.id, []];
+
+                        const data = await fetchLotes(quadra.id);
+                        if (!Array.isArray(data)) {
+                            throw new Error(`Formato inválido ao carregar lotes da ${sector.name}.`);
+                        }
+                        return [sector.id, data];
+                    })
+                );
+
+                if (isMounted) setLotesPorQuadra(Object.fromEntries(lotes));
+            } catch (error) {
+                console.error('Erro ao carregar lotes do mapa:', error);
+                if (isMounted) setLotesError(true);
+            } finally {
+                if (isMounted) setLotesLoading(false);
+            }
+        }
+
+        loadLotes();
+        return () => { isMounted = false; };
     }, []);
 
     /* falecidos agrupados por quadra */
@@ -86,17 +133,21 @@ export default function MapPage() {
         return lotes.size;
     }
 
+    function totalLotes(sectorId) {
+        if (lotesLoading) return '…';
+        if (lotesError) return '—';
+        return lotesPorQuadra[sectorId]?.length || 0;
+    }
+
     const sector = SECTORS.find((s) => s.id === selected) || null;
-    const itensSetor = sector ? porQuadra[sector.id] : [];
-    const lotesOcupados = useMemo(() => {
-        const mapa = new Map();
-        itensSetor.forEach(({ falecido, lote }) => {
-            if (!lote) return;
-            if (!mapa.has(lote)) mapa.set(lote, []);
-            mapa.get(lote).push(falecido);
-        });
-        return mapa;
-    }, [itensSetor]);
+    const itensSetor = sector
+        ? porQuadra[sector.id]
+        : [];
+    const lotesSetor = sector
+        ? [...(lotesPorQuadra[sector.id] || [])].sort(
+            (a, b) => Number(a.numero) - Number(b.numero)
+        )
+        : [];
 
     /* ---------- zoom e arrastar ---------- */
     function clampOffset(off, z) {
@@ -221,7 +272,7 @@ export default function MapPage() {
                                     <button
                                         key={item.id}
                                         type="button"
-                                        aria-label={`${item.name}: ${ocupados(item.id)} de ${item.total} lotes com homenagem`}
+                                        aria-label={`${item.name}: ${ocupados(item.id)} de ${totalLotes(item.id)} lotes cadastrados`}
                                         aria-pressed={selected === item.id}
                                         className={`${styles.sectorPin} ${selected === item.id ? styles.sectorActive : ''}`}
                                         style={{ left: `${item.x}%`, top: `${item.y}%` }}
@@ -231,7 +282,7 @@ export default function MapPage() {
                                         <div className={styles.sectorTooltip}>
                                             <strong>{item.name}</strong>
                                             <span>
-                                                {ocupados(item.id)} de {item.total} lotes
+                                                {ocupados(item.id)} de {totalLotes(item.id)} lotes
                                             </span>
                                         </div>
                                     </button>
@@ -266,51 +317,37 @@ export default function MapPage() {
                             <>
                                 <span className={styles.panelLabel}>Quadra selecionada</span>
                                 <h2 className={styles.panelTitle}>{sector.name}</h2>
-                                <p className={styles.panelSub}>
-                                    {ocupados(sector.id)} de {sector.total} lotes com homenagem
-                                </p>
 
-                                <h3 className={styles.groupTitle}>Lotes</h3>
-                                <div className={styles.lots}>
-                                    {Array.from({ length: sector.total }, (_, i) => i + 1).map((numero) => {
-                                        const lista = lotesOcupados.get(numero);
-                                        if (lista) {
+                                <h3 className={styles.groupTitle}>Lotes cadastrados</h3>
+                                {lotesError ? (
+                                    <p className={styles.emptyMsg} role="alert">Não foi possível carregar os lotes desta quadra.</p>
+                                ) : lotesLoading ? (
+                                    <p className={styles.emptyMsg}>Carregando lotes...</p>
+                                ) : lotesSetor.length > 0 ? (
+                                    <div className={styles.lots}>
+                                        {lotesSetor.map((lote) => {
+                                            const numero = Number(lote.numero);
+                                            const memoriais = itensSetor.filter((item) => item.lote === numero);
+                                            const title = memoriais.length
+                                                ? `Lote ${numero}: ${memoriais.map((item) => item.falecido.nome).join(', ')}`
+                                                : `Lote ${numero}`;
+
                                             return (
                                                 <Link
-                                                    key={numero}
-                                                    to={`/falecidos/${lista[0].id}`}
-                                                    className={`${styles.lot} ${styles.lotTaken}`}
-                                                    title={`Lote ${numero}: ${lista.map((m) => m.nome).join(', ')}`}
+                                                    key={lote.id}
+                                                    to={memoriais.length
+                                                        ? `/falecidos/${memoriais[0].falecido.id}`
+                                                        : `/lote/${lote.id}`}
+                                                    className={`${styles.lot} ${memoriais.length ? styles.lotTaken : ''}`}
+                                                    title={title}
                                                 >
                                                     {numero}
                                                 </Link>
                                             );
-                                        }
-                                        return (
-                                            <span key={numero} className={styles.lot} title={`Lote ${numero}`}>
-                                                {numero}
-                                            </span>
-                                        );
-                                    })}
-                                </div>
-
-                                <div className={styles.legend}>
-                                    <span><i className={styles.legendTaken} /> Com homenagem</span>
-                                    <span><i className={styles.legendFree} /> Sem registro</span>
-                                </div>
-
-                                <h3 className={styles.groupTitle}>Homenageados nesta quadra</h3>
-                                {itensSetor.length > 0 ? (
-                                    <ul className={styles.people}>
-                                        {itensSetor.map(({ falecido, lote }) => (
-                                            <li key={falecido.id}>
-                                                <Link to={`/falecidos/${falecido.id}`}>{falecido.nome}</Link>
-                                                {lote && <span>Lote {lote}</span>}
-                                            </li>
-                                        ))}
-                                    </ul>
+                                        })}
+                                    </div>
                                 ) : (
-                                    <p className={styles.emptyMsg}>Ainda não há homenagens cadastradas nesta quadra.</p>
+                                    <p className={styles.emptyMsg}>Ainda não há lotes cadastrados nesta quadra.</p>
                                 )}
                             </>
                         ) : (
@@ -329,7 +366,7 @@ export default function MapPage() {
                                             <button type="button" onClick={() => selectSector(item)}>
                                                 <strong>{item.name}</strong>
                                                 <span>
-                                                    {ocupados(item.id)} de {item.total} lotes
+                                                    {ocupados(item.id)} de {totalLotes(item.id)} lotes
                                                 </span>
                                             </button>
                                         </li>

@@ -84,6 +84,12 @@
     margin-bottom: 23px;
 }
 
+.statsError {
+    margin: -12px 0 18px;
+    color: #a33b32;
+    font-size: 0.78rem;
+}
+
 .statCard {
     display: flex;
     min-width: 0;

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
-    LayoutDashboard, Users, Map as MapIcon, LogOut, ChevronRight, ChevronLeft, Church,
+    LayoutDashboard, Users, Map as MapIcon, LogOut, ChevronRight, ChevronLeft, Church, Home,
 } from 'lucide-react';
 import styles from './AdminSidebar.module.css';
 
@@ -9,6 +9,7 @@ const MENU = [
     { to: '/admin', label: 'Início', icon: LayoutDashboard, end: true },
     { to: '/admin/falecidos', label: 'Falecidos', icon: Users },
     { to: '/admin/quadraslotes', label: 'Quadras e Lotes', icon: MapIcon },
+    { to: '/', label: 'Voltar à página inicial', icon: Home, end: true },
 ];
 
 export default function AdminSidebar({ onLogout }) {
