@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { fetchFalecidos } from '../lib/api';
+import { getPageItems } from '../data/adminPagination';
 import FalecidoCard from '../components/FalecidoCard';
 import styles from './AllFalecidosPage.module.css';
 
@@ -245,33 +246,39 @@ export default function FalecidosPage() {
                             {totalPages > 1 && (
                                 <div className={styles.pagination}>
                                     <button
-                                        className={styles.pageBtn}
+                                        className={`${styles.pageBtn} ${styles.pageNavBtn}`}
                                         disabled={currentPage === 1}
                                         onClick={() => updateParams({ page: currentPage - 1 })}
+                                        aria-label="Página anterior"
                                     >
                                         <ChevronLeft size={18} />
                                     </button>
 
-                                    {Array.from(
-                                        { length: totalPages },
-                                        (_, index) => index + 1
-                                    ).map((number) => (
+                                    {getPageItems(currentPage, totalPages).map((item, index) => item === '…' ? (
+                                        <span key={`ellipsis-${index}`} className={styles.pageEllipsis} aria-hidden="true">…</span>
+                                    ) : (
                                         <button
-                                            key={number}
-                                            className={`${styles.pageBtn} ${number === currentPage ? styles.pageBtnActive : ''}`}
-                                            onClick={() => updateParams({ page: number })}
+                                            key={item}
+                                            className={`${styles.pageBtn} ${styles.pageNumberBtn} ${item === currentPage ? styles.pageBtnActive : ''}`}
+                                            onClick={() => updateParams({ page: item })}
+                                            aria-label={`Página ${item}`}
+                                            aria-current={item === currentPage ? 'page' : undefined}
                                         >
-                                            {number}
+                                            {item}
                                         </button>
                                     ))}
 
                                     <button
-                                        className={styles.pageBtn}
+                                        className={`${styles.pageBtn} ${styles.pageNavBtn}`}
                                         disabled={currentPage === totalPages}
                                         onClick={() => updateParams({ page: currentPage + 1 })}
+                                        aria-label="Próxima página"
                                     >
                                         <ChevronRight size={18} />
                                     </button>
+                                    <span className={styles.mobilePageCount} aria-live="polite">
+                                        Página {currentPage} de {totalPages}
+                                    </span>
                                 </div>
                             )}
                         </>

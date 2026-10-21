@@ -254,6 +254,9 @@
     justify-content: center;
     align-items: center;
     gap: 8px;
+    max-width: 100%;
+    flex-wrap: wrap;
+    margin: 0 auto;
 }
 
 .pageBtn {
@@ -294,6 +297,18 @@
     background: #0d477e;
     border-color: #0d477e;
     color: #ffffff;
+}
+
+.pageEllipsis {
+    display: grid;
+    min-width: 20px;
+    height: 44px;
+    place-items: center;
+    color: #555555;
+}
+
+.mobilePageCount {
+    display: none;
 }
 
 .empty {
@@ -374,5 +389,55 @@
     .cardDesc {
         font-size: 0.85rem;
         padding: 0 16px;
+    }
+
+    .pagination {
+        gap: 4px;
+        padding: 0 8px;
+    }
+
+    .pageBtn {
+        min-width: 36px;
+        height: 40px;
+    }
+
+    .pageEllipsis {
+        min-width: 14px;
+        height: 40px;
+    }
+}
+
+@media (max-width: 380px) {
+    .pagination {
+        gap: 2px;
+        padding: 0 4px;
+    }
+
+    .pageBtn {
+        min-width: 32px;
+        height: 36px;
+    }
+
+    .pageEllipsis {
+        min-width: 10px;
+        height: 36px;
+    }
+}
+
+@media (max-width: 420px) {
+    .pagination {
+        flex-wrap: nowrap;
+    }
+
+    .pageNumberBtn:not(.pageBtnActive),
+    .pageEllipsis {
+        display: none;
+    }
+
+    .mobilePageCount {
+        display: inline;
+        color: #555555;
+        font-size: 0.85rem;
+        white-space: nowrap;
     }
 }
