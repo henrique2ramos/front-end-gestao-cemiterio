@@ -5,11 +5,14 @@ import { fetchFalecidos } from '../lib/api';
 import FalecidoCard from '../components/FalecidoCard';
 import styles from './AllFalecidosPage.module.css';
 
-const PER_PAGE = 8;
+const DEFAULT_PER_PAGE = 8;
+const PER_PAGE_OPTIONS = [8, 16, 32, 50];
 
 export default function FalecidosPage() {
     const [searchParams, setSearchParams] = useSearchParams();
     const searchQuery = searchParams.get('search') || '';
+    const perPageParam = Number(searchParams.get('perPage'));
+    const perPage = PER_PAGE_OPTIONS.includes(perPageParam) ? perPageParam : DEFAULT_PER_PAGE;
     const [localSearch, setLocalSearch] = useState(searchQuery);
     const [falecidos, setFalecidos] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -26,7 +29,8 @@ export default function FalecidosPage() {
     function updateParams({
         search = searchQuery,
         filter = activeFilter,
-        page = 1
+        page = 1,
+        perPage: nextPerPage = perPage
     }, options = {}) {
         const params = new URLSearchParams(searchParams);
 
@@ -48,6 +52,11 @@ export default function FalecidosPage() {
             params.set('page', page);
         } else {
             params.delete('page');
+        }
+        if (nextPerPage === DEFAULT_PER_PAGE) {
+            params.delete('perPage');
+        } else {
+            params.set('perPage', nextPerPage);
         }
         setSearchParams(params, options);
     }
@@ -115,14 +124,21 @@ export default function FalecidosPage() {
 
     const totalPages = Math.max(
         1,
-        Math.ceil(filtered.length / PER_PAGE)
+        Math.ceil(filtered.length / perPage)
     );
 
-    const currentPage = Math.min(page, totalPages);
+    const currentPage = Math.max(1, Math.min(page, totalPages));
+    const paginationPages = totalPages <= 7
+        ? Array.from({ length: totalPages }, (_, index) => index + 1)
+        : currentPage <= 4
+            ? [1, 2, 3, 4, 5, 'ellipsis-end', totalPages]
+            : currentPage >= totalPages - 3
+                ? [1, 'ellipsis-start', ...Array.from({ length: 5 }, (_, index) => totalPages - 4 + index)]
+                : [1, 'ellipsis-start', currentPage - 1, currentPage, currentPage + 1, 'ellipsis-end', totalPages];
 
     const memoriaisPagina = filtered.slice(
-        (currentPage - 1) * PER_PAGE,
-        currentPage * PER_PAGE
+        (currentPage - 1) * perPage,
+        currentPage * perPage
     );
 
     function handleFilter(filter) {
@@ -227,11 +243,27 @@ export default function FalecidosPage() {
 
             <section className={styles.results}>
                 <div className={styles.container}>
-                    <p className={styles.resultsCount}>
-                        {filtered.length === 0
-                            ? 'Nenhum falecido encontrado.'
-                            : `${filtered.length} falecido${filtered.length > 1 ? 's' : ''} encontrado${filtered.length > 1 ? 's' : ''}.`}
-                    </p>
+                    <div className={styles.resultsToolbar}>
+                        <p className={styles.resultsCount}>
+                            {filtered.length === 0
+                                ? 'Nenhum falecido encontrado.'
+                                : `${filtered.length} falecido${filtered.length > 1 ? 's' : ''} encontrado${filtered.length > 1 ? 's' : ''}.`}
+                        </p>
+                        <label className={styles.pageSizeControl}>
+                            <span>Exibir por página</span>
+                            <select
+                                value={perPage}
+                                onChange={(event) => updateParams({
+                                    perPage: Number(event.target.value),
+                                    page: 1
+                                })}
+                            >
+                                {PER_PAGE_OPTIONS.map((option) => (
+                                    <option key={option} value={option}>{option}</option>
+                                ))}
+                            </select>
+                        </label>
+                    </div>
 
                     {memoriaisPagina.length > 0 ? (
                         <>
@@ -247,28 +279,36 @@ export default function FalecidosPage() {
                             {totalPages > 1 && (
                                 <div className={styles.pagination}>
                                     <button
+                                        type="button"
                                         className={styles.pageBtn}
+                                        aria-label="Página anterior"
                                         disabled={currentPage === 1}
                                         onClick={() => updateParams({ page: currentPage - 1 })}
                                     >
                                         <ChevronLeft size={18} />
                                     </button>
 
-                                    {Array.from(
-                                        { length: totalPages },
-                                        (_, index) => index + 1
-                                    ).map((number) => (
-                                        <button
-                                            key={number}
-                                            className={`${styles.pageBtn} ${number === currentPage ? styles.pageBtnActive : ''}`}
-                                            onClick={() => updateParams({ page: number })}
-                                        >
-                                            {number}
-                                        </button>
+                                    {paginationPages.map((number) => (
+                                        typeof number === 'number' ? (
+                                            <button
+                                                key={number}
+                                                type="button"
+                                                aria-label={`Página ${number}`}
+                                                aria-current={number === currentPage ? 'page' : undefined}
+                                                className={`${styles.pageBtn} ${number === currentPage ? styles.pageBtnActive : ''}`}
+                                                onClick={() => updateParams({ page: number })}
+                                            >
+                                                {number}
+                                            </button>
+                                        ) : (
+                                            <span key={number} className={styles.pageEllipsis} aria-hidden="true">…</span>
+                                        )
                                     ))}
 
                                     <button
+                                        type="button"
                                         className={styles.pageBtn}
+                                        aria-label="Próxima página"
                                         disabled={currentPage === totalPages}
                                         onClick={() => updateParams({ page: currentPage + 1 })}
                                     >

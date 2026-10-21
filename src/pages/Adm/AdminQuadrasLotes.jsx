@@ -24,6 +24,7 @@ import Spinner from '../../components/Spinner';
 import styles from './AdminQuadrasLotes.module.css';
 
 const ITEMS_PER_PAGE = 10;
+const VISIBLE_PAGE_WINDOW = 20;
 
 const getToken = () => localStorage.getItem('memorialAdminToken') || '';
 
@@ -265,6 +266,17 @@ export default function AdminFalecidos({ onLogout }) {
     const totalPages = Math.max(1, Math.ceil(filteredMemoriais.length / ITEMS_PER_PAGE));
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const currentMemoriais = filteredMemoriais.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+    const firstVisiblePage = currentPage <= VISIBLE_PAGE_WINDOW
+        ? 1
+        : currentPage - VISIBLE_PAGE_WINDOW + 1;
+    const lastVisiblePage = Math.min(totalPages, firstVisiblePage + VISIBLE_PAGE_WINDOW - 1);
+    const paginationPages = [
+        ...(firstVisiblePage > 1 ? [1, ...(firstVisiblePage > 2 ? ['ellipsis-start'] : [])] : []),
+        ...Array.from(
+            { length: lastVisiblePage - firstVisiblePage + 1 },
+            (_, index) => firstVisiblePage + index
+        ),
+    ];
 
     // --- SALVAR FALECIDO ---
     const saveFalecido = async (e) => {
@@ -781,11 +793,40 @@ export default function AdminFalecidos({ onLogout }) {
                                         Mostrando {startIndex + 1} a {Math.min(startIndex + ITEMS_PER_PAGE, filteredMemoriais.length)} de {filteredMemoriais.length}
                                     </p>
                                     <div className={styles.pagination}>
-                                        <button className={styles.pageBtn} disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}><ChevronLeft size={18} /></button>
-                                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                                            <button key={page} className={`${styles.pageBtn} ${page === currentPage ? styles.pageBtnActive : ''}`} onClick={() => setCurrentPage(page)}>{page}</button>
+                                        <button
+                                            type="button"
+                                            className={styles.pageBtn}
+                                            aria-label="Página anterior"
+                                            disabled={currentPage === 1}
+                                            onClick={() => setCurrentPage((page) => page - 1)}
+                                        >
+                                            <ChevronLeft size={18} />
+                                        </button>
+                                        {paginationPages.map((page) => (
+                                            typeof page === 'number' ? (
+                                                <button
+                                                    key={page}
+                                                    type="button"
+                                                    aria-label={`Página ${page}`}
+                                                    aria-current={page === currentPage ? 'page' : undefined}
+                                                    className={`${styles.pageBtn} ${page === currentPage ? styles.pageBtnActive : ''}`}
+                                                    onClick={() => setCurrentPage(page)}
+                                                >
+                                                    {page}
+                                                </button>
+                                            ) : (
+                                                <span key={page} className={styles.pageEllipsis} aria-hidden="true">…</span>
+                                            )
                                         ))}
-                                        <button className={styles.pageBtn} disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}><ChevronRight size={18} /></button>
+                                        <button
+                                            type="button"
+                                            className={styles.pageBtn}
+                                            aria-label="Próxima página"
+                                            disabled={currentPage === totalPages}
+                                            onClick={() => setCurrentPage((page) => page + 1)}
+                                        >
+                                            <ChevronRight size={18} />
+                                        </button>
                                     </div>
                                 </div>
                             )}
