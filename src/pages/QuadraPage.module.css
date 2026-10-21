@@ -9,7 +9,6 @@
   padding: 0 24px;
 }
 
-/* --- Navegação Topo --- */
 .topNav {
   padding: 30px 0 20px;
 }
@@ -34,7 +33,6 @@
   transform: translateX(-4px);
 }
 
-/* --- Cabeçalho do Túmulo --- */
 .tombHeader {
   text-align: center;
   margin-bottom: 48px;
@@ -67,7 +65,6 @@
   color: #666666;
 }
 
-/* --- Grid de Pessoas --- */
 .grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -92,7 +89,6 @@
   box-shadow: 0 12px 36px rgba(0, 34, 68, 0.1);
 }
 
-/* --- Foto --- */
 .personImage {
   flex-shrink: 0;
   width: 120px;
@@ -118,7 +114,6 @@
   color: #999;
 }
 
-/* --- Informações --- */
 .personInfo {
   flex: 1;
 }
@@ -197,7 +192,6 @@
   margin: 0;
 }
 
-/* --- Card não encontrado --- */
 .card {
   background: #ffffff;
   border-radius: 16px;
@@ -205,7 +199,6 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
 }
 
-/* --- Rodapé --- */
 .footer {
   text-align: center;
   margin-top: 60px;
@@ -215,7 +208,6 @@
   color: #999;
 }
 
-/* --- Responsividade --- */
 @media (max-width: 700px) {
   .personCard {
     flex-direction: column;
@@ -249,7 +241,6 @@
   }
 }
 
-/* --- Cabecalho de cada lote na pagina da quadra --- */
 .loteHeader {
     display: flex;
     align-items: center;

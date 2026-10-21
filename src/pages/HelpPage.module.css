@@ -5,7 +5,6 @@
   font-family: 'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
 }
 
-/* ---------------- TOPO (azul institucional) ---------------- */
 .hero {
   position: relative;
   isolation: isolate;
@@ -76,7 +75,6 @@
   line-height: 1.75;
 }
 
-/* ---------------- LAYOUT ---------------- */
 .layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 300px;
@@ -95,7 +93,6 @@
   gap: 48px;
 }
 
-/* ---------------- A FOLHA ---------------- */
 .sheet {
   padding: 48px 52px 40px;
   background: #fffefd;
@@ -218,7 +215,6 @@
   line-height: 1.7;
 }
 
-/* ---------------- DÚVIDAS ---------------- */
 .faqTitle {
   margin: 0 0 16px;
   color: #002046;
@@ -277,7 +273,6 @@
   text-underline-offset: 3px;
 }
 
-/* ---------------- LATERAL DE CONTATO ---------------- */
 .aside {
   position: sticky;
   top: 96px;
@@ -317,7 +312,6 @@
   font-size: 1.1rem;
 }
 
-/* ---------------- RESPONSIVO ---------------- */
 @media (max-width: 900px) {
   .layout {
     grid-template-columns: 1fr;

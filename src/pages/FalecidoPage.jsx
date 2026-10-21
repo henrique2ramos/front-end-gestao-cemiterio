@@ -80,7 +80,7 @@ export default function FalecidoPage() {
     <div className={styles.page}>
 
       <div className={styles.container}>
-        {/* Navegação Topo */}
+        
         <div className={styles.topNav}>
           <button onClick={() => navigate(-1)} className={styles.backLink}>
             <ChevronLeft size={20} />
@@ -88,11 +88,11 @@ export default function FalecidoPage() {
           </button>
         </div>
 
-        {/* Card Principal */}
+        
         <section className={styles.mainSection}>
           <div className={styles.profileCard}>
 
-            {/* Cabeçalho do Perfil */}
+            
             <div className={styles.profileHeader}>
               <div className={styles.photoWrapper}>
                 <img src={resolveImageUrl(falecido.imagem)} alt={falecido.nome} className={styles.photo} />
@@ -131,7 +131,7 @@ export default function FalecidoPage() {
               </div>
             </div>
 
-            {/* Navegação por Abas */}
+            
             <div className={styles.tabNavWrapper}>
               <div className={styles.tabNav}>
                 <button
@@ -149,7 +149,7 @@ export default function FalecidoPage() {
               </div>
             </div>
 
-            {/* Conteúdo das Abas */}
+            
             <div className={styles.tabContent}>
               {activeTab === 'bio' && (
                 <div className={styles.bioSection}>
@@ -195,7 +195,7 @@ export default function FalecidoPage() {
         </section>
       </div>
 
-      {/* Lightbox para fotos em tela cheia */}
+      
       {lightboxIndex !== null && galleryImages.length > 0 && (
         <div className={styles.lightbox} onClick={() => setLightboxIndex(null)}>
           <button className={styles.lightboxClose} onClick={() => setLightboxIndex(null)}>

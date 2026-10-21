@@ -20,7 +20,6 @@
   height: 16px;
 }
 
-/* Sizes */
 .small {
   padding: 10px 24px;
   font-size: 0.85rem;
@@ -36,7 +35,6 @@
   font-size: 1rem;
 }
 
-/* Variants */
 .primary {
   background: #1565c0;
   color: white;

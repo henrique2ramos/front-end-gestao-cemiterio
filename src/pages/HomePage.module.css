@@ -10,7 +10,6 @@
   padding: 0 24px;
 }
 
-/* ---------------- HERO ---------------- */
 .heroIntegrated {
   position: relative;
   isolation: isolate;
@@ -86,7 +85,6 @@
   text-shadow: 0 4px 30px rgba(0, 20, 50, 0.7);
 }
 
-/* Ornamento dourado sob o título */
 .heroLineStrong::after {
   content: '';
   display: block;
@@ -106,8 +104,6 @@
   text-shadow: 0 2px 14px rgba(0, 20, 50, 0.75);
 }
 
-
-/* ---------------- BUSCA ---------------- */
 .integratedSearchContainer {
   position: relative;
   z-index: 2;
@@ -222,7 +218,6 @@
   background: #eae8e7;
 }
 
-/* ---------------- SEÇÕES ---------------- */
 .section {
   padding: 88px 0;
   background: #fbf9f8;
@@ -272,7 +267,6 @@
   border-color: #775a19;
 }
 
-/* ---------------- CARROSSEL ---------------- */
 .carouselWrapper {
   position: relative;
   display: flex;
@@ -331,7 +325,6 @@
   text-align: center;
 }
 
-/* ---------------- MAPA ---------------- */
 .mapSectionBlue {
   position: relative;
   isolation: isolate;
@@ -422,7 +415,6 @@
   background: #ffdea5;
 }
 
-/* ---------------- RESPONSIVO ---------------- */
 @media (max-width: 700px) {
   .heroIntegrated {
     min-height: 500px;

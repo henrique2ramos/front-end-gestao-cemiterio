@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 import { fetchFalecidos, fetchLotes, fetchQuadras } from '../lib/api';
 import styles from './MapPage.module.css';
-import mapaImg from '../assets/mapaExemplo.png';
+import mapaImg from '../assets/mapaExemplo.jfif';
 
 const MAX_ZOOM = 3;
 
@@ -108,7 +108,6 @@ export default function MapPage() {
         return () => { isMounted = false; };
     }, []);
 
-    /* falecidos agrupados por quadra */
     const porQuadra = useMemo(() => {
         const grupos = {};
         SECTORS.forEach((s) => {
@@ -149,7 +148,6 @@ export default function MapPage() {
         )
         : [];
 
-    /* ---------- zoom e arrastar ---------- */
     function clampOffset(off, z) {
         const el = mapRef.current;
         if (!el) return off;
@@ -179,7 +177,6 @@ export default function MapPage() {
         }
         setSelected(item.id);
 
-        /* aproxima e centraliza a quadra escolhida */
         const el = mapRef.current;
         const z = Math.max(zoom, 2);
         setZoom(z);
@@ -239,7 +236,7 @@ export default function MapPage() {
 
             <main className={styles.main}>
                 <div className={styles.layout}>
-                    {/* ---------- MAPA ---------- */}
+                    
                     <div className={styles.mapWrapper} style={{ '--ratio': ratio }}>
                         <div
                             ref={mapRef}
@@ -311,7 +308,7 @@ export default function MapPage() {
                         </div>
                     </div>
 
-                    {/* ---------- PAINEL LATERAL ---------- */}
+                    
                     <aside className={styles.panel}>
                         {sector ? (
                             <>

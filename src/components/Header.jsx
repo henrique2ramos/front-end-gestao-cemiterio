@@ -33,7 +33,7 @@ export default function Header({ isAuthenticated = false, onLogout }) {
   return (
     <header className={styles.header}>
 
-      {/* Barra Principal Institucional */}
+      
       <div className={styles.mainBar}>
         <div className={styles.container}>
           <Link to="/" className={styles.logo}>

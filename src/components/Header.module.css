@@ -8,8 +8,6 @@
     font-family: 'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
 }
 
-
-/* BARRA PRINCIPAL */
 .mainBar {
     background: #1565c0;
 }
@@ -24,7 +22,6 @@
     padding: 0 24px;
 }
 
-/* LOGO */
 .logo {
     display: flex;
     align-items: center;
@@ -68,7 +65,6 @@
     letter-spacing: 0.04em;
 }
 
-/* NAVEGAÇÃO */
 .nav {
     display: flex;
     gap: 8px;
@@ -98,7 +94,6 @@
     box-shadow: none;
 }
 
-
 .mobileMenuBtn {
     display: none;
     background: #ffd283;
@@ -108,7 +103,6 @@
     cursor: pointer;
 }
 
-/* RESPONSIVO */
 @media(max-width: 992px) {
     .accLinks {
         display: none;

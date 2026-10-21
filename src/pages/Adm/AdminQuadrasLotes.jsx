@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plus, Edit, Trash2, Search, X, QrCode, ChevronLeft, ChevronRight, LayoutGrid, SquareChartGantt } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, X, QrCode, ChevronLeft, ChevronRight, LayoutGrid, AlertCircle, CalendarDays } from 'lucide-react';
 import QRCode from 'react-qr-code';
 import { useLocation } from 'react-router-dom';
 import {
@@ -20,43 +20,43 @@ import {
 } from '../../lib/api';
 import AdminSidebar from './AdminSidebar';
 import CopyLinkButton from '../../components/CopyLinkButton';
+import AutocompleteInput from '../../components/AutocompleteInput';
 import Spinner from '../../components/Spinner';
+import { getPageItems } from './../../data/adminPagination';
 import styles from './AdminQuadrasLotes.module.css';
 
 const ITEMS_PER_PAGE = 10;
-const VISIBLE_PAGE_WINDOW = 20;
+const LOTES_PER_PAGE = 40;
 
 const getToken = () => localStorage.getItem('memorialAdminToken') || '';
 
 const isAbsoluteUrl = (src) => /^(https?:)?\/\//i.test(src) || src.startsWith('data:');
 const resolveOnce = (src) => (!src || isAbsoluteUrl(src) ? src : resolveImageUrl(src));
 
-export default function AdminFalecidos({ onLogout }) {
+export default function AdminQuadrasLotes({ onLogout }) {
     const location = useLocation();
     const editHandledRef = useRef(false);
     const [falecidos, setFalecidos] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
+    const [currentLotePage, setCurrentLotePage] = useState(1);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedImageFile, setSelectedImageFile] = useState(null);
+    const [imagePreview, setImagePreview] = useState('');
     const [selectedGalleryFiles, setSelectedGalleryFiles] = useState([]);
 
     const [selectedQuadra, setSelectedQuadra] = useState(null);
     const [selectedLote, setSelectedLote] = useState(null);
-
-    // quadras e lotes vêm da API; o banco é a fonte da verdade
     const [quadras, setQuadras] = useState([]);
     const [lotes, setLotes] = useState([]);
+    const [quantidadeLotesPorQuadra, setQuantidadeLotesPorQuadra] = useState({});
     const [carregandoQuadras, setCarregandoQuadras] = useState(true);
-    // id da quadra cujos lotes já foram buscados: permite derivar o loading
-    // sem setState síncrono dentro do effect
     const [quadraDosLotes, setQuadraDosLotes] = useState(null);
 
     const [isFormModalOpen, setIsFormModalOpen] = useState(false);
     const [isQrModalOpen, setIsQrModalOpen] = useState(false);
     const [selectedFalecido, setSelectedFalecido] = useState(null);
 
-    // Modal de confirmação genérico
     const [confirmModal, setConfirmModal] = useState({ open: false, title: '', message: '', onConfirm: null });
 
     const openConfirm = (title, message, onConfirm) =>
@@ -156,7 +156,6 @@ export default function AdminFalecidos({ onLogout }) {
         loadMemoriais();
     }, []);
 
-    // Carrega as quadras do backend
     useEffect(() => {
         let cancelado = false;
 
@@ -177,7 +176,29 @@ export default function AdminFalecidos({ onLogout }) {
         return () => { cancelado = true; };
     }, []);
 
-    // Carrega os lotes da quadra selecionada
+    useEffect(() => {
+        let cancelado = false;
+
+        async function carregarContagemLotes() {
+            const resultados = await Promise.all(quadras.map(async (quadra) => {
+                try {
+                    const data = await fetchLotes(quadra.id);
+                    return [quadra.id, Array.isArray(data) ? data.length : 0];
+                } catch (error) {
+                    console.error(`Erro ao contar lotes da quadra ${quadra.nome}:`, error);
+                    return [quadra.id, 0];
+                }
+            }));
+
+            if (!cancelado) setQuantidadeLotesPorQuadra(Object.fromEntries(resultados));
+        }
+
+        if (quadras.length > 0) carregarContagemLotes();
+        else setQuantidadeLotesPorQuadra({});
+
+        return () => { cancelado = true; };
+    }, [quadras, lotes]);
+
     useEffect(() => {
         const quadra = quadras.find(q => q.nome === selectedQuadra);
 
@@ -204,7 +225,21 @@ export default function AdminFalecidos({ onLogout }) {
         return () => { cancelado = true; };
     }, [selectedQuadra, quadras]);
 
-    // Abre edição vinda do dashboard apenas uma vez; ref impede re-disparo ao salvar falecidos
+    useEffect(() => {
+        if (!location.state?.novo) return;
+
+        setSelectedFalecido(null);
+        setSelectedImageFile(null);
+        setSelectedGalleryFiles([]);
+        setImagePreview('');
+        setFormData({
+            nome: '', dataNascimento: '', dataMorte: '',
+            setor: '', lote: '',
+            descricao: '', biografia: '', imagem: '', tipo: 'historica'
+        });
+        setIsFormModalOpen(true);
+    }, [location.state?.novo]);
+
     useEffect(() => {
         if (editHandledRef.current) return;
         const editId = location.state?.editFalecidoId;
@@ -212,28 +247,22 @@ export default function AdminFalecidos({ onLogout }) {
         const found = falecidos.find((m) => m.id === editId);
         if (found) {
             editHandledRef.current = true;
-            // Navega até o lote do falecido antes de abrir o modal
             const quadraMatch = found.localizacao?.match(/^Quadra\s+(.+?),/);
             const loteMatch = found.localizacao?.match(/Lote\s+(.+?)$/);
             if (quadraMatch) setSelectedQuadra(quadraMatch[1].trim());
             if (loteMatch) setSelectedLote(loteMatch[1].trim());
             openEditModal(found);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [location.state?.editFalecidoId, falecidos.length]);
 
     // --- DADOS DERIVADOS ---
     const quadraSelecionada = quadras.find(q => q.nome === selectedQuadra) || null;
-
-    // O loading dos lotes e derivado: enquanto os lotes da quadra atual nao
-    // chegaram, a tela mostra spinner em vez de "nenhum lote encontrado"
     const carregandoLotes = Boolean(quadraSelecionada) && quadraDosLotes !== quadraSelecionada.id;
 
     const quadrasComCount = quadras.map(q => ({
         id: q.id,
         nome: q.nome,
-        // contagem por UUID: comparacao exata, sem parse de texto
-        count: falecidos.filter(m => m.quadraId === q.id).length
+        count: quantidadeLotesPorQuadra[q.id] ?? 0
     }));
 
     const lotesDaQuadra = (quadraSelecionada && !carregandoLotes)
@@ -249,9 +278,20 @@ export default function AdminFalecidos({ onLogout }) {
     const lotesComCount = lotesDaQuadra.map(lote => ({
         id: lote.id,
         nome: lote.numero,
-        // contagem por UUID: comparacao exata, sem parse de texto
         count: falecidos.filter(m => m.loteId === lote.id).length
     }));
+
+    const termoLote = searchTerm.trim().toLowerCase();
+    const lotesVisiveis = termoLote
+        ? lotesComCount.filter(l => String(l.nome).toLowerCase().includes(termoLote))
+        : lotesComCount;
+    const totalLotePages = Math.max(1, Math.ceil(lotesVisiveis.length / LOTES_PER_PAGE));
+    const startLoteIndex = (currentLotePage - 1) * LOTES_PER_PAGE;
+    const lotesDaPagina = lotesVisiveis.slice(startLoteIndex, startLoteIndex + LOTES_PER_PAGE);
+
+    useEffect(() => {
+        if (currentLotePage > totalLotePages) setCurrentLotePage(totalLotePages);
+    }, [currentLotePage, totalLotePages]);
 
     const memoriaisDoLote = (selectedQuadra && selectedLote)
         ? falecidos.filter(m => m.localizacao === `Quadra ${selectedQuadra}, Lote ${selectedLote}`)
@@ -261,22 +301,14 @@ export default function AdminFalecidos({ onLogout }) {
         typeof m.nome === 'string' && m.nome.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    useEffect(() => { setCurrentPage(1); }, [searchTerm]);
+    useEffect(() => {
+        setCurrentPage(1);
+        setCurrentLotePage(1);
+    }, [searchTerm]);
 
     const totalPages = Math.max(1, Math.ceil(filteredMemoriais.length / ITEMS_PER_PAGE));
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const currentMemoriais = filteredMemoriais.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-    const firstVisiblePage = currentPage <= VISIBLE_PAGE_WINDOW
-        ? 1
-        : currentPage - VISIBLE_PAGE_WINDOW + 1;
-    const lastVisiblePage = Math.min(totalPages, firstVisiblePage + VISIBLE_PAGE_WINDOW - 1);
-    const paginationPages = [
-        ...(firstVisiblePage > 1 ? [1, ...(firstVisiblePage > 2 ? ['ellipsis-start'] : [])] : []),
-        ...Array.from(
-            { length: lastVisiblePage - firstVisiblePage + 1 },
-            (_, index) => firstVisiblePage + index
-        ),
-    ];
 
     // --- SALVAR FALECIDO ---
     const saveFalecido = async (e) => {
@@ -292,8 +324,8 @@ export default function AdminFalecidos({ onLogout }) {
             form.append('nome', formData.nome);
             form.append('biografia', formData.biografia || '');
             form.append('descricao', formData.descricao || '');
-            form.append('dataNascimento', formData.dataNascimento || '');
-            form.append('dataMorte', formData.dataMorte || '');
+            form.append('dataNascimento', formatarData(formData.dataNascimento));
+            form.append('dataMorte', formatarData(formData.dataMorte));
             form.append('localizacao', localizacao);
             form.append('tipo', formData.tipo || 'historica');
 
@@ -315,8 +347,8 @@ export default function AdminFalecidos({ onLogout }) {
                     nome: formData.nome,
                     biografia: formData.biografia || '',
                     descricao: formData.descricao || '',
-                    dataNascimento: formData.dataNascimento || '',
-                    dataMorte: formData.dataMorte || '',
+                    dataNascimento: formatarData(formData.dataNascimento),
+                    dataMorte: formatarData(formData.dataMorte),
                     localizacao,
                     tipo: formData.tipo || 'historica',
                     ...(imagemAlterada ? { imagem: formData.imagem.trim() } : {}),
@@ -340,8 +372,8 @@ export default function AdminFalecidos({ onLogout }) {
 
     const deleteFalecido = async (id, nome) => {
         openConfirm(
-            'Excluir falecido',
-            `Tem certeza que deseja excluir o falecido de ${nome}? Esta ação não pode ser desfeita.`,
+            'Excluir registro',
+            <>Tem certeza que deseja <strong className={styles.confirmEmphasis}>excluir permanentemente</strong> o registro de <strong className={styles.confirmEmphasis}>{nome}</strong>? Esta ação <strong className={styles.confirmEmphasis}>não pode ser desfeita</strong>.</>,
             async () => {
                 try {
                     await apiDeleteFalecido(id, getToken());
@@ -355,11 +387,16 @@ export default function AdminFalecidos({ onLogout }) {
     };
 
     // --- FORMATAR DATA ---
-    const formatarData = (valor) => {
-        const n = valor.replace(/\D/g, '').slice(0, 8);
-        if (n.length <= 2) return n;
-        if (n.length <= 4) return `${n.slice(0, 2)}/${n.slice(2)}`;
-        return `${n.slice(0, 2)}/${n.slice(2, 4)}/${n.slice(4)}`;
+    const formatarData = (valor = '') => {
+        const isoDate = valor.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (isoDate) {
+            const [, ano, mes, dia] = isoDate;
+            return `${dia}/${mes}/${ano}`;
+        }
+        const digitos = valor.replace(/\D/g, '').slice(0, 8);
+        if (digitos.length <= 2) return digitos;
+        if (digitos.length <= 4) return `${digitos.slice(0, 2)}/${digitos.slice(2)}`;
+        return `${digitos.slice(0, 2)}/${digitos.slice(2, 4)}/${digitos.slice(4)}`;
     };
 
     const handleInputChange = (e) => {
@@ -367,20 +404,30 @@ export default function AdminFalecidos({ onLogout }) {
         let v = value;
         if (name === 'dataNascimento' || name === 'dataMorte') v = formatarData(value);
         else if (name === 'setor') v = value.toUpperCase();
+        if (name === 'imagem') setSelectedImageFile(null);
         setFormData(prev => ({ ...prev, [name]: v }));
+    };
+
+    const handleQuadraChange = (setor) => {
+        setSelectedQuadra(setor || null);
+        setSelectedLote(null);
+        setFormData(prev => ({ ...prev, setor, lote: '' }));
     };
 
     const handleImageUpload = (e) => {
         const file = e.target.files?.[0];
         if (!file) {
             setSelectedImageFile(null);
+            setImagePreview(selectedFalecido?.imagem || '');
             return;
         }
 
         setSelectedImageFile(file);
         const reader = new FileReader();
         reader.onloadend = () => {
-            setFormData(prev => ({ ...prev, imagem: reader.result }));
+            const preview = typeof reader.result === 'string' ? reader.result : '';
+            setImagePreview(preview);
+            setFormData(prev => ({ ...prev, imagem: preview }));
         };
         reader.readAsDataURL(file);
     };
@@ -400,18 +447,21 @@ export default function AdminFalecidos({ onLogout }) {
         setSelectedFalecido(falecido);
         let setor = '', lote = '';
         if (falecido.localizacao) {
-            const s = falecido.localizacao.match(/Quadra\s+(.+?),/);
-            const l = falecido.localizacao.match(/Lote\s+(.+?)$/);
+            const s = falecido.localizacao.match(/Quadra\s+(.+?),/i);
+            const l = falecido.localizacao.match(/Lote\s+(.+?)$/i);
             if (s) setor = s[1].trim();
             if (l) lote = l[1].trim();
         }
         setFormData({ ...falecido, setor, lote });
+        setSelectedImageFile(null);
+        setImagePreview(falecido.imagem || '');
         setIsFormModalOpen(true);
     };
 
     const closeFormModal = () => {
         setSelectedFalecido(null);
         setSelectedImageFile(null);
+        setImagePreview('');
         setSelectedGalleryFiles([]);
         setFormData({
             nome: '', dataNascimento: '', dataMorte: '',
@@ -440,15 +490,12 @@ export default function AdminFalecidos({ onLogout }) {
                 const quadra = quadras.find(q => q.nome === editingQuadra);
                 if (!quadra) return;
 
-                // O backend renomeia a quadra; a localizacao de cada falecido é
-                // recalculada a partir das relações, não precisa ser reescrita.
                 await updateQuadra(quadra.id, nome, getToken());
                 await recarregarQuadras();
                 await recarregarMemoriais();
 
                 if (selectedQuadra === editingQuadra) setSelectedQuadra(nome);
             } else {
-                // Navega direto para a nova quadra; o admin adiciona lotes/falecidos a partir daqui
                 await createQuadra(nome, getToken());
                 await recarregarQuadras();
                 setSelectedQuadra(nome);
@@ -466,7 +513,7 @@ export default function AdminFalecidos({ onLogout }) {
     const handleDeleteQuadra = (nome) => {
         openConfirm(
             `Excluir Quadra ${nome}`,
-            `Isso removerá a Quadra ${nome} e TODOS os falecidos dentro dela. Esta ação não pode ser desfeita.`,
+            <>Isso <strong className={styles.confirmEmphasis}>removerá a Quadra {nome}</strong> e <strong className={styles.confirmEmphasis}>TODOS os falecidos</strong> dentro dela. Esta ação <strong className={styles.confirmEmphasis}>não pode ser desfeita</strong>.</>,
             async () => {
                 const quadra = quadras.find(q => q.nome === nome);
                 if (!quadra) return;
@@ -513,7 +560,6 @@ export default function AdminFalecidos({ onLogout }) {
 
                 if (selectedLote === editingLote) setSelectedLote(nome);
             } else {
-                // Navega para o novo lote; o admin clica em "Novo Falecido" para adicionar
                 await createLote(quadraSelecionada.id, nome, getToken());
                 await recarregarLotes();
                 setSelectedLote(nome);
@@ -560,7 +606,7 @@ export default function AdminFalecidos({ onLogout }) {
     const handleDeleteLote = (lote) => {
         openConfirm(
             `Excluir Lote ${lote}`,
-            `Isso removerá o Lote ${lote} da Quadra ${selectedQuadra} e TODOS os falecidos dentro dele. Esta ação não pode ser desfeita.`,
+            <>Isso <strong className={styles.confirmEmphasis}>removerá o Lote {lote}</strong> da <strong className={styles.confirmEmphasis}>Quadra {selectedQuadra}</strong> e <strong className={styles.confirmEmphasis}>TODOS os falecidos</strong> dentro dele. Esta ação <strong className={styles.confirmEmphasis}>não pode ser desfeita</strong>.</>,
             async () => {
                 const alvo = lotes.find(l => l.numero === lote);
                 if (!alvo) return;
@@ -593,8 +639,7 @@ export default function AdminFalecidos({ onLogout }) {
     const [isLoteQrModalOpen, setIsLoteQrModalOpen] = useState(false);
     const [loteQrData, setLoteQrData] = useState(null);
     const openLoteQrModal = (lote) => {
-        // O QR aponta para o UUID do lote: renomear o lote ou a quadra
-        // nao invalida mais a placa impressa.
+
         const people = falecidos.filter(m => m.loteId === lote.id);
         setLoteQrData({ id: lote.id, nome: lote.nome, people });
         setIsLoteQrModalOpen(true);
@@ -606,7 +651,7 @@ export default function AdminFalecidos({ onLogout }) {
     const [quadraQrData, setQuadraQrData] = useState(null);
     const openQuadraQrModal = (quadra) => {
         const people = falecidos.filter(m => m.quadraId === quadra.id);
-        setQuadraQrData({ id: quadra.id, nome: quadra.nome, people });
+        setQuadraQrData({ id: quadra.id, nome: quadra.nome, people, loteCount: quadra.count });
         setIsQuadraQrModalOpen(true);
     };
     const quadraQrUrl = quadraQrData ? `${window.location.origin}/quadra/${quadraQrData.id}` : '';
@@ -641,7 +686,9 @@ export default function AdminFalecidos({ onLogout }) {
                             </h1>
                             <p className={styles.subtitle}>
                                 {nivelAtual === 'inicio' && 'Selecione uma quadra para ver os lotes.'}
-                                {nivelAtual === 'quadra' && `${lotesComCount.length} lote${lotesComCount.length !== 1 ? 's' : ''} nesta quadra.`}
+                                {nivelAtual === 'quadra' && (termoLote
+                                    ? `${lotesVisiveis.length} de ${lotesComCount.length} lotes.`
+                                    : `${lotesComCount.length} lote${lotesComCount.length !== 1 ? 's' : ''} nesta quadra.`)}
                                 {nivelAtual === 'lote' && `${filteredMemoriais.length} ${filteredMemoriais.length === 1 ? 'falecido' : 'falecidos'} neste lote.`}
                             </p>
                         </div>
@@ -656,12 +703,6 @@ export default function AdminFalecidos({ onLogout }) {
                                     <button className={styles.addButton} onClick={() => openLoteModal()}>
                                         <Plus size={20} /> Novo Lote
                                     </button>
-                                    <button
-                                        className={styles.addButton}
-                                        onClick={() => setIsLoteSequenciaModalOpen(true)}
-                                    >
-                                        <Plus size={20} /> Criar vários lotes
-                                    </button>
                                 </>
                             )}
                             {nivelAtual === 'lote' && (
@@ -672,6 +713,9 @@ export default function AdminFalecidos({ onLogout }) {
                                         descricao: '', biografia: '', imagem: '', tipo: 'historica'
                                     });
                                     setSelectedFalecido(null);
+                                    setSelectedImageFile(null);
+                                    setSelectedGalleryFiles([]);
+                                    setImagePreview('');
                                     setIsFormModalOpen(true);
                                 }}>
                                     <Plus size={20} /> Novo Falecido
@@ -685,11 +729,11 @@ export default function AdminFalecidos({ onLogout }) {
                         <div className={styles.setoresGrid}>
                             {quadrasComCount.map(q => (
                                 <div key={q.nome} className={styles.setorCard}>
-                                    <button className={styles.setorCardBtn} onClick={() => { setSelectedQuadra(q.nome); setSelectedLote(null); setSearchTerm(''); }}>
+                                        <button className={styles.setorCardBtn} onClick={() => { setSelectedQuadra(q.nome); setSelectedLote(null); setSearchTerm(''); setCurrentLotePage(1); }}>
                                         <div className={styles.setorIcon}><LayoutGrid size={28} /></div>
                                         <div className={styles.setorInfo}>
                                             <h3>Quadra {q.nome}</h3>
-                                            <p>{q.count} {q.count === 1 ? 'falecido' : 'falecidos'}</p>
+                                            <p>{q.count} {q.count === 1 ? 'lote' : 'lotes'}</p>
                                         </div>
                                     </button>
                                     <div className={styles.cardActions}>
@@ -710,30 +754,74 @@ export default function AdminFalecidos({ onLogout }) {
 
                     {/* --- NÍVEL 2: LOTES --- */}
                     {nivelAtual === 'quadra' && (
-                        <div className={styles.setoresGrid}>
-                            {lotesComCount.map(l => (
-                                <div key={l.nome} className={styles.setorCard}>
-                                    <button className={styles.setorCardBtn} onClick={() => { setSelectedLote(l.nome); setSearchTerm(''); setCurrentPage(1); }}>
-                                        <div className={styles.setorIcon}><SquareChartGantt size={28} /></div>
-                                        <div className={styles.setorInfo}>
-                                            <h3>Lote {l.nome}</h3>
-                                            <p>{l.count} {l.count === 1 ? 'falecido' : 'falecidos'}</p>
+                        <>
+                            <div className={styles.loteSearch}>
+                                <div className={styles.searchBox}>
+                                    <Search size={18} className={styles.searchIcon} />
+                                    <input
+                                        type="text"
+                                        placeholder="Buscar lote pelo número..."
+                                        aria-label="Buscar lote"
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
+                                    {searchTerm && (
+                                        <button type="button" className={styles.clearSearchBtn} aria-label="Limpar busca" onClick={() => setSearchTerm('')}>
+                                            <X size={16} />
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                            <div className={`${styles.setoresGrid} ${styles.lotesGrid}`}>
+                                {lotesDaPagina.map(l => (
+                                    <div key={l.nome} className={styles.setorCard}>
+                                        <button className={styles.setorCardBtn} onClick={() => { setSelectedLote(l.nome); setSearchTerm(''); setCurrentPage(1); }}>
+                                            <div className={styles.setorIcon}>
+                                                <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                                    <path d="M6 21v-9a6 6 0 0 1 12 0v9" />
+                                                    <path d="M4 21h16" />
+                                                    <path d="M12 8v5M10 10h4" />
+                                                </svg>
+                                            </div>
+                                            <div className={styles.setorInfo}>
+                                                <h3>Lote {l.nome}</h3>
+                                                <p>{l.count} {l.count === 1 ? 'falecido' : 'falecidos'}</p>
+                                            </div>
+                                        </button>
+                                        <div className={styles.cardActions}>
+                                            <button className={styles.iconBtn} title="QR Code do Lote" onClick={() => openLoteQrModal(l)}><QrCode size={16} /></button>
+                                            <button className={styles.iconBtn} title="Editar Lote" onClick={() => openLoteModal(l.nome)}><Edit size={16} /></button>
+                                            <button className={`${styles.iconBtn} ${styles.deleteBtn}`} title="Excluir Lote" onClick={() => handleDeleteLote(l.nome)}><Trash2 size={16} /></button>
                                         </div>
-                                    </button>
-                                    <div className={styles.cardActions}>
-                                        <button className={styles.iconBtn} title="QR Code do Lote" onClick={() => openLoteQrModal(l)}><QrCode size={16} /></button>
-                                        <button className={styles.iconBtn} title="Editar Lote" onClick={() => openLoteModal(l.nome)}><Edit size={16} /></button>
-                                        <button className={`${styles.iconBtn} ${styles.deleteBtn}`} title="Excluir Lote" onClick={() => handleDeleteLote(l.nome)}><Trash2 size={16} /></button>
+                                    </div>
+                                ))}
+                                {carregandoLotes && (
+                                    <Spinner label="Carregando lotes..." />
+                                )}
+                                {!carregandoLotes && lotesComCount.length === 0 && (
+                                    <p className={styles.emptyState}>Nenhum lote encontrado. Crie um para começar.</p>
+                                )}
+                                {!carregandoLotes && lotesComCount.length > 0 && lotesVisiveis.length === 0 && (
+                                    <p className={styles.emptyState}>Nenhum lote com o número “{searchTerm.trim()}”.</p>
+                                )}
+                            </div>
+                            {!carregandoLotes && lotesVisiveis.length > LOTES_PER_PAGE && (
+                                <div className={styles.paginationContainer}>
+                                    <p className={styles.paginationInfo}>
+                                        Mostrando <strong>{startLoteIndex + 1}</strong> a <strong>{Math.min(startLoteIndex + LOTES_PER_PAGE, lotesVisiveis.length)}</strong> de <strong>{lotesVisiveis.length}</strong> lotes
+                                    </p>
+                                    <div className={styles.pagination}>
+                                        <button className={styles.pageBtn} disabled={currentLotePage === 1} onClick={() => setCurrentLotePage(page => page - 1)} aria-label="Página anterior"><ChevronLeft size={18} /></button>
+                                        {getPageItems(currentLotePage, totalLotePages).map((page, index) => (
+                                            page === '…'
+                                                ? <span key={`lotes-gap-${index}`} className={styles.pageEllipsis}>…</span>
+                                                : <button key={page} className={`${styles.pageBtn} ${page === currentLotePage ? styles.pageBtnActive : ''}`} onClick={() => setCurrentLotePage(page)}>{page}</button>
+                                        ))}
+                                        <button className={styles.pageBtn} disabled={currentLotePage === totalLotePages} onClick={() => setCurrentLotePage(page => page + 1)} aria-label="Próxima página"><ChevronRight size={18} /></button>
                                     </div>
                                 </div>
-                            ))}
-                            {carregandoLotes && (
-                                <Spinner label="Carregando lotes..." />
                             )}
-                            {!carregandoLotes && lotesComCount.length === 0 && (
-                                <p className={styles.emptyState}>Nenhum lote encontrado. Crie um para começar.</p>
-                            )}
-                        </div>
+                        </>
                     )}
 
                     {/* --- NÍVEL 3: FALECIDOS --- */}
@@ -742,7 +830,12 @@ export default function AdminFalecidos({ onLogout }) {
                             <div className={styles.toolbar}>
                                 <div className={styles.searchBox}>
                                     <Search size={18} className={styles.searchIcon} />
-                                    <input type="text" placeholder="Buscar falecido..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                                    <input type="text" placeholder="Buscar falecido pelo nome..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                                    {searchTerm && (
+                                        <button type="button" className={styles.clearSearchBtn} aria-label="Limpar busca" onClick={() => setSearchTerm('')}>
+                                            <X size={16} />
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                             <div className={styles.tableContainer}>
@@ -756,12 +849,12 @@ export default function AdminFalecidos({ onLogout }) {
                                     </thead>
                                     <tbody>
                                         {currentMemoriais.map(falecido => (
-                                            <tr key={falecido.id}>
+                                            <tr key={falecido.id} className={styles.tableRow}>
                                                 <td className={styles.nameCell}>
                                                     <div className={styles.avatar}>
                                                         <img src={falecido.imagem} alt={falecido.nome} />
                                                     </div>
-                                                    <div>
+                                                    <div className={styles.personInfo}>
                                                         <span className={styles.name}>{falecido.nome}</span>
                                                         <span className={styles.dateCell}>{falecido.dataNascimento || '—'} — {falecido.dataMorte || '—'}</span>
                                                     </div>
@@ -772,9 +865,17 @@ export default function AdminFalecidos({ onLogout }) {
                                                     </span>
                                                 </td>
                                                 <td className={styles.actionsCell}>
-                                                    <button className={styles.iconBtn} title="QR Code" onClick={() => openQrModal(falecido)}><QrCode size={18} /></button>
-                                                    <button className={styles.iconBtn} title="Editar" onClick={() => openEditModal(falecido)}><Edit size={18} /></button>
-                                                    <button className={`${styles.iconBtn} ${styles.deleteBtn}`} title="Excluir" onClick={() => deleteFalecido(falecido.id, falecido.nome)}><Trash2 size={18} /></button>
+                                                    <div className={styles.actionButtonsGroup}>
+                                                        <button className={styles.iconBtn} title="Gerar QR Code" onClick={() => openQrModal(falecido)}>
+                                                            <QrCode size={18} />
+                                                        </button>
+                                                        <button className={styles.iconBtn} title="Editar" onClick={() => openEditModal(falecido)}>
+                                                            <Edit size={18} />
+                                                        </button>
+                                                        <button className={`${styles.iconBtn} ${styles.deleteBtn}`} title="Excluir" onClick={() => deleteFalecido(falecido.id, falecido.nome)}>
+                                                            <Trash2 size={18} />
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))}
@@ -790,43 +891,16 @@ export default function AdminFalecidos({ onLogout }) {
                             {totalPages > 1 && (
                                 <div className={styles.paginationContainer}>
                                     <p className={styles.paginationInfo}>
-                                        Mostrando {startIndex + 1} a {Math.min(startIndex + ITEMS_PER_PAGE, filteredMemoriais.length)} de {filteredMemoriais.length}
+                                        Mostrando <strong>{startIndex + 1}</strong> a <strong>{Math.min(startIndex + ITEMS_PER_PAGE, filteredMemoriais.length)}</strong> de <strong>{filteredMemoriais.length}</strong>
                                     </p>
                                     <div className={styles.pagination}>
-                                        <button
-                                            type="button"
-                                            className={styles.pageBtn}
-                                            aria-label="Página anterior"
-                                            disabled={currentPage === 1}
-                                            onClick={() => setCurrentPage((page) => page - 1)}
-                                        >
-                                            <ChevronLeft size={18} />
-                                        </button>
-                                        {paginationPages.map((page) => (
-                                            typeof page === 'number' ? (
-                                                <button
-                                                    key={page}
-                                                    type="button"
-                                                    aria-label={`Página ${page}`}
-                                                    aria-current={page === currentPage ? 'page' : undefined}
-                                                    className={`${styles.pageBtn} ${page === currentPage ? styles.pageBtnActive : ''}`}
-                                                    onClick={() => setCurrentPage(page)}
-                                                >
-                                                    {page}
-                                                </button>
-                                            ) : (
-                                                <span key={page} className={styles.pageEllipsis} aria-hidden="true">…</span>
-                                            )
+                                        <button className={styles.pageBtn} disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}><ChevronLeft size={18} /></button>
+                                        {getPageItems(currentPage, totalPages).map((page, i) => (
+                                            page === '…'
+                                                ? <span key={`gap-${i}`} className={styles.pageEllipsis}>…</span>
+                                                : <button key={page} className={`${styles.pageBtn} ${page === currentPage ? styles.pageBtnActive : ''}`} onClick={() => setCurrentPage(page)}>{page}</button>
                                         ))}
-                                        <button
-                                            type="button"
-                                            className={styles.pageBtn}
-                                            aria-label="Próxima página"
-                                            disabled={currentPage === totalPages}
-                                            onClick={() => setCurrentPage((page) => page + 1)}
-                                        >
-                                            <ChevronRight size={18} />
-                                        </button>
+                                        <button className={styles.pageBtn} disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}><ChevronRight size={18} /></button>
                                     </div>
                                 </div>
                             )}
@@ -879,77 +953,10 @@ export default function AdminFalecidos({ onLogout }) {
                 </div>
             )}
 
-            {isLoteSequenciaModalOpen && (
-                <div className={styles.modalOverlay}>
-                    <div className={styles.modalContent}>
-                        <div className={styles.modalHeader}>
-                            <h2>Criar vários lotes — Quadra {selectedQuadra}</h2>
-                            <button
-                                className={styles.closeBtn}
-                                onClick={() => setIsLoteSequenciaModalOpen(false)}
-                                disabled={criandoLotes}
-                                aria-label="Fechar"
-                            >
-                                <X size={24} />
-                            </button>
-                        </div>
-                        <form onSubmit={saveLotesEmSequencia} className={styles.form}>
-                            <p className={styles.subtitle}>
-                                Os lotes serão numerados em sequência a partir do número inicial.
-                                Você pode cadastrar até 500 lotes por vez.
-                            </p>
-                            <div className={styles.formGroup}>
-                                <label htmlFor="numero-inicial-lotes">Número inicial *</label>
-                                <input
-                                    id="numero-inicial-lotes"
-                                    type="text"
-                                    inputMode="numeric"
-                                    pattern="[0-9]+"
-                                    required
-                                    value={numeroInicialLotes}
-                                    onChange={(e) => setNumeroInicialLotes(e.target.value)}
-                                    placeholder="Ex: 1"
-                                    autoFocus
-                                    disabled={criandoLotes}
-                                />
-                            </div>
-                            <div className={styles.formGroup}>
-                                <label htmlFor="quantidade-lotes">Quantidade de lotes *</label>
-                                <input
-                                    id="quantidade-lotes"
-                                    type="number"
-                                    min="1"
-                                    max="500"
-                                    step="1"
-                                    required
-                                    value={quantidadeLotes}
-                                    onChange={(e) => setQuantidadeLotes(e.target.value)}
-                                    placeholder="Ex: 60"
-                                    disabled={criandoLotes}
-                                />
-                            </div>
-                            <div className={styles.modalActions}>
-                                <button
-                                    type="button"
-                                    className={styles.cancelBtn}
-                                    onClick={() => setIsLoteSequenciaModalOpen(false)}
-                                    disabled={criandoLotes}
-                                >
-                                    Cancelar
-                                </button>
-                                <button type="submit" className={styles.saveBtn} disabled={criandoLotes}>
-                                    {criandoLotes ? 'Cadastrando...' : 'Criar lotes'}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
-
             {/* --- MODAL FALECIDO --- */}
             {isFormModalOpen && (
-                <div className={styles.modalOverlay}>
-                    <div className={styles.modalContentLarge}>
+                <div className={styles.modalOverlay} onClick={closeFormModal}>
+                    <div className={styles.modalContentLarge} onClick={(e) => e.stopPropagation()}>
                         <div className={styles.modalHeader}>
                             <h2>{selectedFalecido ? 'Editar Falecido' : 'Novo Falecido'}</h2>
                             <button className={styles.closeBtn} onClick={closeFormModal}><X size={24} /></button>
@@ -960,26 +967,52 @@ export default function AdminFalecidos({ onLogout }) {
                                     <h3>Dados Pessoais e Localização</h3>
                                     <div className={styles.formGroup}>
                                         <label>Nome Completo *</label>
-                                        <input type="text" name="nome" required value={formData.nome} onChange={handleInputChange} />
+                                        <input type="text" name="nome" placeholder="Ex: Maria Aparecida" required value={formData.nome} onChange={handleInputChange} />
                                     </div>
                                     <div className={styles.formRow}>
                                         <div className={styles.formGroup}>
                                             <label>Data Nascimento *</label>
-                                            <input type="text" name="dataNascimento" required placeholder="Ex: 12/03/1823" value={formData.dataNascimento} onChange={handleInputChange} />
+                                            <input type="text" name="dataNascimento" required placeholder="DD/MM/AAAA" value={formData.dataNascimento} onChange={handleInputChange} />
                                         </div>
                                         <div className={styles.formGroup}>
                                             <label>Data de Falecimento *</label>
-                                            <input type="text" name="dataMorte" required placeholder="Ex: 04/11/1912" value={formData.dataMorte} onChange={handleInputChange} />
+                                            <input type="text" name="dataMorte" required placeholder="DD/MM/AAAA" value={formData.dataMorte} onChange={handleInputChange} />
                                         </div>
                                     </div>
                                     <div className={styles.formRow}>
                                         <div className={styles.formGroup}>
                                             <label>Quadra *</label>
-                                            <input type="text" name="setor" required value={formData.setor} onChange={handleInputChange} />
+                                            <input 
+                                                type="text" 
+                                                name="setor" 
+                                                list="quadras-list" 
+                                                placeholder="Selecione ou cole..." 
+                                                autoComplete="off"
+                                                value={formData.setor} 
+                                                onChange={handleInputChange} 
+                                            />
+                                            <datalist id="quadras-list">
+                                                {quadras.map(q => (
+                                                    <option key={q.id} value={q.nome} />
+                                                ))}
+                                            </datalist>
                                         </div>
                                         <div className={styles.formGroup}>
                                             <label>Lote *</label>
-                                            <input type="text" name="lote" required value={formData.lote} onChange={handleInputChange} />
+                                            <input 
+                                                type="text" 
+                                                name="lote" 
+                                                list="lotes-list" 
+                                                placeholder="Selecione ou cole..." 
+                                                autoComplete="off"
+                                                value={formData.lote} 
+                                                onChange={handleInputChange} 
+                                            />
+                                            <datalist id="lotes-list">
+                                                {lotesDaQuadra.map(l => (
+                                                    <option key={l.id} value={l.numero || l.nome || l.id} />
+                                                ))}
+                                            </datalist>
                                         </div>
                                     </div>
                                     <div className={styles.formGroup}>
@@ -991,37 +1024,42 @@ export default function AdminFalecidos({ onLogout }) {
                                     </div>
                                     <div className={styles.formGroup}>
                                         <label>Imagem de Perfil</label>
-                                        <input type="file" accept="image/*" onChange={handleImageUpload} />
-                                        <small style={{ display: 'block', marginTop: '8px', color: '#666' }}>
-                                            Você pode escolher uma foto do computador ou usar um URL abaixo.
-                                        </small>
+                                        <div className={styles.fileInputWrapper}>
+                                            <input type="file" accept="image/*" onChange={handleImageUpload} />
+                                        </div>
+                                        <small className={styles.inputHelp}>Escolha uma foto principal do computador.</small>
+                                        {imagePreview && (
+                                            <div className={styles.profileImagePreview}>
+                                                <img
+                                                    src={resolveOnce(imagePreview)}
+                                                    alt="Prévia da imagem do memorial"
+                                                    onError={(event) => { event.currentTarget.style.display = 'none'; }}
+                                                />
+                                            </div>
+                                        )}
                                     </div>
                                     <div className={styles.formGroup}>
-                                        <label>URL da Imagem (opcional)</label>
-                                        <input type="url" name="imagem" placeholder="https://..." value={formData.imagem} onChange={handleInputChange} />
-                                    </div>
-                                    <div className={styles.formGroup}>
-                                        <label>Fotos da Galeria (opcional)</label>
-                                        <input type="file" accept="image/*" multiple onChange={handleGalleryUpload} />
-                                        <small style={{ display: 'block', marginTop: '8px', color: '#666' }}>
-                                            Você pode enviar até 10 imagens para a galeria do falecido.
-                                        </small>
+                                        <label>Fotos da Galeria</label>
+                                        <div className={styles.fileInputWrapper}>
+                                            <input type="file" accept="image/*" multiple onChange={handleGalleryUpload} />
+                                        </div>
+                                        <small className={styles.inputHelp}>Você pode enviar até 10 imagens para a galeria do falecido.</small>
                                     </div>
                                 </div>
                                 <div className={styles.formCol}>
                                     <h3>Biografia e Textos</h3>
                                     <div className={styles.formGroup}>
                                         <label>Breve Descrição *</label>
-                                        <textarea name="descricao" rows="2" required value={formData.descricao} onChange={handleInputChange} />
+                                        <textarea name="descricao" rows="2" placeholder="Uma frase curta que resuma a pessoa..." required value={formData.descricao} onChange={handleInputChange} />
                                     </div>
                                     <div className={styles.formGroup}>
-                                        <label>Biografia Completa {formData.tipo === 'historica' ? '*' : '(Opcional)'}</label>
-                                        <textarea name="biografia" rows="6" required={formData.tipo === 'historica'} value={formData.biografia} onChange={handleInputChange} />
+                                        <label>Biografia Completa</label>
+                                        <textarea name="biografia" rows="8" placeholder="Escreva a história completa do falecido aqui..." value={formData.biografia} onChange={handleInputChange} />
                                     </div>
                                 </div>
                                 <div className={styles.modalActionsFull}>
                                     <button type="button" className={styles.cancelBtn} onClick={closeFormModal}>Cancelar</button>
-                                    <button type="submit" className={styles.saveBtn}>Salvar</button>
+                                    <button type="submit" className={styles.saveBtn}>Salvar Registro</button>
                                 </div>
                             </form>
                         </div>
@@ -1034,7 +1072,7 @@ export default function AdminFalecidos({ onLogout }) {
                 <div className={styles.modalOverlay} onClick={closeConfirm}>
                     <div className={styles.confirmModal} onClick={(e) => e.stopPropagation()}>
                         <div className={styles.confirmIcon}>
-                            <Trash2 size={28} color="#cc2200" />
+                            <AlertCircle size={32} color="#dc2626" />
                         </div>
                         <h2 className={styles.confirmTitle}>{confirmModal.title}</h2>
                         <p className={styles.confirmMessage}>{confirmModal.message}</p>
@@ -1044,7 +1082,7 @@ export default function AdminFalecidos({ onLogout }) {
                                 className={styles.deleteConfirmBtn}
                                 onClick={() => { confirmModal.onConfirm?.(); closeConfirm(); }}
                             >
-                                Excluir
+                                Excluir Permanentemente
                             </button>
                         </div>
                     </div>
@@ -1053,21 +1091,21 @@ export default function AdminFalecidos({ onLogout }) {
 
             {/* --- MODAL QR CODE DO FALECIDO --- */}
             {isQrModalOpen && selectedFalecido && (
-                <div className={styles.modalOverlay}>
-                    <div className={styles.modalContentSmall}>
+                <div className={styles.modalOverlay} onClick={() => setIsQrModalOpen(false)}>
+                    <div className={styles.modalContentSmall} onClick={(e) => e.stopPropagation()}>
                         <div className={styles.qrHeader}>
                             <h2>QR Code do Falecido</h2>
                             <button className={styles.closeBtn} onClick={() => setIsQrModalOpen(false)}><X size={24} /></button>
                         </div>
                         <div className={styles.qrContainer}>
                             <p>Escaneie para acessar o falecido de <strong>{selectedFalecido.nome}</strong></p>
-<div className={styles.qrCodeBox}>
-                                   <QRCode value={qrCodeUrl} size={200} fgColor="#003366" />
-                               </div>
-                               <CopyLinkButton url={qrCodeUrl} />
-                               <button className={styles.saveBtn} onClick={() => window.print()}>
-                                   Imprimir Placa
-                               </button>
+                            <div className={styles.qrCodeBox}>
+                                <QRCode value={qrCodeUrl} size={200} fgColor="#0f172a" />
+                            </div>
+                            <CopyLinkButton url={qrCodeUrl} />
+                            <button className={styles.saveBtn} style={{ marginTop: '16px', width: '100%' }} onClick={() => window.print()}>
+                                Imprimir Placa
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -1075,8 +1113,8 @@ export default function AdminFalecidos({ onLogout }) {
 
             {/* --- MODAL QR CODE DO LOTE --- */}
             {isLoteQrModalOpen && loteQrData && (
-                <div className={styles.modalOverlay}>
-                    <div className={styles.modalContentSmall}>
+                <div className={styles.modalOverlay} onClick={() => setIsLoteQrModalOpen(false)}>
+                    <div className={styles.modalContentSmall} onClick={(e) => e.stopPropagation()}>
                         <div className={styles.qrHeader}>
                             <h2>QR Code do Lote</h2>
                             <button className={styles.closeBtn} onClick={() => setIsLoteQrModalOpen(false)}><X size={24} /></button>
@@ -1087,12 +1125,12 @@ export default function AdminFalecidos({ onLogout }) {
                                 {loteQrData.people.length} {loteQrData.people.length === 1 ? 'falecido' : 'falecidos'} neste lote
                             </p>
                             <div className={styles.qrCodeBox}>
-                                <QRCode value={loteQrUrl} size={200} fgColor="#003366" />
+                                <QRCode value={loteQrUrl} size={200} fgColor="#0f172a" />
                             </div>
                             <div className={styles.loteQrCopy}>
                                 <CopyLinkButton url={loteQrUrl} />
                             </div>
-                            <button className={styles.saveBtn} onClick={() => window.print()}>Imprimir Placa</button>
+                            <button className={styles.saveBtn} style={{ marginTop: '16px', width: '100%' }} onClick={() => window.print()}>Imprimir Placa</button>
                         </div>
                     </div>
                 </div>
@@ -1100,8 +1138,8 @@ export default function AdminFalecidos({ onLogout }) {
 
             {/* --- MODAL QR CODE DA QUADRA --- */}
             {isQuadraQrModalOpen && quadraQrData && (
-                <div className={styles.modalOverlay}>
-                    <div className={styles.modalContentSmall}>
+                <div className={styles.modalOverlay} onClick={() => setIsQuadraQrModalOpen(false)}>
+                    <div className={styles.modalContentSmall} onClick={(e) => e.stopPropagation()}>
                         <div className={styles.qrHeader}>
                             <h2>QR Code da Quadra</h2>
                             <button className={styles.closeBtn} onClick={() => setIsQuadraQrModalOpen(false)}><X size={24} /></button>
@@ -1109,13 +1147,13 @@ export default function AdminFalecidos({ onLogout }) {
                         <div className={styles.qrContainer}>
                             <p>Quadra {quadraQrData.nome}</p>
                             <p style={{ fontSize: '0.85rem', color: '#888', marginBottom: '16px' }}>
-                                {quadraQrData.people.length} {quadraQrData.people.length === 1 ? 'falecido' : 'falecidos'} nesta quadra
+                                {quadraQrData.loteCount} {quadraQrData.loteCount === 1 ? 'lote' : 'lotes'} nesta quadra
                             </p>
                             <div className={styles.qrCodeBox}>
-                                <QRCode value={quadraQrUrl} size={200} fgColor="#003366" />
+                                <QRCode value={quadraQrUrl} size={200} fgColor="#0f172a" />
                             </div>
                             <CopyLinkButton url={quadraQrUrl} />
-                            <button className={styles.saveBtn} onClick={() => window.print()}>Imprimir Placa</button>
+                            <button className={styles.saveBtn} style={{ marginTop: '16px', width: '100%' }} onClick={() => window.print()}>Imprimir Placa</button>
                         </div>
                     </div>
                 </div>

@@ -5,7 +5,6 @@
     font-family: 'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
 }
 
-/* ---------------- TOPO ---------------- */
 .heroBanner {
     position: relative;
     isolation: isolate;
@@ -76,7 +75,6 @@
     line-height: 1.75;
 }
 
-/* ---------------- LAYOUT ---------------- */
 .main {
     padding: 48px 24px 88px;
 }
@@ -90,7 +88,6 @@
     margin: 0 auto;
 }
 
-/* ---------------- MAPA ---------------- */
 .mapWrapper {
     width: 100%;
     max-width: calc(82vh * var(--ratio, 1.6) + 20px);
@@ -149,7 +146,6 @@
     pointer-events: none;
 }
 
-/* modo ?calibrar */
 .calibrar {
     position: absolute;
     left: 12px;
@@ -163,7 +159,6 @@
     font-weight: 600;
 }
 
-/* ---------------- CONTROLES ---------------- */
 .mapControls {
     position: absolute;
     top: 16px;
@@ -199,7 +194,6 @@
     cursor: default;
 }
 
-/* ---------------- PINOS ---------------- */
 .sectorPin {
     position: absolute;
     display: flex;
@@ -217,7 +211,7 @@
     font-weight: 700;
     cursor: pointer;
     box-shadow: 0 4px 14px rgba(0, 20, 50, 0.4);
-    /* --inv mantém o pino do mesmo tamanho mesmo com zoom */
+    
     transform: translate(-50%, -50%) scale(calc(var(--inv, 1) * var(--hover, 1)));
     transition: transform 0.2s ease, background 0.2s ease;
 }
@@ -285,7 +279,6 @@
     visibility: visible;
 }
 
-/* ---------------- PAINEL (folha de papel) ---------------- */
 .panel {
     position: sticky;
     top: 96px;
@@ -334,7 +327,6 @@
     text-transform: uppercase;
 }
 
-/* lista de quadras */
 .sectorList {
     margin: 0;
     padding: 0;
@@ -374,7 +366,6 @@
     font-size: 0.88rem;
 }
 
-/* grade de lotes */
 .lots {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
@@ -416,7 +407,6 @@
     line-height: 1.6;
 }
 
-/* ---------------- RESPONSIVO ---------------- */
 @media (max-width: 1024px) {
     .layout {
         grid-template-columns: 1fr;

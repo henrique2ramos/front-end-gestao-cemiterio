@@ -11,7 +11,6 @@
     padding: 0 24px;
 }
 
-/* --- Banner (mesmo estilo da página de Ajuda) --- */
 .heroBanner {
     position: relative;
     isolation: isolate;
@@ -80,7 +79,6 @@
     line-height: 1.75;
 }
 
-/* Barra de Busca  */
 .searchWrapper {
     display: flex;
     align-items: center;
@@ -135,7 +133,6 @@
     color: #0066cc;
 }
 
-/* Seção de Filtros separada */
 .filterSection {
     padding: 40px 0 16px;
     background: #f3f0ee;
@@ -147,7 +144,6 @@
     z-index: 10;
 }
 
-/* Filtros */
 .filters {
     display: flex;
     gap: 12px;
@@ -181,17 +177,8 @@
     box-shadow: 0 4px 12px rgba(0, 32, 70, 0.2);
 }
 
-/* --- Resultados --- */
 .results {
     padding: 10px 0 80px;
-}
-
-.resultsToolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 32px;
 }
 
 .resultsCount {
@@ -199,31 +186,7 @@
     font-size: 0.95rem;
     font-style: italic;
     color: #6b6e75;
-    margin: 0;
-}
-
-.pageSizeControl {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    color: #475b77;
-    font-size: 0.88rem;
-    white-space: nowrap;
-}
-
-.pageSizeControl select {
-    min-height: 40px;
-    padding: 0 32px 0 12px;
-    border: 1px solid #d6dfe9;
-    border-radius: 8px;
-    color: #123b70;
-    background: #ffffff;
-    font: inherit;
-}
-
-.pageSizeControl select:focus-visible {
-    outline: 3px solid rgba(53, 104, 200, 0.3);
-    outline-offset: 2px;
+    margin-bottom: 32px;
 }
 
 .grid {
@@ -286,19 +249,14 @@
     color: white;
 }
 
-/* --- Paginação --- */
 .pagination {
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-wrap: wrap;
     gap: 8px;
-    max-width: 100%;
-    padding: 0 8px;
 }
 
 .pageBtn {
-    flex: 0 0 44px;
     min-width: 44px;
     height: 44px;
     display: flex;
@@ -312,16 +270,6 @@
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s ease;
-}
-
-.pageEllipsis {
-    display: flex;
-    width: 24px;
-    height: 44px;
-    flex: 0 0 24px;
-    align-items: center;
-    justify-content: center;
-    color: #666666;
 }
 
 .pageBtn:hover:not(:disabled) {
@@ -348,31 +296,6 @@
     color: #ffffff;
 }
 
-@media (max-width: 480px) {
-    .resultsToolbar {
-        flex-direction: column;
-        gap: 12px;
-    }
-
-    .pagination {
-        gap: 4px;
-        padding: 0;
-    }
-
-    .pageBtn {
-        flex-basis: 36px;
-        min-width: 36px;
-        height: 40px;
-    }
-
-    .pageEllipsis {
-        width: 16px;
-        flex-basis: 16px;
-        height: 40px;
-    }
-}
-
-/* --- Estado Vazio --- */
 .empty {
     text-align: center;
     padding: 64px 24px;
@@ -414,7 +337,6 @@
     transform: translateY(-2px);
 }
 
-/* --- Responsividade --- */
 @media (max-width: 700px) {
     .heroBanner {
         padding: 60px 20px 60px;

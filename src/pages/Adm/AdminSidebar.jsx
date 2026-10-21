@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
-    LayoutDashboard, Users, Map as MapIcon, LogOut, ChevronRight, ChevronLeft, Church, Home,
+    LayoutDashboard, Users, Map as MapIcon, LogOut, ChevronRight, ChevronLeft, Home, Component
 } from 'lucide-react';
 import styles from './AdminSidebar.module.css';
 
@@ -9,7 +9,6 @@ const MENU = [
     { to: '/admin', label: 'Início', icon: LayoutDashboard, end: true },
     { to: '/admin/falecidos', label: 'Falecidos', icon: Users },
     { to: '/admin/quadraslotes', label: 'Quadras e Lotes', icon: MapIcon },
-    { to: '/', label: 'Voltar à página inicial', icon: Home, end: true },
 ];
 
 export default function AdminSidebar({ onLogout }) {
@@ -17,6 +16,7 @@ export default function AdminSidebar({ onLogout }) {
     const navigate = useNavigate();
 
     const closeOnMobile = () => setIsOpen(false);
+    
     const handleLogout = () => {
         onLogout();
         closeOnMobile();
@@ -35,19 +35,18 @@ export default function AdminSidebar({ onLogout }) {
                     aria-label={isOpen ? 'Fechar menu' : 'Abrir menu'}
                     aria-expanded={isOpen}
                 >
-                    {isOpen ? <ChevronLeft size={21} /> : <ChevronRight size={21} />}
+                    {isOpen ? <ChevronLeft size={22} /> : <ChevronRight size={22} />}
                 </button>
 
                 <NavLink to="/admin" className={styles.sidebarHeader} onClick={closeOnMobile}>
-                    <span className={styles.brandMark} aria-hidden="true">
-                        <Church size={35} strokeWidth={1.7} />
-                    </span>
                     <span className={styles.brandText}>
-                        <span>Painel Administrativo</span>
+                        <strong>Painel</strong>
+                        <strong>Administrativo</strong>
                     </span>
                 </NavLink>
 
                 <div className={styles.navLabel}>Menu principal</div>
+                
                 <nav className={styles.sidebarNav} aria-label="Menu administrativo">
                     {MENU.map(({ to, label, icon: Icon, end }) => (
                         <NavLink
@@ -57,16 +56,20 @@ export default function AdminSidebar({ onLogout }) {
                             onClick={closeOnMobile}
                             className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}
                         >
-                            <Icon size={19} strokeWidth={1.9} />
+                            <Icon size={20} strokeWidth={2} className={styles.navIcon} />
                             <span>{label}</span>
                         </NavLink>
                     ))}
                 </nav>
 
                 <div className={styles.sidebarFooter}>
-                    <button type="button" className={styles.navItem} onClick={handleLogout}>
-                        <LogOut size={19} strokeWidth={1.9} />
-                        <span>Sair</span>
+                    <button type="button" className={styles.navItem} onClick={() => navigate('/')}>
+                        <Home size={20} strokeWidth={2} className={styles.navIcon} />
+                        <span>Ir para o site</span>
+                    </button>
+                    <button type="button" className={styles.navItemLogout} onClick={handleLogout}>
+                        <LogOut size={20} strokeWidth={2} className={styles.navIcon} />
+                        <span>Sair do sistema</span>
                     </button>
                 </div>
             </aside>

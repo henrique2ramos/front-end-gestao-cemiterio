@@ -3,12 +3,13 @@
     top: 0;
     z-index: 1001;
     display: flex;
-    width: 232px;
+    width: 260px; 
     height: 100vh;
-    flex: 0 0 232px;
+    flex: 0 0 260px;
     flex-direction: column;
-    background: linear-gradient(180deg, #154a80 0%, #103d70 100%);
-    color: #fff;
+    background: #1150af; 
+    color: #f8fafc;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.04);
 }
 
 .trayToggle {
@@ -21,109 +22,148 @@
 
 .sidebarHeader {
     display: flex;
-    min-height: 96px;
+    min-height: 88px;
     align-items: center;
-    gap: 12px;
-    padding: 17px 19px;
+    gap: 14px;
+    padding: 0 24px;
     color: #fff;
     text-decoration: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    transition: opacity 0.2s ease;
+}
+
+.sidebarHeader:hover {
+    opacity: 0.85;
 }
 
 .brandMark {
     display: grid;
-    width: 38px;
-    height: 42px;
-    flex: 0 0 38px;
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
     place-items: center;
-    color: #d6e7ff;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
 .brandText {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
 }
 
 .brandText strong {
     color: #fff;
-    font-size: 0.78rem;
-    font-weight: 700;
-    letter-spacing: 0.01em;
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
 }
 
 .brandText span {
-    color: #d0deef;
-    font-size: 0.63rem;
+    color: #94a3b8; 
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .navLabel {
-    display: none;
+    display: block;
+    padding: 24px 24px 8px;
+    color: #7d9bc4; 
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
 }
 
 .sidebarNav {
     display: flex;
     flex: 1;
     flex-direction: column;
-    gap: 5px;
-    padding: 20px 13px;
+    gap: 8px;
+    padding: 8px 16px;
 }
 
-.navItem {
+.navItem, .navItemLogout {
     display: flex;
     width: 100%;
     align-items: center;
-    gap: 13px;
-    padding: 10px 13px;
+    gap: 14px;
+    padding: 12px 16px;
     border: 0;
-    border-radius: 9px;
+    border-radius: 12px;
     background: transparent;
-    color: #c2cede;
+    color: #94a3b8; 
     cursor: pointer;
     font-family: inherit;
-    font-size: 0.76rem;
-    font-weight: 550;
+    font-size: 0.92rem;
+    font-weight: 500;
     text-align: left;
     text-decoration: none;
-    transition: background 0.18s ease, color 0.18s ease;
+    transition: all 0.2s ease;
+}
+
+.navIcon {
+    transition: transform 0.2s ease;
 }
 
 .navItem:hover {
-    background: rgba(255, 255, 255, 0.07);
-    color: #fff;
+    background: rgba(255, 255, 255, 0.04);
+    color: #f8fafc;
+}
+
+.navItem:hover .navIcon {
+    transform: scale(1.1);
+    color: #3b82f6;
 }
 
 .navItem.active {
-    background: #1977e8;
+    background: linear-gradient(135deg, rgba(39, 99, 226, 0.753), rgba(29, 76, 207, 0.384));
     color: #fff;
-    box-shadow: 0 4px 10px rgba(7, 43, 90, 0.15);
+    font-weight: 600;
+}
+
+.navItem.active .navIcon {
+    color: #3b82f6; 
 }
 
 .sidebarFooter {
-    padding: 12px 13px 14px;
-    border-top: 1px solid rgba(255, 255, 255, 0.11);
+    padding: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
-.sidebarFooter .navItem:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: #fff;
+.navItemLogout:hover {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.navItemLogout:hover .navIcon {
+    transform: translateX(3px); 
+    color: #ef4444;
 }
 
 .navItem:focus-visible,
+.navItemLogout:focus-visible,
 .sidebarHeader:focus-visible,
 .trayToggle:focus-visible {
-    outline: 3px solid #9ebeff;
-    outline-offset: 3px;
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
 }
 
 @media (max-width: 768px) {
     .sidebar {
         position: fixed;
         left: 0;
-        width: 252px;
-        flex-basis: 252px;
+        width: 280px;
+        flex-basis: 280px;
         transform: translateX(-100%);
-        box-shadow: 12px 0 35px rgba(11, 28, 48, 0.22);
-        transition: transform 0.28s ease;
+        box-shadow: 12px 0 40px rgba(0, 0, 0, 0.4);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .sidebar.open {
@@ -132,19 +172,21 @@
 
     .trayToggle {
         position: absolute;
-        top: 24px;
-        right: -42px;
+        top: 50%;
+        transform: translateY(-50%);
+        right: -40px;
         display: flex;
-        width: 42px;
-        height: 46px;
+        width: 45px;
+        height: 45px;
         align-items: center;
         justify-content: center;
         border: 0;
-        border-radius: 0 12px 12px 0;
-        background: #154a80;
+        border-radius: 0 20px 20px 0;
+        background: #093ebb88;
         color: #fff;
         cursor: pointer;
-        box-shadow: 5px 3px 12px rgba(11, 28, 48, 0.16);
+        box-shadow: 6px 0 16px rgba(0, 0, 0, 0.15);
+        border-left: 1px solid rgba(255, 255, 255, 0.05);
     }
 
     .overlay {
@@ -153,14 +195,23 @@
         z-index: 1000;
         display: block;
         border: 0;
-        background: rgba(12, 27, 45, 0.4);
-        backdrop-filter: blur(2px);
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(4px);
+        animation: fadeIn 0.3s ease;
     }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
     .sidebar,
-    .navItem {
+    .navItem,
+    .navIcon,
+    .overlay {
         transition: none;
+        animation: none;
     }
 }

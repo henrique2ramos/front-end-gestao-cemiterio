@@ -9,7 +9,6 @@
   padding: 0 24px;
 }
 
-/* --- Navegação Topo --- */
 .topNav {
   padding: 30px 0 20px;
 }
@@ -34,13 +33,11 @@
   transform: translateX(-4px);
 }
 
-/* --- Card Principal --- */
 .mainSection {
   position: relative;
   z-index: 10;
   margin-bottom: 80px;
 }
-
 
 .profileCard {
   background: #ffffff;
@@ -51,7 +48,6 @@
   box-shadow: 0 20px 56px rgba(0, 32, 70, .1);
 }
 
-/* Cabeçalho do Perfil */
 .profileHeader {
   display: flex;
   gap: 48px;
@@ -91,7 +87,6 @@
   letter-spacing: -0.02em;
 }
 
-/* --- Datas e Localização --- */
 .metadata {
   display: flex;
   flex-wrap: wrap;
@@ -100,7 +95,6 @@
   align-items: center;
 }
 
-/* Container das datas */
 .dateWrapper {
   display: flex;
   align-items: center;
@@ -129,7 +123,6 @@
   font-weight: 800;
 }
 
-/* Linha divisória entre as datas */
 .dateDivider {
   width: 1px;
   height: 16px;
@@ -137,7 +130,6 @@
   margin: 0 16px;
 }
 
-/* --- Botões de Ação  --- */
 .actionButtons {
   display: flex;
   flex-wrap: wrap;
@@ -176,8 +168,6 @@
   font-weight: 500;
 }
 
-
-/* --- Abas de Navegação --- */
 .tabNavWrapper {
   display: flex;
   justify-content: center;
@@ -238,7 +228,6 @@
   background-color: #775a19;
 }
 
-/* --- Conteúdo das Abas --- */
 .tabContent {
   padding: 56px 48px;
   min-height: 300px;
@@ -254,7 +243,6 @@
   line-height:1.9;
 }
 
-/* Citação / Homenagem  */
 .tributeBox {
   font-size: 1.1rem;
   margin-top: 56px;
@@ -298,7 +286,6 @@
   letter-spacing: 0.08em;
 }
 
-/* --- Galeria --- */
 .galleryGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -365,7 +352,6 @@
   padding: 32px 20px;
 }
 
-/* --- Lightbox  --- */
 .lightbox {
   position: fixed;
   inset: 0;
@@ -377,10 +363,9 @@
   cursor: pointer;
 }
 
-/* --- Botão Fechar da Galeria --- */
 .lightboxClose {
   position: fixed;
-  /* Prende o botão na tela */
+  
   top: 24px;
   right: 24px;
   color: #111111;
@@ -403,7 +388,6 @@
   transform: scale(1.1);
 }
 
-/* Setas de navegação lateral */
 .lightboxNav {
   position: absolute;
   top: 50%;
@@ -462,7 +446,6 @@
   font-size: 0.9rem;
 }
 
-/* --- Responsividade --- */
 @media (max-width: 900px) {
   .profileHeader {
     flex-direction: column;
