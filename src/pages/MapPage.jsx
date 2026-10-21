@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
-import { fetchFalecidos, fetchLotes, fetchQuadras } from '../lib/api';
+import { ZoomIn, ZoomOut, RotateCcw, ChevronLeft, ChevronRight, Search, ArrowLeft } from 'lucide-react';
+import { fetchFalecidos, fetchLotes, fetchQuadras, resolveImageUrl } from '../lib/api';
 import styles from './MapPage.module.css';
 import mapaImg from '../assets/mapaExemplo.jfif';
+import personPlaceholder from '../assets/person-placeholder.svg';
 
 const MAX_ZOOM = 3;
+const LOTS_PER_PAGE = 48;
+const lotNumberCollator = new Intl.Collator('pt-BR', { numeric: true, sensitivity: 'base' });
 
 const SECTORS = [
     { id: 'A', name: 'Quadra A', x: 73, y: 95 },
@@ -28,10 +31,10 @@ function pinPosition(sector, ratio) {
 
 function parseLocal(texto) {
     if (typeof texto !== 'string') return null;
-    const quadra = texto.match(/quadra\s*([a-z])/i);
+    const quadra = texto.match(/quadra\s*([a-z0-9-]+)/i);
     if (!quadra) return null;
-    const lote = texto.match(/lote\s*(\d+)/i);
-    return { quadra: quadra[1].toUpperCase(), lote: lote ? Number(lote[1]) : null };
+    const lote = texto.match(/lote\s*([^,\s]+)/i);
+    return { quadra: quadra[1].toUpperCase(), lote: lote?.[1] ?? null };
 }
 
 function normalizeQuadraId(nome) {
@@ -40,12 +43,26 @@ function normalizeQuadraId(nome) {
         : '';
 }
 
+function nomeQuadra(quadra) {
+    const nome = String(quadra?.nome ?? '');
+    return /^quadra\s/i.test(nome) ? nome : `Quadra ${nome}`;
+}
+
+function normalizarNumeroLote(value) {
+    const numero = String(value ?? '').trim();
+    return /^\d+$/.test(numero) ? String(Number(numero)) : numero.toLocaleLowerCase('pt-BR');
+}
+
 export default function MapPage() {
     const [selected, setSelected] = useState(null);
+    const [selectedLoteId, setSelectedLoteId] = useState(null);
+    const [quadras, setQuadras] = useState([]);
     const [falecidos, setFalecidos] = useState([]);
     const [lotesPorQuadra, setLotesPorQuadra] = useState({});
     const [lotesLoading, setLotesLoading] = useState(true);
     const [lotesError, setLotesError] = useState(false);
+    const [buscaLote, setBuscaLote] = useState('');
+    const [paginaLotes, setPaginaLotes] = useState(1);
     const [zoom, setZoom] = useState(1);
     const [offset, setOffset] = useState({ x: 0, y: 0 });
     const [dragging, setDragging] = useState(false);
@@ -75,23 +92,40 @@ export default function MapPage() {
 
         async function loadLotes() {
             try {
-                const quadras = await fetchQuadras();
+                const respostaQuadras = await fetchQuadras();
+                const quadras = Array.isArray(respostaQuadras)
+                    ? respostaQuadras
+                    : respostaQuadras?.items ?? respostaQuadras?.quadras ?? [];
                 if (!Array.isArray(quadras)) {
                     throw new Error('Formato inválido ao carregar quadras.');
                 }
 
+                if (isMounted) setQuadras(quadras);
                 const lotes = await Promise.all(
-                    SECTORS.map(async (sector) => {
-                        const quadra = quadras.find(
-                            (item) => normalizeQuadraId(item.nome) === sector.id
-                        );
-                        if (!quadra) return [sector.id, []];
+                    quadras.map(async (quadra) => {
+                        const sector = { name: quadra.nome };
 
-                        const data = await fetchLotes(quadra.id);
+                        const response = await fetchLotes(quadra.id, { page: 1, limit: 1000 });
+                        const data = Array.isArray(response)
+                            ? response
+                            : response?.items ?? response?.lotes ?? response?.data;
                         if (!Array.isArray(data)) {
                             throw new Error(`Formato inválido ao carregar lotes da ${sector.name}.`);
                         }
-                        return [sector.id, data];
+                        const pageSize = Number(response?.limit ?? response?.perPage ?? 1000);
+                        const totalPages = response?.totalPages
+                            ?? Math.max(1, Math.ceil((response?.total ?? data.length) / pageSize));
+                        if (totalPages <= 1) return [quadra.id, data];
+
+                        const otherPages = await Promise.all(
+                            Array.from({ length: totalPages - 1 }, (_, index) =>
+                                fetchLotes(quadra.id, { page: index + 2, limit: 1000 })
+                            )
+                        );
+                        const otherItems = otherPages.flatMap((page) => Array.isArray(page)
+                            ? page
+                            : page?.items ?? page?.lotes ?? page?.data ?? []);
+                        return [quadra.id, [...data, ...otherItems]];
                     })
                 );
 
@@ -110,25 +144,38 @@ export default function MapPage() {
 
     const porQuadra = useMemo(() => {
         const grupos = {};
-        SECTORS.forEach((s) => {
-            grupos[s.id] = [];
+        quadras.forEach((quadra) => {
+            grupos[quadra.id] = [];
         });
         falecidos.forEach((falecido) => {
             const local = parseLocal(falecido.localizacao);
-            if (local && grupos[local.quadra]) {
-                grupos[local.quadra].push({ falecido, lote: local.lote });
-            }
+            const quadra = local && quadras.find(
+                (item) => normalizeQuadraId(item.nome) === local.quadra
+            );
+            if (quadra) grupos[quadra.id].push({ falecido, lote: local.lote });
         });
         return grupos;
-    }, [falecidos]);
+    }, [falecidos, quadras]);
 
     const pins = useMemo(
-        () => SECTORS.map((item) => ({ ...item, ...pinPosition(item, ratio) })),
-        [ratio]
+        () => quadras.flatMap((quadra) => {
+            const position = SECTORS.find(
+                (item) => item.id === normalizeQuadraId(quadra.nome)
+            );
+            return position ? [{
+                ...position,
+                ...quadra,
+                id: quadra.id,
+                code: normalizeQuadraId(quadra.nome),
+                name: nomeQuadra(quadra),
+                ...pinPosition(position, ratio),
+            }] : [];
+        }),
+        [quadras, ratio]
     );
 
     function ocupados(sectorId) {
-        const lotes = new Set(porQuadra[sectorId].filter((i) => i.lote).map((i) => i.lote));
+        const lotes = new Set((porQuadra[sectorId] || []).filter((i) => i.lote).map((i) => i.lote));
         return lotes.size;
     }
 
@@ -138,13 +185,33 @@ export default function MapPage() {
         return lotesPorQuadra[sectorId]?.length || 0;
     }
 
-    const sector = SECTORS.find((s) => s.id === selected) || null;
+    const sector = quadras.find((item) => item.id === selected) || null;
     const itensSetor = sector
-        ? porQuadra[sector.id]
+        ? porQuadra[sector.id] || []
         : [];
     const lotesSetor = sector
         ? [...(lotesPorQuadra[sector.id] || [])].sort(
-            (a, b) => Number(a.numero) - Number(b.numero)
+            (a, b) => lotNumberCollator.compare(String(a.numero ?? ''), String(b.numero ?? ''))
+        )
+        : [];
+    const lotesVazios = lotesSetor.filter((lote) => !itensSetor.some((item) =>
+        item.falecido.loteId === lote.id
+        || normalizarNumeroLote(item.lote) === normalizarNumeroLote(lote.numero)
+    )).length;
+    const lotesFiltrados = lotesSetor.filter((lote) =>
+        String(lote.numero ?? '').toLocaleLowerCase('pt-BR').includes(buscaLote.trim().toLocaleLowerCase('pt-BR'))
+    );
+    const totalPaginasLotes = Math.max(1, Math.ceil(lotesFiltrados.length / LOTS_PER_PAGE));
+    const paginaLotesAtual = Math.min(paginaLotes, totalPaginasLotes);
+    const lotesVisiveis = lotesFiltrados.slice(
+        (paginaLotesAtual - 1) * LOTS_PER_PAGE,
+        paginaLotesAtual * LOTS_PER_PAGE
+    );
+    const loteSelecionado = lotesSetor.find((lote) => String(lote.id) === String(selectedLoteId)) || null;
+    const pessoasDoLote = loteSelecionado
+        ? itensSetor.filter((item) =>
+            item.falecido.loteId === loteSelecionado.id
+            || normalizarNumeroLote(item.lote) === normalizarNumeroLote(loteSelecionado.numero)
         )
         : [];
 
@@ -173,19 +240,26 @@ export default function MapPage() {
     function selectSector(item) {
         if (selected === item.id) {
             setSelected(null);
+            setSelectedLoteId(null);
+            resetView();
             return;
         }
         setSelected(item.id);
+        setSelectedLoteId(null);
+        setBuscaLote('');
+        setPaginaLotes(1);
 
         const el = mapRef.current;
+        const position = SECTORS.find((sectorItem) => sectorItem.id === normalizeQuadraId(item.nome));
+        if (!position) return;
         const z = Math.max(zoom, 2);
         setZoom(z);
         if (el) {
             setOffset(
                 clampOffset(
                     {
-                        x: -(item.x / 100 - 0.5) * el.clientWidth * z,
-                        y: -(item.y / 100 - 0.5) * el.clientHeight * z,
+                        x: -(position.x / 100 - 0.5) * el.clientWidth * z,
+                        y: -(position.y / 100 - 0.5) * el.clientHeight * z,
                     },
                     z
                 )
@@ -275,7 +349,7 @@ export default function MapPage() {
                                         style={{ left: `${item.x}%`, top: `${item.y}%` }}
                                         onClick={() => selectSector(item)}
                                     >
-                                        <span>{item.id}</span>
+                                        <span>{item.code}</span>
                                         <div className={styles.sectorTooltip}>
                                             <strong>{item.name}</strong>
                                             <span>
@@ -306,45 +380,169 @@ export default function MapPage() {
                                 </button>
                             </div>
                         </div>
+                        <div className={styles.mapLegend} aria-label="Legenda do mapa">
+                            <span><i className={styles.legendQuadra} /> Quadra no mapa</span>
+                            <span><i className={styles.legendOccupied} /> Lote com pessoas</span>
+                            <span><i className={styles.legendEmpty} /> Lote sem pessoas</span>
+                        </div>
                     </div>
 
                     
                     <aside className={styles.panel}>
                         {sector ? (
                             <>
-                                <span className={styles.panelLabel}>Quadra selecionada</span>
-                                <h2 className={styles.panelTitle}>{sector.name}</h2>
-
-                                <h3 className={styles.groupTitle}>Lotes cadastrados</h3>
+                                <nav className={styles.panelBreadcrumb} aria-label="Navegação do mapa">
+                                    <button
+                                        type="button"
+                                        className={styles.breadcrumbBack}
+                                    onClick={() => {
+                                        if (loteSelecionado) {
+                                            setSelectedLoteId(null);
+                                            return;
+                                        }
+                                        setSelected(null);
+                                        setBuscaLote('');
+                                        setPaginaLotes(1);
+                                        resetView();
+                                    }}
+                                    >
+                                        <ArrowLeft size={16} />
+                                        {loteSelecionado ? nomeQuadra(sector) : 'Todas as quadras'}
+                                    </button>
+                                    <ChevronRight size={15} className={styles.breadcrumbSeparator} aria-hidden="true" />
+                                    <span>{loteSelecionado ? `Lote ${loteSelecionado.numero}` : nomeQuadra(sector)}</span>
+                                </nav>
+                                
+                                {loteSelecionado ? (
+                                    <>
+                                        <div className={styles.lotPanelHeader}>
+                                            <div className={styles.lotPanelHeading}>
+                                                <h2 className={styles.selectedLotTitle}>Lote {loteSelecionado.numero}</h2>
+                                                <span className={styles.lotCount}>
+                                                    {pessoasDoLote.length} {pessoasDoLote.length === 1 ? 'pessoa sepultada' : 'pessoas sepultadas'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        {pessoasDoLote.length > 0 ? (
+                                            <ul className={styles.deceasedList}>
+                                                {pessoasDoLote.map(({ falecido }) => (
+                                                    <li key={falecido.id}>
+                                                        <Link to={`/falecidos/${falecido.id}`} className={styles.deceasedLink}>
+                                                            <img
+                                                                className={styles.deceasedPhoto}
+                                                                src={resolveImageUrl(falecido.imagem) || personPlaceholder}
+                                                                alt=""
+                                                                onError={(event) => { event.currentTarget.src = personPlaceholder; }}
+                                                            />
+                                                            <span className={styles.deceasedInfo}>
+                                                                <strong>{falecido.nome}</strong>
+                                                                <small>
+                                                                    Nascimento: {falecido.dataNascimento || falecido.anoNascimento || '—'}
+                                                                    {' · Falecimento: '}{falecido.dataMorte || falecido.anoMorte || '—'}
+                                                                </small>
+                                                                {(falecido.descricao || falecido.biografia) && (
+                                                                    <small className={styles.deceasedDescription}>
+                                                                        {falecido.descricao || falecido.biografia}
+                                                                    </small>
+                                                                )}
+                                                            </span>
+                                                            <ChevronRight size={17} aria-hidden="true" />
+                                                        </Link>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        ) : (
+                                            <p className={styles.emptyMsg}>Não há pessoas cadastradas neste lote.</p>
+                                        )}
+                                    </>
+                                ) : (
+                                <>
+                                <div className={styles.lotPanelHeader}>
+                                    <div className={styles.lotPanelHeading}>
+                                        <h3>Lotes</h3>
+                                        <span className={styles.lotCount}>
+                                            {lotesLoading
+                                                ? 'Carregando lotes...'
+                                                : lotesError
+                                                    ? 'Lotes indisponíveis'
+                                                    : `${lotesSetor.length - lotesVazios} / ${lotesSetor.length}`}
+                                        </span>
+                                    </div>
+                                </div>
                                 {lotesError ? (
                                     <p className={styles.emptyMsg} role="alert">Não foi possível carregar os lotes desta quadra.</p>
                                 ) : lotesLoading ? (
                                     <p className={styles.emptyMsg}>Carregando lotes...</p>
                                 ) : lotesSetor.length > 0 ? (
-                                    <div className={styles.lots}>
-                                        {lotesSetor.map((lote) => {
-                                            const numero = Number(lote.numero);
-                                            const memoriais = itensSetor.filter((item) => item.lote === numero);
+                                    <>
+                                        <label className={styles.lotSearch}>
+                                            <Search size={17} aria-hidden="true" />
+                                            <input
+                                                type="search"
+                                                value={buscaLote}
+                                                onChange={(event) => {
+                                                    setBuscaLote(event.target.value);
+                                                    setPaginaLotes(1);
+                                                }}
+                                                placeholder="Buscar lote..."
+                                                aria-label="Buscar lote nesta quadra"
+                                            />
+                                        </label>
+                                        {lotesFiltrados.length > 0 ? (
+                                            <div className={styles.lots}>
+                                        {lotesVisiveis.map((lote) => {
+                                            const numero = String(lote.numero ?? '');
+                                            const memoriais = itensSetor.filter((item) =>
+                                                normalizarNumeroLote(item.lote) === normalizarNumeroLote(numero)
+                                            );
                                             const title = memoriais.length
                                                 ? `Lote ${numero}: ${memoriais.map((item) => item.falecido.nome).join(', ')}`
                                                 : `Lote ${numero}`;
 
                                             return (
-                                                <Link
+                                                <button
+                                                    type="button"
                                                     key={lote.id}
-                                                    to={memoriais.length
-                                                        ? `/falecidos/${memoriais[0].falecido.id}`
-                                                        : `/lote/${lote.id}`}
                                                     className={`${styles.lot} ${memoriais.length ? styles.lotTaken : ''}`}
                                                     title={title}
+                                                    aria-label={`Abrir lote ${numero}`}
+                                                    aria-pressed={String(selectedLoteId) === String(lote.id)}
+                                                    onClick={() => setSelectedLoteId(lote.id)}
                                                 >
                                                     {numero}
-                                                </Link>
+                                                </button>
                                             );
                                         })}
-                                    </div>
+                                            </div>
+                                        ) : (
+                                            <p className={styles.emptyMsg}>Nenhum lote corresponde à busca.</p>
+                                        )}
+                                        {totalPaginasLotes > 1 && (
+                                            <div className={styles.lotPagination}>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setPaginaLotes((page) => Math.max(1, page - 1))}
+                                                    disabled={paginaLotesAtual === 1}
+                                                    aria-label="Página anterior de lotes"
+                                                >
+                                                    <ChevronLeft size={17} />
+                                                </button>
+                                                <span>{paginaLotesAtual} / {totalPaginasLotes}</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setPaginaLotes((page) => Math.min(totalPaginasLotes, page + 1))}
+                                                    disabled={paginaLotesAtual === totalPaginasLotes}
+                                                    aria-label="Próxima página de lotes"
+                                                >
+                                                    <ChevronRight size={17} />
+                                                </button>
+                                            </div>
+                                        )}
+                                    </>
                                 ) : (
                                     <p className={styles.emptyMsg}>Ainda não há lotes cadastrados nesta quadra.</p>
+                                )}
+                                </>
                                 )}
                             </>
                         ) : (
@@ -358,12 +556,12 @@ export default function MapPage() {
 
                                 <h3 className={styles.groupTitle}>Quadras</h3>
                                 <ul className={styles.sectorList}>
-                                    {pins.map((item) => (
-                                        <li key={item.id}>
-                                            <button type="button" onClick={() => selectSector(item)}>
-                                                <strong>{item.name}</strong>
+                                    {quadras.map((quadra) => (
+                                        <li key={quadra.id}>
+                                            <button type="button" onClick={() => selectSector(quadra)}>
+                                                <strong>{nomeQuadra(quadra)}</strong>
                                                 <span>
-                                                    {ocupados(item.id)} de {totalLotes(item.id)} lotes
+                                                    {ocupados(quadra.id)} de {totalLotes(quadra.id)} lotes
                                                 </span>
                                             </button>
                                         </li>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import ScrollToTop from "./components/ScrollToTop"; 
 import MainLayout from "./layout/MainLayout";

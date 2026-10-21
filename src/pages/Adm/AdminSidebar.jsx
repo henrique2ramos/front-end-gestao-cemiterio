@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
-    LayoutDashboard, Users, Map as MapIcon, LogOut, ChevronRight, ChevronLeft, Home, Component
+    LayoutDashboard, Users, Map as MapIcon, LogOut, ChevronRight, ChevronLeft, Home
 } from 'lucide-react';
 import styles from './AdminSidebar.module.css';
 

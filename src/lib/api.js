@@ -54,15 +54,11 @@ async function request(path, options = {}) {
 export async function fetchFalecidos() {
   const data = await request('/api/falecidos');
 
-  console.log('=== RESPOSTA DA API ===');
-  console.log(data);
-  console.log('É array?', Array.isArray(data));
-
   if (Array.isArray(data)) return data;
   if (Array.isArray(data?.falecidos)) return data.falecidos;
   if (Array.isArray(data?.data)) return data.data;
 
-  console.warn('Formato inesperado:', data);
+  console.warn('A API retornou um formato inesperado para a lista de falecidos.');
 
   return [];
 }
@@ -144,8 +140,11 @@ export async function deleteQuadra(id, token) {
   });
 }
 
-export async function fetchLotes(quadraId) {
-  return request(`/api/lotes?quadraId=${encodeURIComponent(quadraId)}`);
+export async function fetchLotes(quadraId, { page, limit } = {}) {
+  const params = new URLSearchParams({ quadraId: String(quadraId) });
+  if (page != null) params.set('page', String(page));
+  if (limit != null) params.set('limit', String(limit));
+  return request(`/api/lotes?${params.toString()}`);
 }
 
 export async function createLote(quadraId, numero, token) {

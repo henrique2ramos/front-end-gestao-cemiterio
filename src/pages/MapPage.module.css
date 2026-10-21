@@ -110,6 +110,45 @@
     touch-action: pan-y;
 }
 
+.mapLegend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 18px;
+    padding: 12px 6px 2px;
+    color: #596273;
+    font-size: 0.78rem;
+}
+
+.mapLegend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.mapLegend i {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    flex: 0 0 10px;
+    border-radius: 50%;
+}
+
+.legendQuadra {
+    background: #b8860b;
+}
+
+.legendOccupied {
+    border-radius: 3px !important;
+    background: #1565c0;
+}
+
+.legendEmpty {
+    border: 1px solid #9a9da4;
+    border-radius: 3px !important;
+    background: #ffffff;
+}
+
 .map.zoomed {
     cursor: grab;
     touch-action: none;
@@ -311,6 +350,82 @@
     line-height: 1.15;
 }
 
+.lotSummary {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr 0.8fr;
+    gap: 8px;
+    padding: 12px;
+    border: 1px solid #d7e5f5;
+    border-left: 4px solid #1565c0;
+    border-radius: 8px;
+    background: #f3f8fd;
+}
+
+.lotSummary span {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.lotSummary small {
+    color: #6b6e75;
+    font-size: 0.7rem;
+}
+
+.lotSummary strong {
+    overflow: hidden;
+    color: #002046;
+    font-size: 0.86rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.panelBreadcrumb {
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: -10px 0 42px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #e4dfdb;
+    color: #596273;
+    font-size: 0.84rem;
+}
+
+.breadcrumbBack {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 4px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: #6b6e75;
+    background: transparent;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.breadcrumbBack:hover {
+    color: #775a19;
+    background: #faf6eb;
+}
+
+.breadcrumbSeparator {
+    color: #9a9da4;
+}
+
+.panelBreadcrumb > span {
+    padding: 6px 10px;
+    border-radius: 6px;
+    color: #775a19;
+    background: #faf6eb;
+    font-weight: 700;
+}
+
 .panelSub {
     margin: 0 0 8px;
     line-height: 1.7;
@@ -325,6 +440,38 @@
     font-weight: 700;
     letter-spacing: 0.16em;
     text-transform: uppercase;
+}
+
+.lotPanelHeader {
+    margin: 0 0 16px;
+}
+
+.lotPanelHeading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.lotPanelHeading h2,
+.lotPanelHeading h3 {
+    margin: 0;
+    color: #775a19;
+    font-family: 'Cormorant Garamond', 'Georgia', serif;
+    font-size: 2rem;
+    font-weight: 600;
+    line-height: 1.1;
+}
+
+.selectedLotTitle {
+    font-size: 2rem;
+}
+
+.lotCount {
+    color: #6b6251;
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
 }
 
 .sectorList {
@@ -372,18 +519,84 @@
     gap: 6px;
 }
 
+.lotSearch {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 14px;
+    padding: 10px 12px;
+    border: 1px solid #e4dfdb;
+    border-radius: 8px;
+    color: #6b6e75;
+    background: #ffffff;
+}
+
+.lotsDivider {
+    margin: 0 0 14px;
+    border-top: 1px solid #e4dfdb;
+}
+
+.lotSearch:focus-within {
+    border-color: #1565c0;
+    box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.12);
+}
+
+.lotSearch input {
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    color: #002046;
+    background: transparent;
+    font: inherit;
+}
+
+.lotPagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 16px;
+    color: #44474e;
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+
+.lotPagination button {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    border: 1px solid #e4dfdb;
+    border-radius: 8px;
+    color: #1565c0;
+    background: #ffffff;
+    cursor: pointer;
+}
+
+.lotPagination button:disabled {
+    color: #9a9da4;
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
 .lot {
     display: flex;
+    min-width: 0;
     height: 38px;
     align-items: center;
     justify-content: center;
+    padding: 0;
     border: 1px solid #e4dfdb;
     border-radius: 6px;
     color: #9a9da4;
     background: #ffffff;
     font-size: 0.82rem;
     font-weight: 600;
+    font-family: inherit;
     text-decoration: none;
+    cursor: pointer;
 }
 
 .lotTaken {
@@ -399,12 +612,81 @@
     transform: translateY(-1px);
 }
 
+.lotSelected {
+    outline: 3px solid #b8860b;
+    outline-offset: 2px;
+}
+
 .emptyMsg {
     margin: 0;
     padding: 8px 0;
     color: #6b6e75;
     font-style: italic;
     line-height: 1.6;
+}
+
+.deceasedList {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.deceasedList li + li {
+    border-top: 1px solid #e4dfdb;
+}
+
+.deceasedLink {
+    display: flex;
+    min-height: 64px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 4px;
+    color: #002046;
+    font-weight: 600;
+}
+
+.deceasedLink:hover {
+    color: #1565c0;
+}
+
+.deceasedPhoto {
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+    border-radius: 7px;
+    background: #eef2f8;
+    object-fit: cover;
+}
+
+.deceasedInfo {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.deceasedInfo strong {
+    overflow: hidden;
+    color: #002046;
+    font-size: 0.92rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.deceasedInfo small {
+    color: #6b6e75;
+    font-size: 0.75rem;
+    font-weight: 400;
+    line-height: 1.4;
+}
+
+.deceasedInfo .deceasedDescription {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
 }
 
 @media (max-width: 1024px) {

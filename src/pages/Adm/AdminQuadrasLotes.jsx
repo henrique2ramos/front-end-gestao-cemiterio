@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plus, Edit, Trash2, Search, X, QrCode, ChevronLeft, ChevronRight, LayoutGrid, AlertCircle, CalendarDays } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, X, QrCode, ChevronLeft, ChevronRight, LayoutGrid, AlertCircle } from 'lucide-react';
 import QRCode from 'react-qr-code';
 import { useLocation } from 'react-router-dom';
 import {
@@ -14,13 +14,11 @@ import {
     deleteQuadra,
     fetchLotes,
     createLote,
-    createLotesEmSequencia,
     updateLote,
     deleteLote,
 } from '../../lib/api';
 import AdminSidebar from './AdminSidebar';
 import CopyLinkButton from '../../components/CopyLinkButton';
-import AutocompleteInput from '../../components/AutocompleteInput';
 import Spinner from '../../components/Spinner';
 import { getPageItems } from './../../data/adminPagination';
 import styles from './AdminQuadrasLotes.module.css';
@@ -53,7 +51,7 @@ export default function AdminQuadrasLotes({ onLogout }) {
     const [carregandoQuadras, setCarregandoQuadras] = useState(true);
     const [quadraDosLotes, setQuadraDosLotes] = useState(null);
 
-    const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+    const [isFormModalOpen, setIsFormModalOpen] = useState(Boolean(location.state?.novo));
     const [isQrModalOpen, setIsQrModalOpen] = useState(false);
     const [selectedFalecido, setSelectedFalecido] = useState(null);
 
@@ -71,16 +69,18 @@ export default function AdminQuadrasLotes({ onLogout }) {
     const [isLoteModalOpen, setIsLoteModalOpen] = useState(false);
     const [editingLote, setEditingLote] = useState(null);
     const [loteNome, setLoteNome] = useState('');
-    const [isLoteSequenciaModalOpen, setIsLoteSequenciaModalOpen] = useState(false);
-    const [numeroInicialLotes, setNumeroInicialLotes] = useState('');
-    const [quantidadeLotes, setQuantidadeLotes] = useState('');
-    const [criandoLotes, setCriandoLotes] = useState(false);
 
     const [formData, setFormData] = useState({
         nome: '', dataNascimento: '', dataMorte: '',
         setor: '', lote: '',
         descricao: '', biografia: '', imagem: '', tipo: 'historica'
     });
+
+    const updateSearchTerm = (value) => {
+        setSearchTerm(value);
+        setCurrentPage(1);
+        setCurrentLotePage(1);
+    };
 
     const normalizeFalecidosFromApi = (items) => items.map((item) => ({
         ...item,
@@ -194,7 +194,6 @@ export default function AdminQuadrasLotes({ onLogout }) {
         }
 
         if (quadras.length > 0) carregarContagemLotes();
-        else setQuantidadeLotesPorQuadra({});
 
         return () => { cancelado = true; };
     }, [quadras, lotes]);
@@ -226,34 +225,15 @@ export default function AdminQuadrasLotes({ onLogout }) {
     }, [selectedQuadra, quadras]);
 
     useEffect(() => {
-        if (!location.state?.novo) return;
-
-        setSelectedFalecido(null);
-        setSelectedImageFile(null);
-        setSelectedGalleryFiles([]);
-        setImagePreview('');
-        setFormData({
-            nome: '', dataNascimento: '', dataMorte: '',
-            setor: '', lote: '',
-            descricao: '', biografia: '', imagem: '', tipo: 'historica'
-        });
-        setIsFormModalOpen(true);
-    }, [location.state?.novo]);
-
-    useEffect(() => {
         if (editHandledRef.current) return;
         const editId = location.state?.editFalecidoId;
         if (!editId || falecidos.length === 0) return;
         const found = falecidos.find((m) => m.id === editId);
         if (found) {
             editHandledRef.current = true;
-            const quadraMatch = found.localizacao?.match(/^Quadra\s+(.+?),/);
-            const loteMatch = found.localizacao?.match(/Lote\s+(.+?)$/);
-            if (quadraMatch) setSelectedQuadra(quadraMatch[1].trim());
-            if (loteMatch) setSelectedLote(loteMatch[1].trim());
             openEditModal(found);
         }
-    }, [location.state?.editFalecidoId, falecidos.length]);
+    }, [location.state?.editFalecidoId, falecidos]);
 
     // --- DADOS DERIVADOS ---
     const quadraSelecionada = quadras.find(q => q.nome === selectedQuadra) || null;
@@ -286,12 +266,9 @@ export default function AdminQuadrasLotes({ onLogout }) {
         ? lotesComCount.filter(l => String(l.nome).toLowerCase().includes(termoLote))
         : lotesComCount;
     const totalLotePages = Math.max(1, Math.ceil(lotesVisiveis.length / LOTES_PER_PAGE));
-    const startLoteIndex = (currentLotePage - 1) * LOTES_PER_PAGE;
+    const paginaLoteAtual = Math.min(currentLotePage, totalLotePages);
+    const startLoteIndex = (paginaLoteAtual - 1) * LOTES_PER_PAGE;
     const lotesDaPagina = lotesVisiveis.slice(startLoteIndex, startLoteIndex + LOTES_PER_PAGE);
-
-    useEffect(() => {
-        if (currentLotePage > totalLotePages) setCurrentLotePage(totalLotePages);
-    }, [currentLotePage, totalLotePages]);
 
     const memoriaisDoLote = (selectedQuadra && selectedLote)
         ? falecidos.filter(m => m.localizacao === `Quadra ${selectedQuadra}, Lote ${selectedLote}`)
@@ -300,11 +277,6 @@ export default function AdminQuadrasLotes({ onLogout }) {
     const filteredMemoriais = memoriaisDoLote.filter(m =>
         typeof m.nome === 'string' && m.nome.toLowerCase().includes(searchTerm.toLowerCase())
     );
-
-    useEffect(() => {
-        setCurrentPage(1);
-        setCurrentLotePage(1);
-    }, [searchTerm]);
 
     const totalPages = Math.max(1, Math.ceil(filteredMemoriais.length / ITEMS_PER_PAGE));
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -408,12 +380,6 @@ export default function AdminQuadrasLotes({ onLogout }) {
         setFormData(prev => ({ ...prev, [name]: v }));
     };
 
-    const handleQuadraChange = (setor) => {
-        setSelectedQuadra(setor || null);
-        setSelectedLote(null);
-        setFormData(prev => ({ ...prev, setor, lote: '' }));
-    };
-
     const handleImageUpload = (e) => {
         const file = e.target.files?.[0];
         if (!file) {
@@ -443,7 +409,7 @@ export default function AdminQuadrasLotes({ onLogout }) {
     };
 
     // --- MODAL FALECIDO ---
-    const openEditModal = (falecido) => {
+    function openEditModal(falecido) {
         setSelectedFalecido(falecido);
         let setor = '', lote = '';
         if (falecido.localizacao) {
@@ -452,11 +418,13 @@ export default function AdminQuadrasLotes({ onLogout }) {
             if (s) setor = s[1].trim();
             if (l) lote = l[1].trim();
         }
+        setSelectedQuadra(setor || null);
+        setSelectedLote(lote || null);
         setFormData({ ...falecido, setor, lote });
         setSelectedImageFile(null);
         setImagePreview(falecido.imagem || '');
         setIsFormModalOpen(true);
-    };
+    }
 
     const closeFormModal = () => {
         setSelectedFalecido(null);
@@ -573,36 +541,6 @@ export default function AdminQuadrasLotes({ onLogout }) {
         setLoteNome('');
     };
 
-    const saveLotesEmSequencia = async (e) => {
-        e.preventDefault();
-        if (!quadraSelecionada) return;
-
-        const quantidade = Number(quantidadeLotes);
-        if (!Number.isInteger(quantidade) || quantidade < 1 || quantidade > 500) {
-            window.alert('Informe uma quantidade entre 1 e 500 lotes.');
-            return;
-        }
-
-        setCriandoLotes(true);
-        try {
-            const resultado = await createLotesEmSequencia(
-                quadraSelecionada.id,
-                numeroInicialLotes.trim(),
-                quantidade,
-                getToken(),
-            );
-            await recarregarLotes();
-            setIsLoteSequenciaModalOpen(false);
-            setNumeroInicialLotes('');
-            setQuantidadeLotes('');
-            window.alert(`${resultado.total} lotes cadastrados com sucesso.`);
-        } catch (error) {
-            window.alert(error.message || 'Não foi possível cadastrar os lotes.');
-        } finally {
-            setCriandoLotes(false);
-        }
-    };
-
     const handleDeleteLote = (lote) => {
         openConfirm(
             `Excluir Lote ${lote}`,
@@ -658,8 +596,8 @@ export default function AdminQuadrasLotes({ onLogout }) {
 
     // --- NAVEGAÇÃO ---
     const goBack = () => {
-        if (selectedLote) { setSelectedLote(null); setSearchTerm(''); setCurrentPage(1); }
-        else if (selectedQuadra) { setSelectedQuadra(null); setSelectedLote(null); setSearchTerm(''); }
+        if (selectedLote) { setSelectedLote(null); updateSearchTerm(''); }
+        else if (selectedQuadra) { setSelectedQuadra(null); setSelectedLote(null); updateSearchTerm(''); }
     };
 
     const nivelAtual = selectedLote ? 'lote' : selectedQuadra ? 'quadra' : 'inicio';
@@ -729,7 +667,7 @@ export default function AdminQuadrasLotes({ onLogout }) {
                         <div className={styles.setoresGrid}>
                             {quadrasComCount.map(q => (
                                 <div key={q.nome} className={styles.setorCard}>
-                                        <button className={styles.setorCardBtn} onClick={() => { setSelectedQuadra(q.nome); setSelectedLote(null); setSearchTerm(''); setCurrentLotePage(1); }}>
+                                        <button className={styles.setorCardBtn} onClick={() => { setSelectedQuadra(q.nome); setSelectedLote(null); updateSearchTerm(''); }}>
                                         <div className={styles.setorIcon}><LayoutGrid size={28} /></div>
                                         <div className={styles.setorInfo}>
                                             <h3>Quadra {q.nome}</h3>
@@ -763,32 +701,32 @@ export default function AdminQuadrasLotes({ onLogout }) {
                                         placeholder="Buscar lote pelo número..."
                                         aria-label="Buscar lote"
                                         value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        onChange={(e) => updateSearchTerm(e.target.value)}
                                     />
                                     {searchTerm && (
-                                        <button type="button" className={styles.clearSearchBtn} aria-label="Limpar busca" onClick={() => setSearchTerm('')}>
+                                        <button type="button" className={styles.clearSearchBtn} aria-label="Limpar busca" onClick={() => updateSearchTerm('')}>
                                             <X size={16} />
                                         </button>
                                     )}
                                 </div>
                             </div>
-                            <div className={`${styles.setoresGrid} ${styles.lotesGrid}`}>
+                            <div className={styles.lotesGrid}>
                                 {lotesDaPagina.map(l => (
-                                    <div key={l.nome} className={styles.setorCard}>
-                                        <button className={styles.setorCardBtn} onClick={() => { setSelectedLote(l.nome); setSearchTerm(''); setCurrentPage(1); }}>
-                                            <div className={styles.setorIcon}>
+                                    <div key={l.nome} className={styles.loteTile}>
+                                        <button className={styles.loteTileMain} onClick={() => { setSelectedLote(l.nome); updateSearchTerm(''); }}>
+                                            <div className={styles.loteTileIcon}>
                                                 <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                                                     <path d="M6 21v-9a6 6 0 0 1 12 0v9" />
                                                     <path d="M4 21h16" />
                                                     <path d="M12 8v5M10 10h4" />
                                                 </svg>
                                             </div>
-                                            <div className={styles.setorInfo}>
-                                                <h3>Lote {l.nome}</h3>
-                                                <p>{l.count} {l.count === 1 ? 'falecido' : 'falecidos'}</p>
+                                            <div className={styles.loteTileInfo}>
+                                                <strong>Lote {l.nome}</strong>
+                                                <span>{l.count} {l.count === 1 ? 'falecido' : 'falecidos'}</span>
                                             </div>
                                         </button>
-                                        <div className={styles.cardActions}>
+                                        <div className={styles.loteTileActions}>
                                             <button className={styles.iconBtn} title="QR Code do Lote" onClick={() => openLoteQrModal(l)}><QrCode size={16} /></button>
                                             <button className={styles.iconBtn} title="Editar Lote" onClick={() => openLoteModal(l.nome)}><Edit size={16} /></button>
                                             <button className={`${styles.iconBtn} ${styles.deleteBtn}`} title="Excluir Lote" onClick={() => handleDeleteLote(l.nome)}><Trash2 size={16} /></button>
@@ -806,18 +744,18 @@ export default function AdminQuadrasLotes({ onLogout }) {
                                 )}
                             </div>
                             {!carregandoLotes && lotesVisiveis.length > LOTES_PER_PAGE && (
-                                <div className={styles.paginationContainer}>
+                                <div className={`${styles.paginationContainer} ${styles.lotePagination}`}>
                                     <p className={styles.paginationInfo}>
                                         Mostrando <strong>{startLoteIndex + 1}</strong> a <strong>{Math.min(startLoteIndex + LOTES_PER_PAGE, lotesVisiveis.length)}</strong> de <strong>{lotesVisiveis.length}</strong> lotes
                                     </p>
                                     <div className={styles.pagination}>
-                                        <button className={styles.pageBtn} disabled={currentLotePage === 1} onClick={() => setCurrentLotePage(page => page - 1)} aria-label="Página anterior"><ChevronLeft size={18} /></button>
-                                        {getPageItems(currentLotePage, totalLotePages).map((page, index) => (
+                                        <button className={styles.pageBtn} disabled={paginaLoteAtual === 1} onClick={() => setCurrentLotePage(page => Math.max(1, page - 1))} aria-label="Página anterior"><ChevronLeft size={18} /></button>
+                                        {getPageItems(paginaLoteAtual, totalLotePages).map((page, index) => (
                                             page === '…'
                                                 ? <span key={`lotes-gap-${index}`} className={styles.pageEllipsis}>…</span>
-                                                : <button key={page} className={`${styles.pageBtn} ${page === currentLotePage ? styles.pageBtnActive : ''}`} onClick={() => setCurrentLotePage(page)}>{page}</button>
+                                                : <button key={page} className={`${styles.pageBtn} ${page === paginaLoteAtual ? styles.pageBtnActive : ''}`} onClick={() => setCurrentLotePage(page)}>{page}</button>
                                         ))}
-                                        <button className={styles.pageBtn} disabled={currentLotePage === totalLotePages} onClick={() => setCurrentLotePage(page => page + 1)} aria-label="Próxima página"><ChevronRight size={18} /></button>
+                                        <button className={styles.pageBtn} disabled={paginaLoteAtual === totalLotePages} onClick={() => setCurrentLotePage(page => Math.min(totalLotePages, page + 1))} aria-label="Próxima página"><ChevronRight size={18} /></button>
                                     </div>
                                 </div>
                             )}
@@ -830,9 +768,9 @@ export default function AdminQuadrasLotes({ onLogout }) {
                             <div className={styles.toolbar}>
                                 <div className={styles.searchBox}>
                                     <Search size={18} className={styles.searchIcon} />
-                                    <input type="text" placeholder="Buscar falecido pelo nome..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                                    <input type="text" placeholder="Buscar falecido pelo nome..." value={searchTerm} onChange={(e) => updateSearchTerm(e.target.value)} />
                                     {searchTerm && (
-                                        <button type="button" className={styles.clearSearchBtn} aria-label="Limpar busca" onClick={() => setSearchTerm('')}>
+                                        <button type="button" className={styles.clearSearchBtn} aria-label="Limpar busca" onClick={() => updateSearchTerm('')}>
                                             <X size={16} />
                                         </button>
                                     )}

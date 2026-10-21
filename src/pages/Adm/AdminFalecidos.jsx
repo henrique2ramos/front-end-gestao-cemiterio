@@ -31,15 +31,15 @@ const isAbsoluteUrl = (src) => /^(https?:)?\/\//i.test(src) || src.startsWith('d
 const resolveOnce = (src) => (!src || isAbsoluteUrl(src) ? src : resolveImageUrl(src));
 
 export default function AdminFalecidos({ onLogout }) {
+    const location = useLocation();
     const [falecidos, setFalecidos] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [debouncedSearch, setDebouncedSearch] = useState('');
+    const [searchTerm, setSearchTerm] = useState(location.state?.search || '');
+    const [debouncedSearch, setDebouncedSearch] = useState(location.state?.search || '');
     const [currentPage, setCurrentPage] = useState(1);
     const [total, setTotal] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
     const [reloadKey, setReloadKey] = useState(0);
-    const location = useLocation();
     const nascimentoDatePickerRef = useRef(null);
     const morteDatePickerRef = useRef(null);
     const [quadrasDisponiveis, setQuadrasDisponiveis] = useState([]);
@@ -49,7 +49,7 @@ export default function AdminFalecidos({ onLogout }) {
     const [imagePreview, setImagePreview] = useState('');
     const [selectedGalleryFiles, setSelectedGalleryFiles] = useState([]);
 
-    const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+    const [isFormModalOpen, setIsFormModalOpen] = useState(Boolean(location.state?.novo));
     const [isQrModalOpen, setIsQrModalOpen] = useState(false);
     const [selectedFalecido, setSelectedFalecido] = useState(null);
 
@@ -82,17 +82,12 @@ export default function AdminFalecidos({ onLogout }) {
                 const arr = Array.isArray(res) ? res : res?.items || [];
                 setLotesDisponiveis(arr);
             }).catch(e => console.error("Erro ao buscar lotes:", e));
-        } else {
-            setLotesDisponiveis([]);
         }
     }, [formData.setor, quadrasDisponiveis]);
 
     useEffect(() => {
-        if (location.state?.search) setSearchTerm(location.state.search);
-        if (location.state?.novo) openNewModal();
         if (location.state?.search || location.state?.novo) window.history.replaceState({}, '');
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [location.state]);
 
     useEffect(() => {
         const t = setTimeout(() => {
@@ -104,7 +99,6 @@ export default function AdminFalecidos({ onLogout }) {
 
     useEffect(() => {
         let cancelado = false;
-        setIsLoading(true);
 
         async function loadPage() {
             try {
@@ -127,7 +121,20 @@ export default function AdminFalecidos({ onLogout }) {
         return () => { cancelado = true; };
     }, [currentPage, debouncedSearch, reloadKey]);
 
-    const reload = () => setReloadKey((k) => k + 1);
+    const reload = () => {
+        setIsLoading(true);
+        setReloadKey((k) => k + 1);
+    };
+
+    const handleSearchChange = (value) => {
+        setIsLoading(true);
+        setSearchTerm(value);
+    };
+
+    const changePage = (page) => {
+        setIsLoading(true);
+        setCurrentPage(page);
+    };
 
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
 
@@ -245,6 +252,7 @@ export default function AdminFalecidos({ onLogout }) {
         setSelectedFalecido(null);
         setSelectedImageFile(null);
         setSelectedGalleryFiles([]);
+        setLotesDisponiveis([]);
         setImagePreview('');
         setFormData(EMPTY_FORM);
         setIsFormModalOpen(true);
@@ -252,6 +260,7 @@ export default function AdminFalecidos({ onLogout }) {
 
     const openEditModal = (falecido) => {
         setSelectedFalecido(falecido);
+        setLotesDisponiveis([]);
         let setor = '', lote = '';
         if (falecido.localizacao) {
             const s = falecido.localizacao.match(/Quadra\s+(.+?),/i);
@@ -306,10 +315,10 @@ export default function AdminFalecidos({ onLogout }) {
                                     type="text"
                                     placeholder="Buscar falecido pelo nome..."
                                     value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    onChange={(e) => handleSearchChange(e.target.value)}
                                 />
                                 {searchTerm && (
-                                    <button type="button" className={styles.clearSearchBtn} aria-label="Limpar busca" onClick={() => setSearchTerm('')}>
+                                    <button type="button" className={styles.clearSearchBtn} aria-label="Limpar busca" onClick={() => handleSearchChange('')}>
                                         <X size={16} />
                                     </button>
                                 )}
@@ -392,7 +401,7 @@ export default function AdminFalecidos({ onLogout }) {
                                     <button
                                         className={styles.pageBtn}
                                         disabled={currentPage === 1}
-                                        onClick={() => setCurrentPage(prev => prev - 1)}
+                                        onClick={() => changePage(currentPage - 1)}
                                     >
                                         <ChevronLeft size={18} />
                                     </button>
@@ -404,7 +413,7 @@ export default function AdminFalecidos({ onLogout }) {
                                                 <button
                                                     key={page}
                                                     className={`${styles.pageBtn} ${page === currentPage ? styles.pageBtnActive : ''}`}
-                                                    onClick={() => setCurrentPage(page)}
+                                                    onClick={() => changePage(page)}
                                                 >
                                                     {page}
                                                 </button>
@@ -414,7 +423,7 @@ export default function AdminFalecidos({ onLogout }) {
                                     <button
                                         className={styles.pageBtn}
                                         disabled={currentPage === totalPages}
-                                        onClick={() => setCurrentPage(prev => prev + 1)}
+                                        onClick={() => changePage(currentPage + 1)}
                                     >
                                         <ChevronRight size={18} />
                                     </button>
@@ -469,7 +478,10 @@ export default function AdminFalecidos({ onLogout }) {
                                                 options={quadrasDisponiveis.map(quadra => quadra.nome)}
                                                 placeholder="Digite ou selecione a quadra"
                                                 ariaLabel="Quadra"
-                                                onChange={(setor) => setFormData(prev => ({ ...prev, setor: setor.toUpperCase() }))}
+                                                onChange={(setor) => {
+                                                    setLotesDisponiveis([]);
+                                                    setFormData(prev => ({ ...prev, setor: setor.toUpperCase(), lote: '' }));
+                                                }}
                                             />
                                         </div>
                                         <div className={styles.formGroup}>

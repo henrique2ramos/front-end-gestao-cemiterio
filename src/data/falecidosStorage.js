@@ -39,7 +39,7 @@ function normalizeLocalizacao(loc) {
 }
 
 function normalizeFalecidoImagem(imagem) {
-    return placeholder;
+    return imagem || placeholder;
 }
 
 export function getMemoriais() {

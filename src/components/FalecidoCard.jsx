@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { MapPin, Clock } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import { resolveImageUrl } from '../lib/api';
 import styles from './FalecidoCard.module.css';
 

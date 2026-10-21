@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { fetchFalecidos } from '../lib/api';
@@ -6,7 +6,7 @@ import { getPageItems } from '../data/adminPagination';
 import FalecidoCard from '../components/FalecidoCard';
 import styles from './AllFalecidosPage.module.css';
 
-const PER_PAGE = 8;
+const PER_PAGE = 12;
 
 export default function FalecidosPage() {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -24,11 +24,11 @@ export default function FalecidosPage() {
 
     const page = Number(searchParams.get('page')) || 1;
 
-    function updateParams({
+    const updateParams = useCallback(({ 
         search = searchQuery,
         filter = activeFilter,
         page = 1
-    }, options = {}) {
+    }, options = {}) => {
         const params = new URLSearchParams(searchParams);
 
         if (search.trim()) {
@@ -51,7 +51,7 @@ export default function FalecidosPage() {
             params.delete('page');
         }
         setSearchParams(params, options);
-    }
+    }, [activeFilter, searchParams, searchQuery, setSearchParams]);
     useEffect(() => {
         const timer = setTimeout(() => {
             if (localSearch !== searchQuery) {
@@ -60,7 +60,7 @@ export default function FalecidosPage() {
         }, 500);
 
         return () => clearTimeout(timer);
-    }, [localSearch]);
+    }, [localSearch, searchQuery, updateParams]);
 
     useEffect(() => {
         let isMounted = true;
@@ -90,9 +90,15 @@ export default function FalecidosPage() {
         };
     }, []);
 
-    const todosMemoriais = Array.isArray(falecidos) ? falecidos : [];
-    const personalidadesImportantes = todosMemoriais.filter(m => m.tipo === 'historica');
-    const memoriaisRecentes = todosMemoriais.filter(m => m.tipo === 'recente');
+    const todosMemoriais = falecidos;
+    const personalidadesImportantes = useMemo(
+        () => todosMemoriais.filter(m => m.tipo === 'historica'),
+        [todosMemoriais]
+    );
+    const memoriaisRecentes = useMemo(
+        () => todosMemoriais.filter(m => m.tipo === 'recente'),
+        [todosMemoriais]
+    );
 
     const filtered = useMemo(() => {
         let list = todosMemoriais;

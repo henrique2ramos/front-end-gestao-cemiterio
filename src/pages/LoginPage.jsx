@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowRight, Lock, Mail, ShieldAlert, ShieldCheck, X } from 'lucide-react';
+import { ArrowRight, Eye, EyeOff, Lock, Mail, ShieldAlert, ShieldCheck, X } from 'lucide-react';
 import { loginAdmin } from '../lib/api';
 import styles from './LoginPage.module.css';
 import logo from '../assets/logo.png';
@@ -9,12 +9,13 @@ export default function LoginPage({ onLogin }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [formData, setFormData] = useState({ email: '', password: '' });
+  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorModal, setErrorModal] = useState({ open: false, message: '' });
 
   function handleChange(event) {
     const { name, value } = event.target;
-    const sanitizedValue = name === 'email' || name === 'password' ? value.replace(/\s+/g, '') : value;
+    const sanitizedValue = name === 'email' ? value.replace(/\s+/g, '') : value;
 
     setFormData((current) => ({ ...current, [name]: sanitizedValue }));
 
@@ -24,7 +25,7 @@ export default function LoginPage({ onLogin }) {
   }
 
   function handleKeyDown(event) {
-    const isRestrictedField = event.target.name === 'email' || event.target.name === 'password';
+    const isRestrictedField = event.target.name === 'email';
 
     if (isRestrictedField && event.key === ' ') {
       event.preventDefault();
@@ -32,7 +33,7 @@ export default function LoginPage({ onLogin }) {
   }
 
   function handlePaste(event) {
-    const isRestrictedField = event.target.name === 'email' || event.target.name === 'password';
+    const isRestrictedField = event.target.name === 'email';
 
     if (!isRestrictedField) return;
 
@@ -60,7 +61,7 @@ export default function LoginPage({ onLogin }) {
     event.preventDefault();
 
     const email = formData.email.trim();
-    const password = formData.password.trim();
+    const password = formData.password;
 
     if (!email || !password) {
       setErrorModal({ open: true, message: 'Informe e-mail e senha válidos para continuar.' });
@@ -119,14 +120,19 @@ export default function LoginPage({ onLogin }) {
             <label className={styles.field} htmlFor="password">
               <div className={styles.fieldHeader}>
                 <span className={styles.fieldLabel}>Senha</span>
-                <a className={styles.linkText} href="#">Esqueceu a senha?</a>
+              <a
+                className={styles.linkText}
+                href="mailto:infraestrutura@pirpirituba.pb.gov.br?subject=Recupera%C3%A7%C3%A3o%20de%20acesso%20ao%20Memorial%20Digital"
+              >
+                Esqueceu a senha?
+              </a>
               </div>
               <div className={styles.inputWrapper}>
                 <Lock size={18} className={styles.inputIcon} />
                 <input
                   id="password"
                   name="password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={handleChange}
@@ -134,6 +140,15 @@ export default function LoginPage({ onLogin }) {
                   onPaste={handlePaste}
                   required
                 />
+                <button
+                  type="button"
+                  className={styles.passwordToggle}
+                  onClick={() => setShowPassword((visible) => !visible)}
+                  aria-label={showPassword ? 'Ocultar senha' : 'Exibir senha'}
+                  aria-pressed={showPassword}
+                >
+                  {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
+                </button>
               </div>
             </label>
 

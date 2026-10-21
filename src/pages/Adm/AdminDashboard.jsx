@@ -70,7 +70,7 @@ export default function AdminDashboard({ onLogout }) {
 
                 const totaisLotes = await Promise.all(
                     quadras.map(async (quadra) => {
-                        const data = await fetchLotes(quadra.id, { page: 1, limit: 1 });
+                        const data = await fetchLotes(quadra.id);
                         if (!Array.isArray(data) && !Array.isArray(data?.items)) {
                             throw new Error(`Formato inválido: quadra ${quadra.nome}.`);
                         }
@@ -125,7 +125,7 @@ export default function AdminDashboard({ onLogout }) {
                         <form className={styles.search} onSubmit={buscar} role="search">
                             <Search size={20} className={styles.searchIcon} aria-hidden="true" />
                             <input
-                                type="search"
+                                type="text"
                                 value={busca}
                                 onChange={(e) => setBusca(e.target.value)}
                                 placeholder="Buscar falecido pelo nome..."

@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, LogIn, LogOut } from 'lucide-react';
+import { Menu, X, LogIn, LogOut, ExternalLink } from 'lucide-react';
 import { useState } from 'react';
 import styles from './Header.module.css';
 import logo from '../assets/logo.png';
@@ -24,10 +24,12 @@ export default function Header({ isAuthenticated = false, onLogout }) {
         { to: '/falecidos', label: 'Falecidos' },
         { to: '/ajuda', label: 'Ajuda' },
         { to: '/mapa', label: 'Mapa do Cemitério' },
-        ...(isAuthenticated ? [{ to: '/admin', label: 'Administração' }] : []),
         ...(isAuthenticated
-          ? []
-          : [{ to: '/login', label: 'Login', icon: <LogIn size={16} /> }]),
+          ? [{ to: '/admin', label: 'Administração' }]
+          : [
+              { to: 'https://pirpirituba.pb.gov.br/', label: 'Prefeitura', external: true, icon: <ExternalLink size={14} /> },
+              { to: '/login', label: 'Login', icon: <LogIn size={16} /> },
+            ]),
       ];
 
   return (
@@ -60,7 +62,20 @@ export default function Header({ isAuthenticated = false, onLogout }) {
           </button>
 
           <nav className={`${styles.nav} ${mobileMenuOpen ? styles.navOpen : ''}`}>
-            {navLinks.map(link => (
+            {navLinks.map(link => link.external ? (
+              <a
+                key={link.to}
+                href={link.to}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.navLink}
+                title="Site oficial da Prefeitura de Pirpirituba"
+                aria-label="Abrir o site oficial da Prefeitura de Pirpirituba em uma nova aba"
+              >
+                {link.icon}
+                {link.label}
+              </a>
+            ) : (
               <Link
                 key={link.to}
                 to={link.to}

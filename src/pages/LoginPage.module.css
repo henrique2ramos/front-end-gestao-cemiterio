@@ -141,6 +141,30 @@
   color: #1b1c19;
 }
 
+.passwordToggle {
+  display: grid;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  color: #6b7686;
+  background: transparent;
+  cursor: pointer;
+}
+
+.passwordToggle:hover {
+  color: #002046;
+  background: rgba(0, 32, 70, 0.06);
+}
+
+.passwordToggle:focus-visible {
+  outline: 2px solid #1565c0;
+  outline-offset: 2px;
+}
+
 .checkboxRow {
   display: flex;
   align-items: center;

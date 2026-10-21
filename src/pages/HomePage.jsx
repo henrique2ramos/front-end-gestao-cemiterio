@@ -4,7 +4,7 @@ import { Search, MapPin, ArrowRight, ChevronRight, ChevronLeft } from 'lucide-re
 import FalecidoCard from '../components/FalecidoCard';
 import { fetchFalecidos, resolveImageUrl } from '../lib/api';
 import styles from './HomePage.module.css';
-import mapaImg from '../assets/mapaExemplo.png';
+import mapaImg from '../assets/mapaExemplo.jfif';
 import texturaImg from '../assets/texturaMemorial.jfif';
 
 const PLACEHOLDER_IMG = 'https://placehold.co/400x400/e4e2e1/44474e?text=Foto';

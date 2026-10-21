@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { MapPin, Phone, Mail, Clock, Landmark } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock } from 'lucide-react';
 import logo from '../assets/logo.png'; 
 import styles from './Footer.module.css';
 
