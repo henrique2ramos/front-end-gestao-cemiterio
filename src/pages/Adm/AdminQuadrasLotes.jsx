@@ -14,6 +14,7 @@ import {
     deleteQuadra,
     fetchLotes,
     createLote,
+    createLotesEmSequencia,
     updateLote,
     deleteLote,
 } from '../../lib/api';
@@ -69,6 +70,10 @@ export default function AdminFalecidos({ onLogout }) {
     const [isLoteModalOpen, setIsLoteModalOpen] = useState(false);
     const [editingLote, setEditingLote] = useState(null);
     const [loteNome, setLoteNome] = useState('');
+    const [isLoteSequenciaModalOpen, setIsLoteSequenciaModalOpen] = useState(false);
+    const [numeroInicialLotes, setNumeroInicialLotes] = useState('');
+    const [quantidadeLotes, setQuantidadeLotes] = useState('');
+    const [criandoLotes, setCriandoLotes] = useState(false);
 
     const [formData, setFormData] = useState({
         nome: '', dataNascimento: '', dataMorte: '',
@@ -510,6 +515,36 @@ export default function AdminFalecidos({ onLogout }) {
         setLoteNome('');
     };
 
+    const saveLotesEmSequencia = async (e) => {
+        e.preventDefault();
+        if (!quadraSelecionada) return;
+
+        const quantidade = Number(quantidadeLotes);
+        if (!Number.isInteger(quantidade) || quantidade < 1 || quantidade > 500) {
+            window.alert('Informe uma quantidade entre 1 e 500 lotes.');
+            return;
+        }
+
+        setCriandoLotes(true);
+        try {
+            const resultado = await createLotesEmSequencia(
+                quadraSelecionada.id,
+                numeroInicialLotes.trim(),
+                quantidade,
+                getToken(),
+            );
+            await recarregarLotes();
+            setIsLoteSequenciaModalOpen(false);
+            setNumeroInicialLotes('');
+            setQuantidadeLotes('');
+            window.alert(`${resultado.total} lotes cadastrados com sucesso.`);
+        } catch (error) {
+            window.alert(error.message || 'Não foi possível cadastrar os lotes.');
+        } finally {
+            setCriandoLotes(false);
+        }
+    };
+
     const handleDeleteLote = (lote) => {
         openConfirm(
             `Excluir Lote ${lote}`,
@@ -605,9 +640,17 @@ export default function AdminFalecidos({ onLogout }) {
                                 </button>
                             )}
                             {nivelAtual === 'quadra' && (
-                                <button className={styles.addButton} onClick={() => openLoteModal()}>
-                                    <Plus size={20} /> Novo Lote
-                                </button>
+                                <>
+                                    <button className={styles.addButton} onClick={() => openLoteModal()}>
+                                        <Plus size={20} /> Novo Lote
+                                    </button>
+                                    <button
+                                        className={styles.addButton}
+                                        onClick={() => setIsLoteSequenciaModalOpen(true)}
+                                    >
+                                        <Plus size={20} /> Criar vários lotes
+                                    </button>
+                                </>
                             )}
                             {nivelAtual === 'lote' && (
                                 <button className={styles.addButton} onClick={() => {
@@ -795,6 +838,73 @@ export default function AdminFalecidos({ onLogout }) {
                 </div>
             )}
 
+            {isLoteSequenciaModalOpen && (
+                <div className={styles.modalOverlay}>
+                    <div className={styles.modalContent}>
+                        <div className={styles.modalHeader}>
+                            <h2>Criar vários lotes — Quadra {selectedQuadra}</h2>
+                            <button
+                                className={styles.closeBtn}
+                                onClick={() => setIsLoteSequenciaModalOpen(false)}
+                                disabled={criandoLotes}
+                                aria-label="Fechar"
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
+                        <form onSubmit={saveLotesEmSequencia} className={styles.form}>
+                            <p className={styles.subtitle}>
+                                Os lotes serão numerados em sequência a partir do número inicial.
+                                Você pode cadastrar até 500 lotes por vez.
+                            </p>
+                            <div className={styles.formGroup}>
+                                <label htmlFor="numero-inicial-lotes">Número inicial *</label>
+                                <input
+                                    id="numero-inicial-lotes"
+                                    type="text"
+                                    inputMode="numeric"
+                                    pattern="[0-9]+"
+                                    required
+                                    value={numeroInicialLotes}
+                                    onChange={(e) => setNumeroInicialLotes(e.target.value)}
+                                    placeholder="Ex: 1"
+                                    autoFocus
+                                    disabled={criandoLotes}
+                                />
+                            </div>
+                            <div className={styles.formGroup}>
+                                <label htmlFor="quantidade-lotes">Quantidade de lotes *</label>
+                                <input
+                                    id="quantidade-lotes"
+                                    type="number"
+                                    min="1"
+                                    max="500"
+                                    step="1"
+                                    required
+                                    value={quantidadeLotes}
+                                    onChange={(e) => setQuantidadeLotes(e.target.value)}
+                                    placeholder="Ex: 60"
+                                    disabled={criandoLotes}
+                                />
+                            </div>
+                            <div className={styles.modalActions}>
+                                <button
+                                    type="button"
+                                    className={styles.cancelBtn}
+                                    onClick={() => setIsLoteSequenciaModalOpen(false)}
+                                    disabled={criandoLotes}
+                                >
+                                    Cancelar
+                                </button>
+                                <button type="submit" className={styles.saveBtn} disabled={criandoLotes}>
+                                    {criandoLotes ? 'Cadastrando...' : 'Criar lotes'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
             {/* --- MODAL FALECIDO --- */}
             {isFormModalOpen && (
                 <div className={styles.modalOverlay}>
@@ -932,13 +1042,15 @@ export default function AdminFalecidos({ onLogout }) {
                         </div>
                         <div className={styles.qrContainer}>
                             <p>Lote {loteQrData.nome}</p>
-                            <p style={{ fontSize: '0.85rem', color: '#888', marginBottom: '16px' }}>
+                            <p className={styles.loteQrCount}>
                                 {loteQrData.people.length} {loteQrData.people.length === 1 ? 'falecido' : 'falecidos'} neste lote
                             </p>
                             <div className={styles.qrCodeBox}>
                                 <QRCode value={loteQrUrl} size={200} fgColor="#003366" />
                             </div>
-                            <CopyLinkButton url={loteQrUrl} />
+                            <div className={styles.loteQrCopy}>
+                                <CopyLinkButton url={loteQrUrl} />
+                            </div>
                             <button className={styles.saveBtn} onClick={() => window.print()}>Imprimir Placa</button>
                         </div>
                     </div>

@@ -156,6 +156,14 @@ export async function createLote(quadraId, numero, token) {
   });
 }
 
+export async function createLotesEmSequencia(quadraId, numeroInicial, quantidade, token) {
+  return request('/api/lotes', {
+    method: 'POST',
+    body: { quadraId, numeroInicial, quantidade },
+    authToken: token,
+  });
+}
+
 export async function updateLote(id, numero, token) {
   return request(`/api/lotes/${id}`, {
     method: 'PUT',
