@@ -956,7 +956,7 @@
 .lotExplorer {
     display: flex;
     flex-direction: column;
-    gap: 22px;
+    gap: 26px;
     padding: 22px;
     border: 1px solid var(--border);
     border-radius: 16px;
@@ -1004,8 +1004,8 @@
     align-items: center;
     justify-content: flex-start;
     width: 100%;
-    margin-top: 8px;
-    padding-top: 10px;
+    margin-top: 12px;
+    padding-top: 20px;
     border-top: 1px solid var(--border);
     gap: 8px 30px;
     font-size: 0.82rem;
@@ -1179,7 +1179,7 @@
 .lotNumberGrid {
     display: grid;
     grid-template-columns: repeat(20, minmax(0, 1fr));
-    gap: 5px;
+    gap: 7px;
 }
 
 .lotGridState {
@@ -1282,7 +1282,7 @@
     --brand-dark: #003366;
 
     width: 100%;
-    margin-top: 14px;
+    margin-top: 18px;
 }
 
 .selectedLotPanel {
@@ -1660,7 +1660,7 @@
 
     .lotNumberGrid {
         grid-template-columns: repeat(10, minmax(0, 1fr));
-        gap: 5px;
+        gap: 6px;
     }
 
     .lotNumberTile {
@@ -1714,7 +1714,7 @@
 
     .lotNumberGrid {
         grid-template-columns: repeat(7, minmax(0, 1fr));
-        gap: 4px;
+        gap: 5px;
     }
 
     .lotNumberTile {
