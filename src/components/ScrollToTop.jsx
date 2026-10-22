@@ -2,10 +2,12 @@ import { useEffect } from 'react';
 import { useLocation, useNavigationType } from 'react-router-dom';
 
 export default function ScrollToTop() {
-    const { pathname, search } = useLocation();
+    const location = useLocation();
+    const { pathname, search } = location;
     const action = useNavigationType();
 
     useEffect(() => {
+        if (location.state?.scrollToMap) return;
 
         if (action !== "POP") {
             window.scrollTo({
@@ -14,7 +16,7 @@ export default function ScrollToTop() {
                 behavior: "instant"
             });
         }
-    }, [pathname, search, action]);
+    }, [pathname, search, action, location.state]);
 
     return null;
 }

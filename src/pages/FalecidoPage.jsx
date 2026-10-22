@@ -125,7 +125,12 @@ export default function FalecidoPage() {
 
                 {falecido.descricao && <p className={styles.shortBio}>{falecido.descricao}</p>}
                 <div className={styles.actionButtons}>
-                  <Button onClick={() => navigate('/mapa')} variant="primary" size="small" icon={<Map size={16} />}>
+                  <Button
+                    onClick={() => navigate(`/mapa?falecido=${encodeURIComponent(falecido.id)}`, { state: { falecido, scrollToMap: true } })}
+                    variant="primary"
+                    size="small"
+                    icon={<Map size={16} />}
+                  >
                     Ver no Mapa 
                   </Button>
                   

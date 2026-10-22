@@ -68,7 +68,10 @@ export default function HomePage() {
     }
 
     return (
-      <div className={styles.falecidosGrid} ref={ref}>
+      <div
+        className={styles.falecidosGrid}
+        ref={ref}
+      >
         {items.slice(0, 10).map((falecido) => (
           <FalecidoCard key={falecido.id} falecido={falecido} showProfilePlaceholder />
         ))}

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { ZoomIn, ZoomOut, RotateCcw, ChevronLeft, ChevronRight, Search, ArrowLeft } from 'lucide-react';
 import { fetchFalecidos, fetchLotes, fetchQuadras, resolveImageUrl } from '../lib/api';
 import styles from './MapPage.module.css';
@@ -33,7 +33,7 @@ function parseLocal(texto) {
     if (typeof texto !== 'string') return null;
     const quadra = texto.match(/quadra\s*([a-z0-9-]+)/i);
     if (!quadra) return null;
-    const lote = texto.match(/lote\s*([^,\s]+)/i);
+    const lote = texto.match(/lote\s*[:#]?\s*([^,\s]+)/i);
     return { quadra: quadra[1].toUpperCase(), lote: lote?.[1] ?? null };
 }
 
@@ -54,10 +54,15 @@ function normalizarNumeroLote(value) {
 }
 
 export default function MapPage() {
+    const location = useLocation();
+    const requestedFalecidoId = new URLSearchParams(location.search).get('falecido');
+    const falecidoFromNavigation = location.state?.falecido;
+    const handledTargetRef = useRef(null);
     const [selected, setSelected] = useState(null);
     const [selectedLoteId, setSelectedLoteId] = useState(null);
     const [quadras, setQuadras] = useState([]);
     const [falecidos, setFalecidos] = useState([]);
+    const [falecidosLoading, setFalecidosLoading] = useState(true);
     const [lotesPorQuadra, setLotesPorQuadra] = useState({});
     const [lotesLoading, setLotesLoading] = useState(true);
     const [lotesError, setLotesError] = useState(false);
@@ -74,6 +79,18 @@ export default function MapPage() {
     const dragRef = useRef(null);
 
     useEffect(() => {
+        if (!requestedFalecidoId && !falecidoFromNavigation) return undefined;
+        const timeout = window.setTimeout(() => {
+            const map = mapRef.current;
+            if (!map) return;
+            const rect = map.getBoundingClientRect();
+            const top = window.scrollY + rect.top - (window.innerHeight - rect.height) / 2;
+            window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+        }, 350);
+        return () => window.clearTimeout(timeout);
+    }, [requestedFalecidoId, falecidoFromNavigation]);
+
+    useEffect(() => {
         let isMounted = true;
         fetchFalecidos()
             .then((data) => {
@@ -81,11 +98,54 @@ export default function MapPage() {
             })
             .catch(() => {
                 if (isMounted) setFalecidos([]);
+            })
+            .finally(() => {
+                if (isMounted) setFalecidosLoading(false);
             });
         return () => {
             isMounted = false;
         };
     }, []);
+
+    useEffect(() => {
+        if ((!requestedFalecidoId && !falecidoFromNavigation) || (!falecidoFromNavigation && falecidosLoading) || lotesLoading || !quadras.length) return;
+        const targetKey = requestedFalecidoId || String(falecidoFromNavigation.id);
+        if (handledTargetRef.current === targetKey) return;
+
+        const falecido = falecidoFromNavigation
+            || falecidos.find((item) => String(item.id) === String(requestedFalecidoId));
+        if (!falecido) return;
+
+        const local = parseLocal(falecido.localizacao);
+        const quadraRef = falecido.quadraId ?? falecido.quadra?.id;
+        const quadraNome = typeof falecido.quadra === 'string'
+            ? falecido.quadra
+            : falecido.quadra?.nome ?? falecido.setor ?? local?.quadra;
+        const quadra = quadras.find((item) =>
+            (quadraRef != null && String(item.id) === String(quadraRef))
+            || (quadraNome && normalizeQuadraId(item.nome) === normalizeQuadraId(quadraNome))
+        );
+        if (!quadra) {
+            handledTargetRef.current = targetKey;
+            return;
+        }
+
+        const lotes = lotesPorQuadra[quadra.id] || [];
+        const loteRef = falecido.loteId ?? falecido.lote?.id;
+        const loteNumero = typeof falecido.lote === 'object'
+            ? falecido.lote?.numero
+            : falecido.lote ?? local?.lote;
+        const lote = lotes.find((item) =>
+            (loteRef != null && String(item.id) === String(loteRef))
+            || (loteNumero != null && normalizarNumeroLote(item.numero) === normalizarNumeroLote(loteNumero))
+        );
+
+        handledTargetRef.current = targetKey;
+        selectSector(quadra);
+        setSelectedLoteId(lote?.id ?? null);
+        setBuscaLote('');
+        setPaginaLotes(1);
+    }, [requestedFalecidoId, falecidoFromNavigation, falecidosLoading, lotesLoading, falecidos, quadras, lotesPorQuadra]);
 
     useEffect(() => {
         let isMounted = true;
@@ -548,7 +608,7 @@ export default function MapPage() {
                                 <span className={styles.panelLabel}>Como navegar</span>
                                 <h2 className={styles.panelTitle}>Escolha uma quadra</h2>
                                 <p className={styles.panelSub}>
-                                    Toque numa quadra, no mapa ou na lista abaixo, para ver os lotes. Use + e − para
+                                    Toque em uma quadra, no mapa ou na lista abaixo, para ver os lotes. Use + e − para
                                     aproximar e arraste para mover o mapa.
                                 </p>
 
