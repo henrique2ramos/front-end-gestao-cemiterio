@@ -38,7 +38,7 @@
     align-items: center;
     gap: 20px;
     box-sizing: border-box;
-    width: calc(100vw - 260px);
+    width: calc(100% + 96px + max(0px, 100vw - 1460px));
     min-height: 112px;
     margin: 0 0 28px calc(-48px - max(0px, (100vw - 1460px) / 2));
     padding: 22px calc(48px + max(0px, (100vw - 1460px) / 2));
@@ -123,6 +123,7 @@
     display: flex;
     flex: 1 1 340px;
     min-width: 0;
+    box-sizing: border-box;
     height: 58px;
     align-items: center;
     gap: 12px;
@@ -231,10 +232,10 @@
 
 .secondaryAction {
     flex: 0 0 184px;
-    border: 1px solid var(--line);
+    border: 1px solid #cbd5e1;
     background: #fff;
     color: var(--ink);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
 }
 
 .secondaryAction:hover {
@@ -521,6 +522,7 @@
     }
 
     .header {
+        width: calc(100% + 64px);
         margin-left: calc(-32px - max(0px, (100vw - 1460px) / 2));
         padding-right: calc(32px + max(0px, (100vw - 1460px) / 2));
         padding-left: calc(32px + max(0px, (100vw - 1460px) / 2));
@@ -537,7 +539,7 @@
     }
 
     .header {
-        width: 100vw;
+        width: calc(100% + 40px);
         min-height: 96px;
         margin-left: -20px;
         padding: 18px 20px;

@@ -157,16 +157,17 @@
 
 .table {
     width: 100%;
-    min-width: 920px;
+    min-width: 1000px;
     table-layout: fixed;
     border-collapse: collapse;
     text-align: center;
 }
 
-.nameColumn { width: 38%; }
-.locationColumn { width: 28%; }
-.typeColumn { width: 12%; }
-.actionsColumn { width: 22%; }
+.nameColumn { width: 34%; }
+.quadraColumn { width: 12%; }
+.loteColumn { width: 12%; }
+.typeColumn { width: 16%; }
+.actionsColumn { width: 26%; }
 
 .table th {
     background: #f8fafc;
@@ -249,18 +250,26 @@
     font-variant-numeric: tabular-nums;
 }
 
-.locationContent {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-weight: 500;
-    color: var(--text-main);
-    justify-content: center;
+.quadraValue {
+    display: inline-grid;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    box-sizing: border-box;
+    place-items: center;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-weight: 700;
 }
 
-.pinIcon {
-    color: var(--brand);
+.loteValue {
+    color: var(--text-main);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
 }
+
+.emptyLocation { color: var(--text-muted); }
 
 .badge {
     padding: 6px 14px;
@@ -904,7 +913,7 @@
     }
 
     .table {
-        min-width: 920px;
+        min-width: 1000px;
     }
 
     .modalContentLarge {

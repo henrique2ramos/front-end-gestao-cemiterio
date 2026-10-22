@@ -440,11 +440,6 @@ export default function MapPage() {
                                 </button>
                             </div>
                         </div>
-                        <div className={styles.mapLegend} aria-label="Legenda do mapa">
-                            <span><i className={styles.legendQuadra} /> Quadra no mapa</span>
-                            <span><i className={styles.legendOccupied} /> Lote com pessoas</span>
-                            <span><i className={styles.legendEmpty} /> Lote sem pessoas</span>
-                        </div>
                     </div>
 
                     
@@ -477,7 +472,9 @@ export default function MapPage() {
                                     <>
                                         <div className={styles.lotPanelHeader}>
                                             <div className={styles.lotPanelHeading}>
-                                                <h2 className={styles.selectedLotTitle}>Lote {loteSelecionado.numero}</h2>
+                                                <h2 className={styles.selectedLotTitle}>
+                                                    Lote <span className={styles.selectedLotNumber}>{loteSelecionado.numero}</span>
+                                                </h2>
                                                 <span className={styles.lotCount}>
                                                     {pessoasDoLote.length} {pessoasDoLote.length === 1 ? 'pessoa sepultada' : 'pessoas sepultadas'}
                                                 </span>
@@ -561,9 +558,9 @@ export default function MapPage() {
                                                 <button
                                                     type="button"
                                                     key={lote.id}
-                                                    className={`${styles.lot} ${memoriais.length ? styles.lotTaken : ''}`}
+                                                    className={`${styles.lot} ${memoriais.length === 1 ? styles.lotSingle : memoriais.length > 1 ? styles.lotMultiple : ''}`}
                                                     title={title}
-                                                    aria-label={`Abrir lote ${numero}`}
+                                                    aria-label={`Abrir lote ${numero}${memoriais.length ? `, ${memoriais.length} falecido${memoriais.length === 1 ? '' : 's'}` : ', vazio'}`}
                                                     aria-pressed={String(selectedLoteId) === String(lote.id)}
                                                     onClick={() => setSelectedLoteId(lote.id)}
                                                 >
@@ -627,6 +624,12 @@ export default function MapPage() {
                                 </ul>
                             </>
                         )}
+                        <div className={styles.mapLegend} aria-label="Legenda do mapa">
+                            <span><i className={styles.legendQuadra} /> Quadra no mapa</span>
+                            <span><i className={styles.legendOccupied} /> Lote com 1 falecido</span>
+                            <span><i className={styles.legendMultiple} /> Lote com 2 ou mais</span>
+                            <span><i className={styles.legendEmpty} /> Lote sem pessoas</span>
+                        </div>
                     </aside>
                 </div>
             </main>

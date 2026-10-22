@@ -7,7 +7,7 @@
     --brand: #0066cc;
     --brand-hover: #0052a3;
     --brand-dark: #003366;
-    
+
     display: flex;
     min-height: 100vh;
     background: var(--bg-page);
@@ -89,8 +89,31 @@
 
 .headerActions {
     display: flex;
-    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px 32px;
 }
+
+.bulkCreateButton {
+    display: inline-flex;
+    min-height: 46px;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 16px;
+    border: 1px solid #cbd9e8;
+    border-radius: 12px;
+    background: #fff;
+    color: #17365f;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.bulkCreateButton:hover { border-color: #9bb8d6; background: #f1f6fc; }
 
 /* --- Estrutura da Tabela --- */
 .card {
@@ -320,7 +343,6 @@
     animation: fadeIn 0.2s ease-out;
 }
 
-.modalContentLarge,
 .modalContentSmall,
 .modalContent {
     background: var(--card-bg);
@@ -330,12 +352,6 @@
     display: flex;
     flex-direction: column;
     z-index: 10000;
-}
-
-.modalContentLarge {
-    width: 95%;
-    max-width: 900px;
-    max-height: 90vh;
 }
 
 .modalContentSmall {
@@ -459,43 +475,6 @@
     font-size: 0.8rem;
 }
 
-.profileImagePreview {
-    position: relative;
-    display: grid;
-    width: 152px;
-    height: 152px;
-    margin-top: 12px;
-    overflow: hidden;
-    place-items: center;
-    border: 1px solid #d1d5db;
-    border-radius: 10px;
-    background: #f8fafc;
-}
-
-.profileImagePreview img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.removeImageBtn {
-    position: absolute;
-    top: 7px;
-    right: 7px;
-    display: grid;
-    width: 30px;
-    height: 30px;
-    place-items: center;
-    border: 1px solid rgba(255, 255, 255, 0.8);
-    border-radius: 50%;
-    background: rgba(15, 23, 42, 0.78);
-    color: #fff;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-.removeImageBtn:hover { background: #b91c1c; }
-
 .fileInputWrapper input {
     padding: 10px;
     background: #f8fafc;
@@ -552,172 +531,23 @@
     box-shadow: 0 6px 16px rgba(0, 102, 204, 0.3);
 }
 
-.formModalOverlay {
-    box-sizing: border-box;
-    padding: 16px;
-    overflow-y: auto;
+.bulkSequencePreview {
+    margin: -4px 0 22px;
+    padding: 11px 13px;
+    border-radius: 9px;
+    background: #f1f6fc;
+    color: #36516f;
+    font-size: 0.88rem;
 }
 
-.modalContentLarge {
-    width: 100%;
-    max-height: calc(100vh - 32px);
-    max-height: calc(100dvh - 32px);
-    border-radius: 16px;
-}
-
-.modalContentLarge .modalHeader {
-    padding: 24px;
-    border-bottom-color: #eaeaea;
-}
-
-.modalContentLarge .modalHeader h2 {
-    font-size: 1.15rem;
-    color: var(--brand-dark);
-    font-weight: 600;
-}
-
-.modalContentLarge .closeBtn {
-    width: auto;
-    height: auto;
-    padding: 0;
-    border-radius: 0;
-    background: none;
-    color: #999;
-}
-
-.modalContentLarge .closeBtn:hover {
-    background: none;
-    color: #333;
-}
-
-.modalContentLarge .modalBody {
-    min-height: 0;
-    overscroll-behavior: contain;
-}
-
-.modalContentLarge .formGrid {
-    gap: 32px;
-    padding: 24px;
-}
-
-.modalContentLarge .formCol h3 {
-    margin-bottom: 20px;
-    padding-bottom: 8px;
-    border-bottom-color: #eaeaea;
-    color: #0066cc;
-    font-size: 0.8rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-}
-
-.modalContentLarge .formGroup {
-    margin-bottom: 20px;
-}
-
-.modalContentLarge .formGroup label {
-    color: #444;
-}
-
-.modalContentLarge .formGroup input,
-.modalContentLarge .formGroup textarea,
-.modalContentLarge .formGroup select {
-    border-color: #d1d5db;
-    border-radius: 8px;
-    font-size: 1rem;
-}
-
-.modalContentLarge .formGroup input:focus,
-.modalContentLarge .formGroup textarea:focus,
-.modalContentLarge .formGroup select:focus {
-    border-color: var(--brand);
-    box-shadow: none;
-}
-
-.modalContentLarge .modalActionsFull {
-    padding-top: 16px;
-    border-top-color: #eaeaea;
-}
-
-.modalContentLarge .cancelBtn,
-.modalContentLarge .saveBtn {
-    display: inline-flex;
-    min-height: 44px;
-    align-items: center;
-    justify-content: center;
-    padding: 0 24px;
-    border: 1px solid transparent;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    line-height: 1;
-    box-shadow: none;
-}
-
-.modalContentLarge .cancelBtn {
-    border-color: #d1d5db;
-    background: transparent;
-    color: #555;
-}
-
-.modalContentLarge .saveBtn {
-    background: #1565c0;
-    color: #fff;
-}
-
-.modalContentLarge .cancelBtn:hover,
-.modalContentLarge .saveBtn:hover {
+.modalActions button:disabled,
+.closeBtn:disabled {
+    cursor: wait;
+    opacity: 0.65;
     transform: none;
 }
 
-.dateInputWrap {
-    position: relative;
-}
-
-.dateInputWrap > input[type="text"] {
-    padding-right: 48px;
-}
-
-.datePickerButton {
-    position: absolute;
-    top: 1px;
-    right: 1px;
-    bottom: 1px;
-    display: grid;
-    width: 44px;
-    place-items: center;
-    border: 0;
-    border-radius: 0 7px 7px 0;
-    background: transparent;
-    color: #64748b;
-    cursor: pointer;
-}
-
-.datePickerButton:hover {
-    background: #f1f5f9;
-    color: #0066cc;
-}
-
-.nativeDatePicker {
-    position: absolute;
-    width: 1px !important;
-    height: 1px !important;
-    padding: 0 !important;
-    border: 0 !important;
-    opacity: 0;
-    pointer-events: none;
-}
-
 @media (max-width: 1024px) {
-    .modalContentLarge {
-        max-width: 640px;
-        margin: 20px;
-    }
-
-    .modalContentLarge .formGrid {
-        grid-template-columns: 1fr;
-        gap: 16px;
-        padding: 20px;
-    }
 }
 
 /* --- Modal de Confirmação --- */
@@ -937,8 +767,8 @@
 /* --- Grid de Quadras/Lotes --- */
 .setoresGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+    gap: 16px;
 }
 
 .lotesGrid {
@@ -1019,72 +849,100 @@
 .loteTileActions .iconBtn { padding: 6px; }
 
 .setorCard {
+    position: relative;
     background: var(--card-bg);
     border: 1px solid var(--border);
-    border-radius: 16px;
-    overflow: hidden;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+    border-radius: 14px;
+    overflow: visible;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+    box-shadow: 0 3px 12px rgba(15, 23, 42, 0.035);
 }
 
 .setorCard:hover {
-    border-color: #cbd5e1;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
-    transform: translateY(-2px);
+    border-color: #b8cce2;
+    box-shadow: 0 8px 20px rgba(15, 48, 84, 0.09);
+    transform: translateY(-1px);
 }
+
+.setorCard:focus-within { z-index: 6; }
 
 .setorCardBtn {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 14px;
     width: 100%;
-    padding: 24px 20px;
-    background: none;
+    min-height: 112px;
+    position: relative;
+    padding: 20px 62px 20px 18px;
+    border-radius: 13px;
+    background: transparent;
     border: none;
     cursor: pointer;
     text-align: left;
+    color: inherit;
 }
 
 .setorCardBtn:hover {
     background: #f8fafc;
 }
 
+.setorCardBtn:focus-visible {
+    position: relative;
+    z-index: 1;
+    outline: 3px solid rgba(23, 103, 189, 0.24);
+    outline-offset: -3px;
+}
+
 .cardActions {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 4px;
-    padding: 12px 16px;
-    border-top: 1px solid var(--border);
-    background: #f8fafc;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 5;
 }
 
 .setorIcon {
-    width: 56px;
-    height: 56px;
-    border-radius: 14px;
+    width: 52px;
+    height: 52px;
+    border-radius: 13px;
     background: #eff6ff;
     color: var(--brand);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    box-shadow: inset 0 2px 4px rgba(0, 102, 204, 0.05);
+    box-shadow: inset 0 1px 3px rgba(0, 102, 204, 0.06);
+    flex: 0 0 52px;
 }
 
+.setorOpenIcon {
+    position: absolute;
+    right: 18px;
+    bottom: 14px;
+    color: #94a3b8;
+    transition: color 0.18s ease, transform 0.18s ease;
+}
+
+.setorCard:hover .setorOpenIcon { color: var(--brand); transform: translateX(2px); }
+
 .setorInfo h3 {
-    font-size: 1.1rem;
+    font-size: 1.08rem;
     font-weight: 700;
     color: var(--brand-dark);
-    margin: 0 0 4px 0;
+    margin: 0;
     letter-spacing: -0.01em;
 }
 
-.setorInfo p {
-    font-size: 0.85rem;
+.setorLotCount {
+    display: inline-flex;
+    width: fit-content;
+    align-items: center;
+    margin-top: 7px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: #f1f5f9;
     color: var(--text-muted);
-    margin: 0;
-    font-weight: 500;
+    font-size: 0.76rem;
+    font-weight: 600;
 }
 
 .loteSearch {
@@ -1094,6 +952,628 @@
 .loteSearch .searchBox {
     background: var(--card-bg);
 }
+
+.lotExplorer {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    padding: 22px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--card-bg);
+    box-shadow: 0 4px 24px rgba(15, 23, 42, 0.035);
+}
+
+.lotToolsCard {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.lotSummary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px 28px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.lotSummaryTotals {
+    display: inline-flex;
+    align-items: center;
+    gap: 18px;
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+.lotSummaryTotals > strong {
+    color: var(--brand-dark);
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.lotSummaryTotals > span {
+    color: var(--text-muted);
+}
+
+.lotSummaryLegend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    margin-top: 8px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    gap: 8px 30px;
+    font-size: 0.82rem;
+}
+
+.lotLegendFilter {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 8px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-muted);
+    font: inherit;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.lotLegendFilter:hover {
+    border-color: #dbeafe;
+    background: #f8fbff;
+}
+
+.lotLegendFilterActive {
+    border-color: #bfdbfe;
+    background: #eaf2ff;
+    color: var(--brand-dark);
+}
+
+.lotLegendFilter strong {
+    color: inherit;
+    font-weight: 700;
+}
+
+.lotLegendFilter:focus-visible {
+    outline: 2px solid rgba(21, 101, 192, 0.35);
+    outline-offset: 2px;
+}
+
+.lotSummaryLegend i {
+    display: block;
+    box-sizing: border-box;
+    width: 12px;
+    height: 12px;
+    min-width: 12px;
+    flex: 0 0 12px;
+    border: 1px solid transparent;
+    border-radius: 3px;
+}
+
+.legendOccupied { background: #bfdbfe; border-color: #93c5fd; }
+.legendMultiple { background: #fde68a; border-color: #f59e0b; }
+.legendEmpty { border-color: #a8b0bb !important; background: transparent; }
+
+.lotControls {
+    display: grid;
+    grid-template-columns: minmax(170px, 0.85fr) minmax(220px, 1.8fr) auto;
+    align-items: center;
+    gap: 12px;
+}
+
+@media (max-width: 900px) {
+    .lotNumberGrid {
+        grid-template-columns: repeat(10, minmax(0, 1fr));
+    }
+
+    .lotControls {
+        grid-template-columns: minmax(150px, 0.8fr) minmax(0, 1.5fr);
+    }
+
+    .lotControls .lotFilters {
+        grid-column: 1 / -1;
+    }
+}
+
+.rangeSelectLabel select {
+    appearance: none;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 44px;
+    padding: 0 42px 0 14px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background-color: var(--card-bg);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364758b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 15px;
+    color: var(--text-main);
+    font: inherit;
+    cursor: pointer;
+}
+
+.lotSearchField {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 9px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--card-bg);
+    color: var(--text-muted);
+}
+
+.lotSearchField:focus-within {
+    outline: 2px solid rgba(21, 101, 192, 0.2);
+    border-color: var(--brand, #1565c0);
+}
+
+.lotSearchField input {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--text-main);
+    font: inherit;
+}
+
+.lotSearchField input::placeholder { color: var(--text-muted); }
+
+.lotSearchField button {
+    display: grid;
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
+    place-items: center;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.lotSearchField button:hover { background: rgba(100, 116, 139, 0.12); color: var(--text-main); }
+
+.rangeSelectLabel select:focus {
+    outline: 2px solid rgba(21, 101, 192, 0.2);
+    border-color: var(--brand, #1565c0);
+}
+
+.lotFilters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.lotFilters button {
+    min-height: 36px;
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--text-muted);
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.lotFilters button:hover,
+.lotFilters .lotFilterActive {
+    border-color: #bfdbfe;
+    background: #e6f0ff;
+    color: var(--brand);
+}
+
+.lotNumberGrid {
+    display: grid;
+    grid-template-columns: repeat(20, minmax(0, 1fr));
+    gap: 5px;
+}
+
+.lotGridState {
+    grid-column: 1 / -1;
+    display: flex;
+    min-height: 150px;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 24px;
+    border: 1px dashed #d5e0ec;
+    border-radius: 12px;
+    background: #f8fafc;
+    color: var(--text-main);
+}
+
+.lotGridState > .lotGridStateIcon {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+    place-items: center;
+    border-radius: 12px;
+    background: #eaf2fb;
+    color: #1767bd;
+}
+
+.lotGridStateText {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.lotGridStateText strong { font-size: 0.95rem; }
+.lotGridStateText > span { color: var(--text-muted); font-size: 0.86rem; }
+.lotGridState > [role="status"] { padding: 12px; }
+
+.lotNumberTile {
+    display: grid;
+    min-width: 0;
+    aspect-ratio: 1;
+    min-height: 0;
+    padding: 4px;
+    place-items: center;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.lotNumberTile:hover {
+    z-index: 1;
+    border-color: #7aa9ea;
+    box-shadow: 0 3px 8px rgba(15, 23, 42, 0.12);
+}
+
+.lotOccupied { background: #dbeafe; color: #1d4ed8; }
+.lotMultiple { background: #fef3c7; color: #92400e; }
+.lotEmpty { border: 1px dashed #cbd5e1; background: transparent; color: #94a3b8; }
+.lotNumberTile.lotSelected { border-color: #0755c8; background: #0755c8; color: #fff; box-shadow: 0 5px 12px rgba(7, 85, 200, 0.25); }
+
+.rangeCaption {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.lotPagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.lotPagination .pagination {
+    margin-left: auto;
+}
+
+.visuallyHidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    clip-path: inset(50%);
+}
+
+.selectedLotInline {
+    --card-bg: #ffffff;
+    --border: #e2e8f0;
+    --text-main: #334155;
+    --text-muted: #64748b;
+    --brand: #0066cc;
+    --brand-hover: #0052a3;
+    --brand-dark: #003366;
+
+    width: 100%;
+    margin-top: 14px;
+}
+
+.selectedLotPanel {
+    position: relative;
+    width: 100%;
+    min-height: 0;
+    overflow: visible;
+    padding: 20px 24px;
+    border: 1px solid #dbe3ed;
+    border-radius: 16px;
+    background: var(--card-bg);
+    box-shadow: 0 4px 24px rgba(15, 23, 42, 0.035);
+}
+
+.selectedLotPanel.selectedLotEmpty { padding: 0 20px; }
+
+.lotPanelHint {
+    display: grid;
+    min-height: 92px;
+    margin: 0;
+    place-items: center;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.selectedLotHeader {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px dashed var(--border);
+}
+
+.selectedLotIdentity {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    align-items: center;
+    gap: 14px;
+}
+
+.selectedLotMarker {
+    display: grid;
+    width: 54px;
+    height: 58px;
+    flex: 0 0 54px;
+    place-items: center;
+    border-radius: 9px;
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.selectedLotMarkerOccupied { background: #dbeafe; color: #1d4ed8; }
+.selectedLotMarkerMultiple { background: #fef3c7; color: #92400e; }
+.selectedLotMarkerEmpty { border: 1px dashed #cbd5e1; background: #f8fafc; color: #64748b; }
+
+.selectedLotTitle {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+}
+
+.selectedLotHeadingRow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 12px;
+}
+
+.lotNavigationGroup { margin-left: auto; }
+
+.selectedLotIdentity h2 {
+    margin: 0;
+    color: var(--text-main);
+    font-size: 1.4rem;
+    line-height: 1.2;
+}
+
+.lotSectorLabel {
+    color: var(--text-muted);
+    font-size: 0.76rem;
+    font-weight: 600;
+    letter-spacing: 0.035em;
+}
+
+.lotCountBadge {
+    width: fit-content;
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    font-weight: 400;
+    line-height: 1.4;
+}
+
+.lotPersonActions,
+.lotNavigationGroup {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.lotNavigationGroup {
+    flex-wrap: wrap;
+    flex: 0 0 auto;
+    gap: 6px;
+}
+
+.lotNavBtn,
+.lotCloseButton {
+    display: inline-flex;
+    min-width: 38px;
+    min-height: 40px;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: transparent;
+    color: var(--text-main);
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.lotNavigationGroup .addButton {
+    min-height: 40px;
+    align-items: center;
+    padding: 0 14px;
+    border-radius: 9px;
+    font-size: 0.86rem;
+    white-space: nowrap;
+}
+
+.lotActionButton {
+    display: inline-flex;
+    min-height: 40px;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: #fff;
+    color: var(--text-main);
+    font: inherit;
+    font-size: 0.86rem;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.lotActionButton:hover { background: #f1f5f9; }
+
+.lotActionsMenu {
+    position: relative;
+    z-index: 5;
+}
+
+.lotMenuTrigger {
+    display: grid;
+    width: 38px;
+    height: 40px;
+    place-items: center;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: #fff;
+    color: #17365f;
+    cursor: pointer;
+    list-style: none;
+}
+
+.lotMenuTrigger::-webkit-details-marker { display: none; }
+.lotMenuTrigger::marker { content: ''; }
+.lotMenuTrigger:hover,
+.lotActionsMenu[open] .lotMenuTrigger { background: #f1f6fc; border-color: #cbd9e8; }
+
+.lotMenuPanel {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 20;
+    display: grid;
+    width: 190px;
+    gap: 3px;
+    padding: 7px;
+    border: 1px solid #dbe3ed;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.16);
+}
+
+.lotMenuPanel button {
+    display: flex;
+    min-height: 42px;
+    align-items: center;
+    gap: 11px;
+    padding: 0 11px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #17365f;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.lotMenuPanel button:hover { background: #f1f6fc; }
+.lotMenuPanel .lotMenuDelete { color: #b42318; }
+.lotMenuPanel .lotMenuDelete:hover { background: #fff1f0; }
+
+.lotNavBtn:hover:not(:disabled),
+.lotCloseButton:hover { background: #f1f5f9; }
+.lotNavBtn:disabled { cursor: not-allowed; opacity: 0.4; }
+
+.lotCloseButton {
+    width: 40px;
+    justify-content: center;
+    padding: 0;
+}
+
+.lotPeopleList {
+    display: flex;
+    flex-direction: column;
+    margin-top: 14px;
+}
+
+.lotPersonRow {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 14px 10px;
+    border-bottom: 1px dashed var(--border);
+    border-radius: 8px;
+    transition: background 0.15s ease;
+}
+
+.lotPersonRow:hover { background: #f8fafc; }
+
+.lotPersonDetails {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 12px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--text-main);
+    text-align: left;
+    cursor: pointer;
+}
+
+.lotPersonAvatar {
+    display: block;
+    width: 46px;
+    height: 46px;
+    flex: 0 0 46px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    border-radius: 50%;
+    background: #f1f5f9;
+}
+
+.lotPersonAvatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.lotPersonText {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.lotPersonText strong { overflow-wrap: anywhere; font-size: 0.94rem; }
+.lotPersonText > span { color: var(--text-muted); font-size: 0.86rem; }
+.lotPersonEmpty { margin: 0; padding: 14px 0; color: var(--text-muted); font-size: 0.9rem; }
+
+.lotPersonActions .iconBtn {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    place-items: center;
+    border-radius: 8px;
+}
+
+.lotPersonActions .iconBtn:hover { background: #eaf2fb; }
 
 /* --- Responsividade --- */
 @media (max-width: 768px) {
@@ -1123,11 +1603,11 @@
         gap: 0;
         padding: 24px;
     }
-    
+
     .formCol h3 {
         margin-top: 24px;
     }
-    
+
     .formCol:first-child h3 {
         margin-top: 0;
     }
@@ -1150,6 +1630,111 @@
     .setoresGrid {
         grid-template-columns: 1fr;
     }
+
+    .setorCardBtn { padding-right: 62px; }
+
+    .lotPagination {
+        align-items: flex-end;
+        flex-direction: column;
+    }
+
+    .lotExplorer {
+        padding: 14px;
+    }
+
+    .lotPagination .pagination {
+        margin-left: 0;
+    }
+
+    .lotSummary {
+        font-size: 0.8rem;
+    }
+
+    .lotSummaryLegend {
+        column-gap: 24px;
+    }
+
+    .lotLegendFilter {
+        white-space: normal;
+    }
+
+    .lotNumberGrid {
+        grid-template-columns: repeat(10, minmax(0, 1fr));
+        gap: 5px;
+    }
+
+    .lotNumberTile {
+        min-height: 0;
+    }
+
+    .selectedLotPanel {
+        padding: 18px;
+    }
+
+    .selectedLotIdentity { gap: 9px; }
+    .selectedLotMarker { width: 42px; height: 46px; flex-basis: 42px; }
+    .selectedLotTitle { flex: 1; min-width: 0; }
+    .selectedLotHeadingRow h2 { font-size: 1.08rem; }
+    .lotSectorLabel { font-size: 0.78rem; }
+    .lotNavigationGroup { gap: 4px; margin-left: auto; }
+    .lotNavigationGroup .lotNavBtn,
+    .lotNavigationGroup .lotCloseButton { min-width: 34px; min-height: 36px; width: 36px; }
+    .lotPersonRow {
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .lotPersonActions {
+        gap: 2px;
+        opacity: 1;
+    }
+
+    .lotPersonActions .iconBtn {
+        width: 32px;
+        height: 32px;
+    }
+
+    .lotPersonAvatar {
+        width: 40px;
+        height: 40px;
+        flex-basis: 40px;
+    }
+
+}
+
+@media (max-width: 560px) {
+    .lotControls {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 8px;
+    }
+
+    .lotControls .lotFilters {
+        grid-column: auto;
+    }
+
+    .lotNumberGrid {
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 4px;
+    }
+
+    .lotNumberTile {
+        font-size: 0.78rem;
+    }
+
+    .selectedLotHeader { align-items: stretch; }
+    .selectedLotIdentity { align-items: flex-start; }
+    .selectedLotMarker { width: 42px; height: 46px; flex-basis: 42px; }
+    .selectedLotHeadingRow { align-items: flex-start; flex-direction: column; gap: 6px; }
+    .selectedLotHeadingRow h2 { font-size: 1.08rem; }
+    .lotNavigationGroup { width: 100%; flex: 1 1 100%; justify-content: flex-end; gap: 4px; }
+    .lotNavigationGroup .lotNavBtn,
+    .lotNavigationGroup .lotCloseButton,
+    .lotMenuTrigger { min-width: 34px; min-height: 36px; width: 36px; }
+    .lotNavigationGroup .addButton { min-height: 36px; padding: 0 9px; font-size: 0.76rem; }
+    .lotActionButton { min-height: 36px; padding: 0 8px; font-size: 0.76rem; }
+    .lotMenuPanel { width: 180px; }
+    .lotGridState { justify-content: flex-start; padding: 18px; }
+    .lotGridStateText { min-width: 0; }
 }
 
 /* --- CONFIGURAÇÕES PARA A IMPRESSORA --- */

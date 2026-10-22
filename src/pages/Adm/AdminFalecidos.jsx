@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Plus, Edit, Trash2, Search, MapPin, X, QrCode, Eye, ChevronLeft, ChevronRight, AlertCircle, CalendarDays } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, X, QrCode, Eye, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
 import QRCode from 'react-qr-code';
 import {
     fetchFalecidos,
@@ -13,7 +13,7 @@ import {
 } from '../../lib/api';
 import AdminSidebar from './AdminSidebar';
 import CopyLinkButton from '../../components/CopyLinkButton';
-import AutocompleteInput from '../../components/AutocompleteInput';
+import FalecidoFormModal from '../../components/FalecidoFormModal';
 import FalecidoDetailsModal from '../../components/FalecidoDetailsModal';
 import { unwrapPage, getPageItems } from './../../data/adminPagination';
 import styles from './AdminFalecidos.module.css';
@@ -29,6 +29,28 @@ const getToken = () => localStorage.getItem('memorialAdminToken') || '';
 
 const isAbsoluteUrl = (src) => /^(https?:)?\/\//i.test(src) || src.startsWith('data:');
 const resolveOnce = (src) => (!src || isAbsoluteUrl(src) ? src : resolveImageUrl(src));
+const normalizeGallery = (item) => {
+    const raw = [item.galeria, item.fotosGaleria, item.imagensGaleria, item.photos, item.gallery]
+        .find((value) => Array.isArray(value) ? value.length > 0 : Boolean(value));
+    let entries = raw;
+    if (typeof entries === 'string') {
+        try {
+            const parsed = JSON.parse(entries);
+            entries = Array.isArray(parsed) ? parsed : [entries];
+        } catch {
+            entries = entries.trim() ? [entries] : [];
+        }
+    } else if (!Array.isArray(entries)) {
+        entries = entries ? [entries] : [];
+    }
+    return entries.map((entry) => typeof entry === 'string' ? entry : entry?.url || entry?.src || entry?.path || entry?.imagem || entry?.image || '')
+        .map(resolveOnce)
+        .filter(Boolean);
+};
+const parseLocalizacao = (value = '') => ({
+    quadra: value.match(/Quadra\s+(.+?)(?:,|$)/i)?.[1]?.trim() || '',
+    lote: value.match(/Lote\s+(.+?)$/i)?.[1]?.trim() || '',
+});
 
 export default function AdminFalecidos({ onLogout }) {
     const location = useLocation();
@@ -63,16 +85,19 @@ export default function AdminFalecidos({ onLogout }) {
     const openConfirm = (title, message, onConfirm) => setConfirmModal({ open: true, title, message, onConfirm });
     const closeConfirm = () => setConfirmModal({ open: false, title: '', message: '', onConfirm: null });
 
-    const normalizeFalecidosFromApi = (items) => items.map((item) => ({
-        ...item,
-        localizacao: item.localizacao || '',
-        tipo: item.tipo || 'historica',
-        imagem: resolveOnce(item.imagem || item.galeria?.[0]) || personPlaceholder,
-        galeria: Array.isArray(item.galeria) ? item.galeria.filter(Boolean).map((src) => resolveOnce(src)) : [],
-        descricao: item.descricao || item.biografia || '',
-        dataNascimento: item.dataNascimento || '',
-        dataMorte: item.dataMorte || '',
-    }));
+    const normalizeFalecidosFromApi = (items) => items.map((item) => {
+        const galeria = normalizeGallery(item);
+        return {
+            ...item,
+            localizacao: item.localizacao || '',
+            tipo: item.tipo || 'historica',
+            imagem: resolveOnce(item.imagem) || galeria[0] || personPlaceholder,
+            galeria,
+            descricao: item.descricao || item.biografia || '',
+            dataNascimento: item.dataNascimento || '',
+            dataMorte: item.dataMorte || '',
+        };
+    });
     useEffect(() => {
         fetchQuadras().then(res => {
             const arr = Array.isArray(res) ? res : res?.items || [];
@@ -259,6 +284,7 @@ export default function AdminFalecidos({ onLogout }) {
         }
     };
     const handleGalleryUpload = (e) => setSelectedGalleryFiles(Array.from(e.target.files || []));
+    const removeGalleryImage = (index) => setSelectedGalleryFiles((files) => files.filter((_, fileIndex) => fileIndex !== index));
 
     const openNewModal = () => {
         setSelectedFalecido(null);
@@ -352,14 +378,16 @@ export default function AdminFalecidos({ onLogout }) {
                             <table className={styles.table}>
                                 <colgroup>
                                     <col className={styles.nameColumn} />
-                                    <col className={styles.locationColumn} />
+                                    <col className={styles.quadraColumn} />
+                                    <col className={styles.loteColumn} />
                                     <col className={styles.typeColumn} />
                                     <col className={styles.actionsColumn} />
                                 </colgroup>
                                 <thead>
                                     <tr>
-                                        <th>Nome do Falecido</th>
-                                        <th>Localização</th>
+                                        <th>Falecido</th>
+                                        <th>Quadra</th>
+                                        <th>Lote</th>
                                         <th>Tipo</th>
                                         <th className={styles.actionsColumn}>Ações</th>
                                     </tr>
@@ -367,11 +395,13 @@ export default function AdminFalecidos({ onLogout }) {
                                 <tbody>
                                     {isLoading ? (
                                         <tr>
-                                            <td colSpan="4" className={styles.emptyState}>Carregando registros...</td>
+                                            <td colSpan="5" className={styles.emptyState}>Carregando registros...</td>
                                         </tr>
                                     ) : (
                                         <>
-                                            {falecidos.map(falecido => (
+                                            {falecidos.map(falecido => {
+                                                const { quadra, lote } = parseLocalizacao(falecido.localizacao);
+                                                return (
                                                 <tr key={falecido.id} className={styles.tableRow}>
                                                     <td className={styles.nameCell}>
                                                         <div className={styles.nameCellContent}>
@@ -386,12 +416,8 @@ export default function AdminFalecidos({ onLogout }) {
                                                         </div>
                                                         </div>
                                                     </td>
-                                                    <td className={styles.locationCell}>
-                                                        <span className={styles.locationContent}>
-                                                            <MapPin size={16} className={styles.pinIcon} />
-                                                            {falecido.localizacao || '—'}
-                                                        </span>
-                                                    </td>
+                                                    <td>{quadra ? <span className={styles.quadraValue}>{quadra}</span> : <span className={styles.emptyLocation}>—</span>}</td>
+                                                    <td className={styles.loteValue}>{lote || <span className={styles.emptyLocation}>—</span>}</td>
                                                     <td>
                                                         <span className={`${styles.badge} ${falecido.tipo === 'historica' ? styles.badgeHist : styles.badgeRec}`}>
                                                             {falecido.tipo === 'historica' ? 'Histórico' : 'Recente'}
@@ -414,10 +440,11 @@ export default function AdminFalecidos({ onLogout }) {
                                                         </div>
                                                     </td>
                                                 </tr>
-                                            ))}
+                                                );
+                                            })}
                                             {falecidos.length === 0 && (
                                                 <tr>
-                                                    <td colSpan="4" className={styles.emptyState}>Nenhum falecido encontrado.</td>
+                                                    <td colSpan="5" className={styles.emptyState}>Nenhum falecido encontrado.</td>
                                                 </tr>
                                             )}
                                         </>
@@ -478,125 +505,37 @@ export default function AdminFalecidos({ onLogout }) {
                 </div>
             </main>
 
-            {/* --- MODAL DE FORMULÁRIO (Criar/Editar) --- */}
             {isFormModalOpen && (
-                <div className={styles.modalOverlay} onClick={closeFormModal}>
-                    <div className={styles.modalContentLarge} onClick={(e) => e.stopPropagation()}>
-                        <div className={styles.modalHeader}>
-                            <h2>{selectedFalecido ? 'Editar Falecido' : 'Novo Falecido'}</h2>
-                            <button className={styles.closeBtn} onClick={closeFormModal}><X size={24} /></button>
-                        </div>
-
-                        <div className={styles.modalBody}>
-                            <form onSubmit={saveFalecido} className={styles.formGrid}>
-                                <div className={styles.formCol}>
-                                    <h3>Dados Pessoais e Localização</h3>
-                                    <div className={styles.formGroup}>
-                                        <label>Nome Completo</label>
-                                        <input type="text" name="nome" placeholder="Ex: Maria Aparecida" value={formData.nome} onChange={handleInputChange} required />
-                                    </div>
-                                    <div className={styles.formRow}>
-                                        <div className={styles.formGroup}>
-                                            <label>Data de Nascimento</label>
-                                            <div className={styles.dateInputWrap}>
-                                                <input type="text" name="dataNascimento" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}" title="Use o formato dd/mm/aaaa" placeholder="dd/mm/aaaa" inputMode="numeric" value={formData.dataNascimento} onChange={handleInputChange} />
-                                                <button type="button" className={styles.datePickerButton} aria-label="Abrir calendário para data de nascimento" onClick={() => abrirCalendario(nascimentoDatePickerRef)}><CalendarDays size={18} /></button>
-                                                <input ref={nascimentoDatePickerRef} className={styles.nativeDatePicker} type="date" aria-label="Selecionar data de nascimento no calendário" tabIndex={-1} value={dataParaInput(formData.dataNascimento)} onChange={(e) => setFormData(prev => ({ ...prev, dataNascimento: formatarData(e.target.value) }))} />
-                                            </div>
-                                        </div>
-                                        <div className={styles.formGroup}>
-                                            <label>Data de Falecimento</label>
-                                            <div className={styles.dateInputWrap}>
-                                                <input type="text" name="dataMorte" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}" title="Use o formato dd/mm/aaaa" placeholder="dd/mm/aaaa" inputMode="numeric" value={formData.dataMorte} onChange={handleInputChange} />
-                                                <button type="button" className={styles.datePickerButton} aria-label="Abrir calendário para data de falecimento" onClick={() => abrirCalendario(morteDatePickerRef)}><CalendarDays size={18} /></button>
-                                                <input ref={morteDatePickerRef} className={styles.nativeDatePicker} type="date" aria-label="Selecionar data de falecimento no calendário" tabIndex={-1} value={dataParaInput(formData.dataMorte)} onChange={(e) => setFormData(prev => ({ ...prev, dataMorte: formatarData(e.target.value) }))} />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className={styles.formRow}>
-                                        <div className={styles.formGroup}>
-                                            <label>Quadra</label>
-                                            <AutocompleteInput
-                                                name="setor"
-                                                value={formData.setor}
-                                                options={quadrasDisponiveis.map(quadra => quadra.nome)}
-                                                placeholder="Digite ou selecione a quadra"
-                                                ariaLabel="Quadra"
-                                                onChange={(setor) => {
-                                                    setLotesDisponiveis([]);
-                                                    setFormData(prev => ({ ...prev, setor: setor.toUpperCase(), lote: '' }));
-                                                }}
-                                            />
-                                        </div>
-                                        <div className={styles.formGroup}>
-                                            <label>Lote</label>
-                                            <AutocompleteInput
-                                                name="lote"
-                                                value={formData.lote}
-                                                options={lotesDisponiveis.map(lote => lote.numero || lote.nome || lote.id)}
-                                                placeholder="Digite ou selecione o lote"
-                                                ariaLabel="Lote"
-                                                onChange={(lote) => setFormData(prev => ({ ...prev, lote }))}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className={styles.formGroup}>
-                                        <label>Categoria (Tipo)</label>
-                                        <select name="tipo" value={formData.tipo} onChange={handleInputChange}>
-                                            <option value="historica">Personalidade Histórica</option>
-                                            <option value="recente">Falecido Recente</option>
-                                        </select>
-                                    </div>
-                                    <div className={styles.formGroup}>
-                                        <label>Imagem de Perfil</label>
-                                        <div className={styles.fileInputWrapper}>
-                                            <input ref={imageInputRef} type="file" accept="image/*" onChange={handleImageUpload} />
-                                        </div>
-                                        <small className={styles.inputHelp}>Escolha uma foto principal do computador.</small>
-                                            <div className={styles.profileImagePreview}>
-                                                <img
-                                                    src={resolveOnce(imagePreview) || personPlaceholder}
-                                                    alt={imagePreview ? 'Prévia da imagem do memorial' : 'Imagem padrão enquanto nenhuma foto for selecionada'}
-                                                    onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = personPlaceholder; }}
-                                                />
-                                                {!imageRemoved && (selectedImageFile || (selectedFalecido?.imagem && selectedFalecido.imagem !== personPlaceholder)) && (
-                                                    <button type="button" className={styles.removeImageBtn} aria-label="Remover imagem de perfil" title="Remover imagem" onClick={removeProfileImage}>
-                                                        <X size={16} />
-                                                    </button>
-                                                )}
-                                            </div>
-                                    </div>
-                                    <div className={styles.formGroup}>
-                                        <label>Fotos da Galeria</label>
-                                        <div className={styles.fileInputWrapper}>
-                                            <input type="file" accept="image/*" multiple onChange={handleGalleryUpload} />
-                                        </div>
-                                        <small className={styles.inputHelp}>Você pode enviar até 10 imagens para a galeria.</small>
-                                    </div>
-                                </div>
-
-                                <div className={styles.formCol}>
-                                    <h3>Biografia e Detalhes</h3>
-                                    <div className={styles.formGroup}>
-                                        <label>Breve Descrição</label>
-                                        <textarea name="descricao" rows="2" placeholder="Uma frase curta que resuma a pessoa..." value={formData.descricao} onChange={handleInputChange} />
-                                        <small className={styles.inputHelp}>Opcional. Se ficar em branco, a descrição não será exibida.</small>
-                                    </div>
-                                    <div className={styles.formGroup}>
-                                        <label>Biografia Completa</label>
-                                        <textarea name="biografia" rows="8" placeholder="Escreva a história completa do falecido aqui..." value={formData.biografia} onChange={handleInputChange} />
-                                        <small className={styles.inputHelp}>Opcional. Se não houver informação, o memorial mostrará “Biografia não informada”.</small>
-                                    </div>
-                                </div>
-
-                                <div className={styles.modalActionsFull}>
-                                    <button type="button" className={styles.cancelBtn} onClick={closeFormModal}>Cancelar</button>
-                                    <button type="submit" className={styles.saveBtn}>Salvar Registro</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
+                <FalecidoFormModal
+                    selectedFalecido={selectedFalecido}
+                    requiredFields
+                    formData={formData}
+                    onClose={closeFormModal}
+                    onSubmit={saveFalecido}
+                    onInputChange={handleInputChange}
+                    setFormData={setFormData}
+                    datePickerRefs={{ birth: nascimentoDatePickerRef, death: morteDatePickerRef }}
+                    openCalendar={abrirCalendario}
+                    dateToInput={dataParaInput}
+                    formatDate={formatarData}
+                    quadraOptions={quadrasDisponiveis.map((quadra) => quadra.nome)}
+                    loteOptions={lotesDisponiveis.map((lote) => lote.numero || lote.nome || lote.id)}
+                    onQuadraChange={(setor) => {
+                        setLotesDisponiveis([]);
+                        setFormData((current) => ({ ...current, setor: setor.toUpperCase(), lote: '' }));
+                    }}
+                    onLoteChange={(lote) => setFormData((current) => ({ ...current, lote }))}
+                    imageInputRef={imageInputRef}
+                    onImageUpload={handleImageUpload}
+                    imagePreview={imagePreview}
+                    resolveImage={resolveOnce}
+                    imageRemoved={imageRemoved}
+                    selectedImageFile={selectedImageFile}
+                    selectedGalleryFiles={selectedGalleryFiles}
+                    onRemoveImage={removeProfileImage}
+                    onGalleryUpload={handleGalleryUpload}
+                    onRemoveGalleryImage={removeGalleryImage}
+                />
             )}
 
             {/* --- MODAL DE CONFIRMAÇÃO --- */}

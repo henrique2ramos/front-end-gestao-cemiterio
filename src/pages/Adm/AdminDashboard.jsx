@@ -6,6 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import AdminSidebar from './AdminSidebar';
 import { fetchFalecidos, fetchLotes, fetchQuadras, resolveImageUrl } from '../../lib/api';
 import { unwrapPage, isDataDesconhecida } from '../../data/adminPagination';
+import personPlaceholder from '../../assets/person-placeholder.svg';
 import styles from './AdminDashboard.module.css';
 
 const fmt = (n) => (typeof n === 'number' ? n.toLocaleString('pt-BR') : '—');
@@ -222,8 +223,14 @@ export default function AdminDashboard({ onLogout }) {
                                                 <td>
                                                     <div className={styles.person}>
                                                         <div className={styles.avatar}>
-                                                            <span aria-hidden="true">{falecido.nome?.trim()?.charAt(0)?.toUpperCase() || '?'}</span>
-                                                            {imageUrl && <img src={imageUrl} alt="" onError={(e) => e.currentTarget.remove()} />}
+                                                            <img
+                                                                src={imageUrl || personPlaceholder}
+                                                                alt=""
+                                                                onError={(event) => {
+                                                                    event.currentTarget.onerror = null;
+                                                                    event.currentTarget.src = personPlaceholder;
+                                                                }}
+                                                            />
                                                         </div>
                                                         <div className={styles.personText}>
                                                             <span className={semNome ? styles.nameUnknown : styles.name}>{falecido.nome || '—'}</span>
