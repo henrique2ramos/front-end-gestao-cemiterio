@@ -9,6 +9,7 @@ import {
 } from '../lib/api';
 import Spinner from '../components/Spinner';
 import styles from './QuadraPage.module.css';
+import personPlaceholder from '../assets/person-placeholder.svg';
 
 export default function QuadraPage() {
   const { id } = useParams();
@@ -138,11 +139,11 @@ export default function QuadraPage() {
                       className={styles.personCard}
                     >
                       <div className={styles.personImage}>
-                        {pessoa.imagem ? (
-                          <img src={resolveImageUrl(pessoa.imagem)} alt={pessoa.nome} />
-                        ) : (
-                          <User size={40} className={styles.userIcon} />
-                        )}
+                  <img
+                    src={resolveImageUrl(pessoa.imagem) || personPlaceholder}
+                    alt={pessoa.nome}
+                    onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = personPlaceholder; }}
+                  />
                       </div>
 
                       <div className={styles.personInfo}>
@@ -160,7 +161,7 @@ export default function QuadraPage() {
                           </span>
                         </div>
 
-                        <p className={styles.personDesc}>{pessoa.descricao}</p>
+                        {pessoa.descricao && <p className={styles.personDesc}>{pessoa.descricao}</p>}
 
                         {pessoa.mensagemFamilia && (
                           <blockquote className={styles.tributeBox}>

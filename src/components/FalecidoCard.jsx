@@ -1,12 +1,19 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin } from 'lucide-react';
+import { MapPin, UserRound } from 'lucide-react';
 import { resolveImageUrl } from '../lib/api';
+import personPlaceholder from '../assets/person-placeholder.svg';
 import styles from './FalecidoCard.module.css';
 
 export default function FalecidoCard({
   falecido,
-  onClick
+  onClick,
+  showProfilePlaceholder = false
 }) {
+  const image = resolveImageUrl(falecido.imagem);
+  const [imageFailed, setImageFailed] = useState(false);
+  const isPlaceholderImage = image === personPlaceholder || /person-placeholder|imagem-indisponivel/i.test(image || '');
+  const hasImage = image && !imageFailed && !(showProfilePlaceholder && isPlaceholderImage);
 
   return (
     <Link
@@ -15,11 +22,20 @@ export default function FalecidoCard({
       onClick={onClick}
     >
       <div className={styles.imageWrapper}>
-        <img
-          src={resolveImageUrl(falecido.imagem)}
-          alt={falecido.nome}
-          className={styles.image}
-        />
+        {hasImage ? (
+          <img
+            src={image}
+            alt={falecido.nome}
+            className={styles.image}
+            onError={() => setImageFailed(true)}
+          />
+        ) : showProfilePlaceholder ? (
+          <div className={styles.noPhoto} aria-label="Sem foto de perfil">
+            <UserRound size={78} strokeWidth={1.35} aria-hidden="true" />
+          </div>
+        ) : (
+          <img src={personPlaceholder} alt="Imagem indisponível" className={styles.image} />
+        )}
       </div>
 
       <div className={styles.content}>
@@ -29,9 +45,7 @@ export default function FalecidoCard({
           {falecido.dataNascimento || '—'} — {falecido.dataMorte || '—'}
         </p>
 
-        <p className={styles.description}>
-          {falecido.descricao}
-        </p>
+        {falecido.descricao && <p className={styles.description}>{falecido.descricao}</p>}
 
         <div className={styles.metaData}>
           <div className={styles.location}>

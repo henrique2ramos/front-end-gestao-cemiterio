@@ -4,6 +4,7 @@ import { ChevronLeft, MapPin, X, Map, Quote, Star } from 'lucide-react';
 import { fetchFalecidoById, resolveImageUrl } from '../lib/api';
 import styles from './FalecidoPage.module.css';
 import Button from '../components/Button';
+import personPlaceholder from '../assets/person-placeholder.svg';
 
 export default function FalecidoPage() {
   const navigate = useNavigate();
@@ -95,7 +96,12 @@ export default function FalecidoPage() {
             
             <div className={styles.profileHeader}>
               <div className={styles.photoWrapper}>
-                <img src={resolveImageUrl(falecido.imagem)} alt={falecido.nome} className={styles.photo} />
+                <img
+                  src={resolveImageUrl(falecido.imagem) || personPlaceholder}
+                  alt={falecido.nome}
+                  className={styles.photo}
+                  onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = personPlaceholder; }}
+                />
               </div>
 
               <div className={styles.infoWrapper}>
@@ -117,7 +123,7 @@ export default function FalecidoPage() {
                   </div>
                 </div>
 
-                <p className={styles.shortBio}>{falecido.descricao}</p>
+                {falecido.descricao && <p className={styles.shortBio}>{falecido.descricao}</p>}
                 <div className={styles.actionButtons}>
                   <Button onClick={() => navigate('/mapa')} variant="primary" size="small" icon={<Map size={16} />}>
                     Ver no Mapa 
@@ -153,7 +159,7 @@ export default function FalecidoPage() {
             <div className={styles.tabContent}>
               {activeTab === 'bio' && (
                 <div className={styles.bioSection}>
-                  <p className={styles.bioText}>{falecido.biografia || falecido.descricao}</p>
+                  <p className={styles.bioText}>{falecido.biografia || falecido.descricao || 'Biografia não informada.'}</p>
 
                   {falecido.mensagemFamilia && (
                     <blockquote className={styles.tributeBox}>
@@ -176,7 +182,7 @@ export default function FalecidoPage() {
                         className={styles.galleryThumb}
                         onClick={() => setLightboxIndex(i)}
                       >
-                        <img src={img.src} alt={img.caption} />
+                        <img src={img.src || personPlaceholder} alt={img.caption} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = personPlaceholder; }} />
                         <div className={styles.thumbOverlay}>
                           <span>{img.caption}</span>
                         </div>
@@ -208,7 +214,7 @@ export default function FalecidoPage() {
             ‹
           </button>
           <div className={styles.lightboxInner} onClick={(e) => e.stopPropagation()}>
-            <img src={galleryImages[lightboxIndex].src} alt={galleryImages[lightboxIndex].caption} />
+            <img src={galleryImages[lightboxIndex].src || personPlaceholder} alt={galleryImages[lightboxIndex].caption} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = personPlaceholder; }} />
             <p>{galleryImages[lightboxIndex].caption}</p>
             <span>{lightboxIndex + 1} / {galleryImages.length}</span>
           </div>

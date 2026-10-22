@@ -55,6 +55,7 @@ export async function fetchFalecidos() {
   const data = await request('/api/falecidos');
 
   if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.items)) return data;
   if (Array.isArray(data?.falecidos)) return data.falecidos;
   if (Array.isArray(data?.data)) return data.data;
 

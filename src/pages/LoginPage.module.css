@@ -112,6 +112,8 @@
 
 .inputWrapper {
   display: flex;
+  min-width: 0;
+  box-sizing: border-box;
   align-items: center;
   gap: 10px;
   padding: 0 14px;
@@ -134,6 +136,8 @@
 
 .inputWrapper input {
   flex: 1;
+  width: 0;
+  min-width: 0;
   height: 100%;
   border: none;
   outline: none;
@@ -143,9 +147,9 @@
 
 .passwordToggle {
   display: grid;
-  flex: 0 0 32px;
-  width: 32px;
-  height: 32px;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
   place-items: center;
   padding: 0;
   border: 0;

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Plus, Edit, Trash2, Search, MapPin, X, QrCode, ChevronLeft, ChevronRight, AlertCircle, CalendarDays } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, MapPin, X, QrCode, Eye, ChevronLeft, ChevronRight, AlertCircle, CalendarDays } from 'lucide-react';
 import QRCode from 'react-qr-code';
 import {
     fetchFalecidos,
@@ -14,10 +14,10 @@ import {
 import AdminSidebar from './AdminSidebar';
 import CopyLinkButton from '../../components/CopyLinkButton';
 import AutocompleteInput from '../../components/AutocompleteInput';
+import FalecidoDetailsModal from '../../components/FalecidoDetailsModal';
 import { unwrapPage, getPageItems } from './../../data/adminPagination';
 import styles from './AdminFalecidos.module.css';
-
-const ITEMS_PER_PAGE = 10;
+import personPlaceholder from '../../assets/person-placeholder.svg';
 
 const EMPTY_FORM = {
     nome: '', dataNascimento: '', dataMorte: '',
@@ -39,19 +39,23 @@ export default function AdminFalecidos({ onLogout }) {
     const [currentPage, setCurrentPage] = useState(1);
     const [total, setTotal] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
     const [reloadKey, setReloadKey] = useState(0);
     const nascimentoDatePickerRef = useRef(null);
     const morteDatePickerRef = useRef(null);
+    const imageInputRef = useRef(null);
     const [quadrasDisponiveis, setQuadrasDisponiveis] = useState([]);
     const [lotesDisponiveis, setLotesDisponiveis] = useState([]);
 
     const [selectedImageFile, setSelectedImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState('');
+    const [imageRemoved, setImageRemoved] = useState(false);
     const [selectedGalleryFiles, setSelectedGalleryFiles] = useState([]);
 
     const [isFormModalOpen, setIsFormModalOpen] = useState(Boolean(location.state?.novo));
     const [isQrModalOpen, setIsQrModalOpen] = useState(false);
     const [selectedFalecido, setSelectedFalecido] = useState(null);
+    const [viewFalecido, setViewFalecido] = useState(null);
 
     const [formData, setFormData] = useState(EMPTY_FORM);
     const [confirmModal, setConfirmModal] = useState({ open: false, title: '', message: '', onConfirm: null });
@@ -63,7 +67,7 @@ export default function AdminFalecidos({ onLogout }) {
         ...item,
         localizacao: item.localizacao || '',
         tipo: item.tipo || 'historica',
-        imagem: resolveOnce(item.imagem || item.galeria?.[0]) || 'https://placehold.co/400x400/png',
+        imagem: resolveOnce(item.imagem || item.galeria?.[0]) || personPlaceholder,
         galeria: Array.isArray(item.galeria) ? item.galeria.filter(Boolean).map((src) => resolveOnce(src)) : [],
         descricao: item.descricao || item.biografia || '',
         dataNascimento: item.dataNascimento || '',
@@ -102,8 +106,8 @@ export default function AdminFalecidos({ onLogout }) {
 
         async function loadPage() {
             try {
-                const res = await fetchFalecidos({ page: currentPage, limit: ITEMS_PER_PAGE, search: debouncedSearch });
-                const page = unwrapPage(res, { page: currentPage, limit: ITEMS_PER_PAGE, search: debouncedSearch });
+                const res = await fetchFalecidos();
+                const page = unwrapPage(res, { page: currentPage, limit: itemsPerPage, search: debouncedSearch });
                 if (cancelado) return;
                 setFalecidos(normalizeFalecidosFromApi(page.items));
                 setTotal(page.total);
@@ -119,7 +123,7 @@ export default function AdminFalecidos({ onLogout }) {
 
         loadPage();
         return () => { cancelado = true; };
-    }, [currentPage, debouncedSearch, reloadKey]);
+    }, [currentPage, debouncedSearch, itemsPerPage, reloadKey]);
 
     const reload = () => {
         setIsLoading(true);
@@ -136,7 +140,13 @@ export default function AdminFalecidos({ onLogout }) {
         setCurrentPage(page);
     };
 
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const changeItemsPerPage = (value) => {
+        setIsLoading(true);
+        setCurrentPage(1);
+        setItemsPerPage(Number(value));
+    };
+
+    const startIndex = (currentPage - 1) * itemsPerPage;
 
     const saveFalecido = async (e) => {
         e.preventDefault();
@@ -156,9 +166,10 @@ export default function AdminFalecidos({ onLogout }) {
             form.append('tipo', formData.tipo || 'historica');
 
             if (selectedImageFile) form.append('imagem', selectedImageFile);
+            else if (imageRemoved) form.append('imagem', '');
             selectedGalleryFiles.forEach((file) => form.append('galeria', file));
 
-            const payload = selectedImageFile || selectedGalleryFiles.length > 0
+            const payload = selectedImageFile || selectedGalleryFiles.length > 0 || imageRemoved
                 ? form
                 : {
                     nome: formData.nome || '',
@@ -227,6 +238,7 @@ export default function AdminFalecidos({ onLogout }) {
     const handleImageUpload = (e) => {
         const file = e.target.files?.[0] || null;
         setSelectedImageFile(file);
+        setImageRemoved(false);
         if (!file) {
             setImagePreview(selectedFalecido?.imagem || '');
             return;
@@ -251,6 +263,7 @@ export default function AdminFalecidos({ onLogout }) {
     const openNewModal = () => {
         setSelectedFalecido(null);
         setSelectedImageFile(null);
+        setImageRemoved(false);
         setSelectedGalleryFiles([]);
         setLotesDisponiveis([]);
         setImagePreview('');
@@ -260,6 +273,7 @@ export default function AdminFalecidos({ onLogout }) {
 
     const openEditModal = (falecido) => {
         setSelectedFalecido(falecido);
+        setImageRemoved(false);
         setLotesDisponiveis([]);
         let setor = '', lote = '';
         if (falecido.localizacao) {
@@ -277,10 +291,19 @@ export default function AdminFalecidos({ onLogout }) {
     const closeFormModal = () => {
         setSelectedFalecido(null);
         setSelectedImageFile(null);
+        setImageRemoved(false);
         setSelectedGalleryFiles([]);
         setImagePreview('');
         setFormData(EMPTY_FORM);
         setIsFormModalOpen(false);
+    };
+
+    const removeProfileImage = () => {
+        setSelectedImageFile(null);
+        setImagePreview('');
+        setImageRemoved(Boolean(selectedFalecido?.imagem && selectedFalecido.imagem !== personPlaceholder) || Boolean(selectedImageFile));
+        setFormData((current) => ({ ...current, imagem: '' }));
+        if (imageInputRef.current) imageInputRef.current.value = '';
     };
 
     const openQrModal = (falecido) => {
@@ -327,6 +350,12 @@ export default function AdminFalecidos({ onLogout }) {
 
                         <div className={styles.tableContainer}>
                             <table className={styles.table}>
+                                <colgroup>
+                                    <col className={styles.nameColumn} />
+                                    <col className={styles.locationColumn} />
+                                    <col className={styles.typeColumn} />
+                                    <col className={styles.actionsColumn} />
+                                </colgroup>
                                 <thead>
                                     <tr>
                                         <th>Nome do Falecido</th>
@@ -345,14 +374,16 @@ export default function AdminFalecidos({ onLogout }) {
                                             {falecidos.map(falecido => (
                                                 <tr key={falecido.id} className={styles.tableRow}>
                                                     <td className={styles.nameCell}>
+                                                        <div className={styles.nameCellContent}>
                                                         <div className={styles.avatar}>
-                                                            <img src={falecido.imagem} alt={falecido.nome} />
+                                                            <img src={falecido.imagem} alt={falecido.nome} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = personPlaceholder; }} />
                                                         </div>
                                                         <div className={styles.personInfo}>
                                                             <span className={styles.name}>{falecido.nome}</span>
                                                             <span className={styles.dateCell}>
                                                                 {falecido.dataNascimento || '—'} — {falecido.dataMorte || '—'}
                                                             </span>
+                                                        </div>
                                                         </div>
                                                     </td>
                                                     <td className={styles.locationCell}>
@@ -371,6 +402,9 @@ export default function AdminFalecidos({ onLogout }) {
                                                             <button className={styles.iconBtn} title="Gerar QR Code" onClick={() => openQrModal(falecido)}>
                                                                 <QrCode size={18} />
                                                             </button>
+                                                        <button className={styles.iconBtn} title="Visualizar dados" aria-label={`Visualizar dados de ${falecido.nome}`} onClick={() => setViewFalecido(falecido)}>
+                                                            <Eye size={18} />
+                                                        </button>
                                                             <button className={styles.iconBtn} title="Editar" onClick={() => openEditModal(falecido)}>
                                                                 <Edit size={18} />
                                                             </button>
@@ -392,12 +426,21 @@ export default function AdminFalecidos({ onLogout }) {
                             </table>
                         </div>
 
-                        {!isLoading && totalPages > 1 && (
+                        {!isLoading && total > 0 && (
                             <div className={styles.paginationContainer}>
                                 <p className={styles.paginationInfo}>
                                     Mostrando <strong>{startIndex + 1}</strong> a <strong>{Math.min(startIndex + falecidos.length, total)}</strong> de <strong>{total}</strong> registros
                                 </p>
-                                <div className={styles.pagination}>
+                                <div className={styles.paginationControls}>
+                                    <label className={styles.pageSizeControl}>
+                                        <span>Por página</span>
+                                        <select value={itemsPerPage} onChange={(event) => changeItemsPerPage(event.target.value)}>
+                                            {[10, 25, 50, 100].map((size) => (
+                                                <option key={size} value={size}>{size}</option>
+                                            ))}
+                                        </select>
+                                    </label>
+                                    {totalPages > 1 && <div className={styles.pagination}>
                                     <button
                                         className={styles.pageBtn}
                                         disabled={currentPage === 1}
@@ -427,6 +470,7 @@ export default function AdminFalecidos({ onLogout }) {
                                     >
                                         <ChevronRight size={18} />
                                     </button>
+                                    </div>}
                                 </div>
                             </div>
                         )}
@@ -506,14 +550,21 @@ export default function AdminFalecidos({ onLogout }) {
                                     <div className={styles.formGroup}>
                                         <label>Imagem de Perfil</label>
                                         <div className={styles.fileInputWrapper}>
-                                            <input type="file" accept="image/*" onChange={handleImageUpload} />
+                                            <input ref={imageInputRef} type="file" accept="image/*" onChange={handleImageUpload} />
                                         </div>
                                         <small className={styles.inputHelp}>Escolha uma foto principal do computador.</small>
-                                            {imagePreview && (
-                                                <div className={styles.profileImagePreview}>
-                                                    <img src={resolveOnce(imagePreview)} alt="Prévia da imagem do memorial" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                                                </div>
-                                            )}
+                                            <div className={styles.profileImagePreview}>
+                                                <img
+                                                    src={resolveOnce(imagePreview) || personPlaceholder}
+                                                    alt={imagePreview ? 'Prévia da imagem do memorial' : 'Imagem padrão enquanto nenhuma foto for selecionada'}
+                                                    onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = personPlaceholder; }}
+                                                />
+                                                {!imageRemoved && (selectedImageFile || (selectedFalecido?.imagem && selectedFalecido.imagem !== personPlaceholder)) && (
+                                                    <button type="button" className={styles.removeImageBtn} aria-label="Remover imagem de perfil" title="Remover imagem" onClick={removeProfileImage}>
+                                                        <X size={16} />
+                                                    </button>
+                                                )}
+                                            </div>
                                     </div>
                                     <div className={styles.formGroup}>
                                         <label>Fotos da Galeria</label>
@@ -529,10 +580,12 @@ export default function AdminFalecidos({ onLogout }) {
                                     <div className={styles.formGroup}>
                                         <label>Breve Descrição</label>
                                         <textarea name="descricao" rows="2" placeholder="Uma frase curta que resuma a pessoa..." value={formData.descricao} onChange={handleInputChange} />
+                                        <small className={styles.inputHelp}>Opcional. Se ficar em branco, a descrição não será exibida.</small>
                                     </div>
                                     <div className={styles.formGroup}>
                                         <label>Biografia Completa</label>
                                         <textarea name="biografia" rows="8" placeholder="Escreva a história completa do falecido aqui..." value={formData.biografia} onChange={handleInputChange} />
+                                        <small className={styles.inputHelp}>Opcional. Se não houver informação, o memorial mostrará “Biografia não informada”.</small>
                                     </div>
                                 </div>
 
@@ -589,6 +642,7 @@ export default function AdminFalecidos({ onLogout }) {
                     </div>
                 </div>
             )}
+            <FalecidoDetailsModal falecido={viewFalecido} onClose={() => setViewFalecido(null)} />
         </div>
     );
 }

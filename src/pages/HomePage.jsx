@@ -6,8 +6,8 @@ import { fetchFalecidos, resolveImageUrl } from '../lib/api';
 import styles from './HomePage.module.css';
 import mapaImg from '../assets/mapaExemplo.jpg';
 import texturaImg from '../assets/texturaMemorial.jfif';
+import personPlaceholder from '../assets/person-placeholder.svg';
 
-const PLACEHOLDER_IMG = 'https://placehold.co/400x400/e4e2e1/44474e?text=Foto';
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -70,7 +70,7 @@ export default function HomePage() {
     return (
       <div className={styles.falecidosGrid} ref={ref}>
         {items.slice(0, 10).map((falecido) => (
-          <FalecidoCard key={falecido.id} falecido={falecido} />
+          <FalecidoCard key={falecido.id} falecido={falecido} showProfilePlaceholder />
         ))}
       </div>
     );
@@ -120,7 +120,11 @@ export default function HomePage() {
               <div className={styles.searchResults}>
                 {filteredResults.map((falecido) => (
                   <Link key={falecido.id} to={`/falecidos/${falecido.id}`} className={styles.resultItem}>
-                    <img src={resolveImageUrl(falecido.imagem) || PLACEHOLDER_IMG} alt={falecido.nome} />
+                    <img
+                      src={resolveImageUrl(falecido.imagem) || personPlaceholder}
+                      alt={falecido.nome}
+                      onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = personPlaceholder; }}
+                    />
                     <strong>{falecido.nome}</strong>
                   </Link>
                 ))}

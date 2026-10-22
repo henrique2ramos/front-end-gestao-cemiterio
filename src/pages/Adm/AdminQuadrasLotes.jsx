@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plus, Edit, Trash2, Search, X, QrCode, ChevronLeft, ChevronRight, LayoutGrid, AlertCircle } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, X, QrCode, Eye, ChevronLeft, ChevronRight, LayoutGrid, AlertCircle, CalendarDays } from 'lucide-react';
 import QRCode from 'react-qr-code';
 import { useLocation } from 'react-router-dom';
 import {
@@ -19,9 +19,12 @@ import {
 } from '../../lib/api';
 import AdminSidebar from './AdminSidebar';
 import CopyLinkButton from '../../components/CopyLinkButton';
+import AutocompleteInput from '../../components/AutocompleteInput';
+import FalecidoDetailsModal from '../../components/FalecidoDetailsModal';
 import Spinner from '../../components/Spinner';
 import { getPageItems } from './../../data/adminPagination';
 import styles from './AdminQuadrasLotes.module.css';
+import personPlaceholder from '../../assets/person-placeholder.svg';
 
 const ITEMS_PER_PAGE = 10;
 const LOTES_PER_PAGE = 40;
@@ -34,6 +37,8 @@ const resolveOnce = (src) => (!src || isAbsoluteUrl(src) ? src : resolveImageUrl
 export default function AdminQuadrasLotes({ onLogout }) {
     const location = useLocation();
     const editHandledRef = useRef(false);
+    const nascimentoDatePickerRef = useRef(null);
+    const morteDatePickerRef = useRef(null);
     const [falecidos, setFalecidos] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
@@ -41,7 +46,9 @@ export default function AdminQuadrasLotes({ onLogout }) {
     const [isLoading, setIsLoading] = useState(true);
     const [selectedImageFile, setSelectedImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState('');
+    const [imageRemoved, setImageRemoved] = useState(false);
     const [selectedGalleryFiles, setSelectedGalleryFiles] = useState([]);
+    const imageInputRef = useRef(null);
 
     const [selectedQuadra, setSelectedQuadra] = useState(null);
     const [selectedLote, setSelectedLote] = useState(null);
@@ -54,6 +61,7 @@ export default function AdminQuadrasLotes({ onLogout }) {
     const [isFormModalOpen, setIsFormModalOpen] = useState(Boolean(location.state?.novo));
     const [isQrModalOpen, setIsQrModalOpen] = useState(false);
     const [selectedFalecido, setSelectedFalecido] = useState(null);
+    const [viewFalecido, setViewFalecido] = useState(null);
 
     const [confirmModal, setConfirmModal] = useState({ open: false, title: '', message: '', onConfirm: null });
 
@@ -86,7 +94,7 @@ export default function AdminQuadrasLotes({ onLogout }) {
         ...item,
         localizacao: item.localizacao || `Quadra A, Lote 1`,
         tipo: item.tipo || 'historica',
-        imagem: resolveOnce(item.imagem || item.galeria?.[0]) || 'https://placehold.co/400x400/png',
+        imagem: resolveOnce(item.imagem || item.galeria?.[0]) || personPlaceholder,
         galeria: Array.isArray(item.galeria) ? item.galeria.filter(Boolean).map((src) => resolveOnce(src)) : [],
         descricao: item.descricao || item.biografia || '',
         dataNascimento: item.dataNascimento || '',
@@ -303,6 +311,8 @@ export default function AdminQuadrasLotes({ onLogout }) {
 
             if (selectedImageFile) {
                 form.append('imagem', selectedImageFile);
+            } else if (imageRemoved) {
+                form.append('imagem', '');
             } else if (imagemAlterada) {
                 form.append('imagem', formData.imagem.trim());
             }
@@ -313,7 +323,7 @@ export default function AdminQuadrasLotes({ onLogout }) {
                 });
             }
 
-            const payload = selectedImageFile || selectedGalleryFiles.length > 0
+            const payload = selectedImageFile || selectedGalleryFiles.length > 0 || imageRemoved
                 ? form
                 : {
                     nome: formData.nome,
@@ -323,13 +333,15 @@ export default function AdminQuadrasLotes({ onLogout }) {
                     dataMorte: formatarData(formData.dataMorte),
                     localizacao,
                     tipo: formData.tipo || 'historica',
-                    ...(imagemAlterada ? { imagem: formData.imagem.trim() } : {}),
+                    ...(imageRemoved ? { imagem: '' } : imagemAlterada ? { imagem: formData.imagem.trim() } : {}),
                 };
 
             if (selectedFalecido) {
                 const updated = await apiUpdateFalecido(selectedFalecido.id, payload, token);
                 setFalecidos((current) => normalizeFalecidosFromApi(
-                    current.map((item) => item.id === selectedFalecido.id ? { ...item, ...updated, localizacao } : item)
+                    current.map((item) => item.id === selectedFalecido.id
+                        ? { ...item, ...updated, ...(imageRemoved ? { imagem: '' } : {}), localizacao }
+                        : item)
                 ));
             } else {
                 const created = await createFalecido(payload, token);
@@ -371,6 +383,24 @@ export default function AdminQuadrasLotes({ onLogout }) {
         return `${digitos.slice(0, 2)}/${digitos.slice(2, 4)}/${digitos.slice(4)}`;
     };
 
+    const dataParaInput = (valor = '') => {
+        const isoDate = valor.match(/^(\d{4}-\d{2}-\d{2})/);
+        if (isoDate) return isoDate[1];
+        const match = valor.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+        return match ? `${match[3]}-${match[2]}-${match[1]}` : '';
+    };
+
+    const abrirCalendario = (ref) => {
+        const input = ref.current;
+        if (!input) return;
+        try {
+            if (typeof input.showPicker === 'function') input.showPicker();
+            else input.click();
+        } catch {
+            input.click();
+        }
+    };
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         let v = value;
@@ -382,6 +412,7 @@ export default function AdminQuadrasLotes({ onLogout }) {
 
     const handleImageUpload = (e) => {
         const file = e.target.files?.[0];
+        setImageRemoved(false);
         if (!file) {
             setSelectedImageFile(null);
             setImagePreview(selectedFalecido?.imagem || '');
@@ -411,6 +442,7 @@ export default function AdminQuadrasLotes({ onLogout }) {
     // --- MODAL FALECIDO ---
     function openEditModal(falecido) {
         setSelectedFalecido(falecido);
+        setImageRemoved(false);
         let setor = '', lote = '';
         if (falecido.localizacao) {
             const s = falecido.localizacao.match(/Quadra\s+(.+?),/i);
@@ -429,6 +461,7 @@ export default function AdminQuadrasLotes({ onLogout }) {
     const closeFormModal = () => {
         setSelectedFalecido(null);
         setSelectedImageFile(null);
+        setImageRemoved(false);
         setImagePreview('');
         setSelectedGalleryFiles([]);
         setFormData({
@@ -437,6 +470,14 @@ export default function AdminQuadrasLotes({ onLogout }) {
             descricao: '', biografia: '', imagem: '', tipo: 'historica'
         });
         setIsFormModalOpen(false);
+    };
+
+    const removeProfileImage = () => {
+        setSelectedImageFile(null);
+        setImagePreview('');
+        setImageRemoved(Boolean(selectedFalecido?.imagem && selectedFalecido.imagem !== personPlaceholder) || Boolean(selectedImageFile));
+        setFormData((current) => ({ ...current, imagem: '' }));
+        if (imageInputRef.current) imageInputRef.current.value = '';
     };
 
     // --- MODAL QUADRA ---
@@ -652,6 +693,7 @@ export default function AdminQuadrasLotes({ onLogout }) {
                                     });
                                     setSelectedFalecido(null);
                                     setSelectedImageFile(null);
+                                    setImageRemoved(false);
                                     setSelectedGalleryFiles([]);
                                     setImagePreview('');
                                     setIsFormModalOpen(true);
@@ -790,7 +832,7 @@ export default function AdminQuadrasLotes({ onLogout }) {
                                             <tr key={falecido.id} className={styles.tableRow}>
                                                 <td className={styles.nameCell}>
                                                     <div className={styles.avatar}>
-                                                        <img src={falecido.imagem} alt={falecido.nome} />
+                                                        <img src={falecido.imagem} alt={falecido.nome} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = personPlaceholder; }} />
                                                     </div>
                                                     <div className={styles.personInfo}>
                                                         <span className={styles.name}>{falecido.nome}</span>
@@ -806,6 +848,9 @@ export default function AdminQuadrasLotes({ onLogout }) {
                                                     <div className={styles.actionButtonsGroup}>
                                                         <button className={styles.iconBtn} title="Gerar QR Code" onClick={() => openQrModal(falecido)}>
                                                             <QrCode size={18} />
+                                                        </button>
+                                                        <button className={styles.iconBtn} title="Visualizar dados" aria-label={`Visualizar dados de ${falecido.nome}`} onClick={() => setViewFalecido(falecido)}>
+                                                            <Eye size={18} />
                                                         </button>
                                                         <button className={styles.iconBtn} title="Editar" onClick={() => openEditModal(falecido)}>
                                                             <Edit size={18} />
@@ -893,7 +938,7 @@ export default function AdminQuadrasLotes({ onLogout }) {
 
             {/* --- MODAL FALECIDO --- */}
             {isFormModalOpen && (
-                <div className={styles.modalOverlay} onClick={closeFormModal}>
+                <div className={`${styles.modalOverlay} ${styles.formModalOverlay}`} onClick={closeFormModal}>
                     <div className={styles.modalContentLarge} onClick={(e) => e.stopPropagation()}>
                         <div className={styles.modalHeader}>
                             <h2>{selectedFalecido ? 'Editar Falecido' : 'Novo Falecido'}</h2>
@@ -909,48 +954,48 @@ export default function AdminQuadrasLotes({ onLogout }) {
                                     </div>
                                     <div className={styles.formRow}>
                                         <div className={styles.formGroup}>
-                                            <label>Data Nascimento *</label>
-                                            <input type="text" name="dataNascimento" required placeholder="DD/MM/AAAA" value={formData.dataNascimento} onChange={handleInputChange} />
+                                            <label>Data de Nascimento *</label>
+                                            <div className={styles.dateInputWrap}>
+                                                <input type="text" name="dataNascimento" required pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}" title="Use o formato dd/mm/aaaa" placeholder="dd/mm/aaaa" inputMode="numeric" value={formData.dataNascimento} onChange={handleInputChange} />
+                                                <button type="button" className={styles.datePickerButton} aria-label="Abrir calendário para data de nascimento" onClick={() => abrirCalendario(nascimentoDatePickerRef)}><CalendarDays size={18} /></button>
+                                                <input ref={nascimentoDatePickerRef} className={styles.nativeDatePicker} type="date" aria-label="Selecionar data de nascimento no calendário" tabIndex={-1} value={dataParaInput(formData.dataNascimento)} onChange={(e) => setFormData(prev => ({ ...prev, dataNascimento: formatarData(e.target.value) }))} />
+                                            </div>
                                         </div>
                                         <div className={styles.formGroup}>
                                             <label>Data de Falecimento *</label>
-                                            <input type="text" name="dataMorte" required placeholder="DD/MM/AAAA" value={formData.dataMorte} onChange={handleInputChange} />
+                                            <div className={styles.dateInputWrap}>
+                                                <input type="text" name="dataMorte" required pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}" title="Use o formato dd/mm/aaaa" placeholder="dd/mm/aaaa" inputMode="numeric" value={formData.dataMorte} onChange={handleInputChange} />
+                                                <button type="button" className={styles.datePickerButton} aria-label="Abrir calendário para data de falecimento" onClick={() => abrirCalendario(morteDatePickerRef)}><CalendarDays size={18} /></button>
+                                                <input ref={morteDatePickerRef} className={styles.nativeDatePicker} type="date" aria-label="Selecionar data de falecimento no calendário" tabIndex={-1} value={dataParaInput(formData.dataMorte)} onChange={(e) => setFormData(prev => ({ ...prev, dataMorte: formatarData(e.target.value) }))} />
+                                            </div>
                                         </div>
                                     </div>
                                     <div className={styles.formRow}>
                                         <div className={styles.formGroup}>
                                             <label>Quadra *</label>
-                                            <input 
-                                                type="text" 
-                                                name="setor" 
-                                                list="quadras-list" 
-                                                placeholder="Selecione ou cole..." 
-                                                autoComplete="off"
-                                                value={formData.setor} 
-                                                onChange={handleInputChange} 
+                                            <AutocompleteInput
+                                                name="setor"
+                                                value={formData.setor}
+                                                options={quadras.map((quadra) => quadra.nome)}
+                                                placeholder="Digite ou selecione a quadra"
+                                                ariaLabel="Quadra"
+                                                onChange={(setor) => {
+                                                    setSelectedQuadra(setor || null);
+                                                    setSelectedLote(null);
+                                                    setFormData((current) => ({ ...current, setor: setor.toUpperCase(), lote: '' }));
+                                                }}
                                             />
-                                            <datalist id="quadras-list">
-                                                {quadras.map(q => (
-                                                    <option key={q.id} value={q.nome} />
-                                                ))}
-                                            </datalist>
                                         </div>
                                         <div className={styles.formGroup}>
                                             <label>Lote *</label>
-                                            <input 
-                                                type="text" 
-                                                name="lote" 
-                                                list="lotes-list" 
-                                                placeholder="Selecione ou cole..." 
-                                                autoComplete="off"
-                                                value={formData.lote} 
-                                                onChange={handleInputChange} 
+                                            <AutocompleteInput
+                                                name="lote"
+                                                value={formData.lote}
+                                                options={lotes.map((lote) => lote.numero || lote.nome || lote.id)}
+                                                placeholder="Digite ou selecione o lote"
+                                                ariaLabel="Lote"
+                                                onChange={(lote) => setFormData((current) => ({ ...current, lote }))}
                                             />
-                                            <datalist id="lotes-list">
-                                                {lotesDaQuadra.map(l => (
-                                                    <option key={l.id} value={l.numero || l.nome || l.id} />
-                                                ))}
-                                            </datalist>
                                         </div>
                                     </div>
                                     <div className={styles.formGroup}>
@@ -963,16 +1008,26 @@ export default function AdminQuadrasLotes({ onLogout }) {
                                     <div className={styles.formGroup}>
                                         <label>Imagem de Perfil</label>
                                         <div className={styles.fileInputWrapper}>
-                                            <input type="file" accept="image/*" onChange={handleImageUpload} />
+                                            <input ref={imageInputRef} type="file" accept="image/*" onChange={handleImageUpload} />
                                         </div>
                                         <small className={styles.inputHelp}>Escolha uma foto principal do computador.</small>
+                                        {!imagePreview && (
+                                            <div className={styles.profileImagePreview}>
+                                                <img src={personPlaceholder} alt="Imagem padrão enquanto nenhuma foto for selecionada" />
+                                            </div>
+                                        )}
                                         {imagePreview && (
                                             <div className={styles.profileImagePreview}>
                                                 <img
-                                                    src={resolveOnce(imagePreview)}
+                                                    src={resolveOnce(imagePreview) || personPlaceholder}
                                                     alt="Prévia da imagem do memorial"
-                                                    onError={(event) => { event.currentTarget.style.display = 'none'; }}
+                                                    onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = personPlaceholder; }}
                                                 />
+                                                {!imageRemoved && (selectedImageFile || (selectedFalecido?.imagem && selectedFalecido.imagem !== personPlaceholder)) && (
+                                                    <button type="button" className={styles.removeImageBtn} aria-label="Remover imagem de perfil" title="Remover imagem" onClick={removeProfileImage}>
+                                                        <X size={16} />
+                                                    </button>
+                                                )}
                                             </div>
                                         )}
                                     </div>
@@ -985,14 +1040,16 @@ export default function AdminQuadrasLotes({ onLogout }) {
                                     </div>
                                 </div>
                                 <div className={styles.formCol}>
-                                    <h3>Biografia e Textos</h3>
+                                    <h3>Biografia e Detalhes</h3>
                                     <div className={styles.formGroup}>
-                                        <label>Breve Descrição *</label>
-                                        <textarea name="descricao" rows="2" placeholder="Uma frase curta que resuma a pessoa..." required value={formData.descricao} onChange={handleInputChange} />
+                                        <label>Breve Descrição</label>
+                                        <textarea name="descricao" rows="2" placeholder="Uma frase curta que resuma a pessoa..." value={formData.descricao} onChange={handleInputChange} />
+                                        <small className={styles.inputHelp}>Opcional. Se ficar em branco, a descrição não será exibida.</small>
                                     </div>
                                     <div className={styles.formGroup}>
                                         <label>Biografia Completa</label>
                                         <textarea name="biografia" rows="8" placeholder="Escreva a história completa do falecido aqui..." value={formData.biografia} onChange={handleInputChange} />
+                                        <small className={styles.inputHelp}>Opcional. Se não houver informação, o memorial mostrará “Biografia não informada”.</small>
                                     </div>
                                 </div>
                                 <div className={styles.modalActionsFull}>
@@ -1096,6 +1153,7 @@ export default function AdminQuadrasLotes({ onLogout }) {
                     </div>
                 </div>
             )}
+            <FalecidoDetailsModal falecido={viewFalecido} onClose={() => setViewFalecido(null)} />
         </div>
     );
 }

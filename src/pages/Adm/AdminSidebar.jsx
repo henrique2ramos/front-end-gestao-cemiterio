@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
-    LayoutDashboard, Users, Map as MapIcon, LogOut, ChevronRight, ChevronLeft, Home
+    LayoutDashboard, Users, Map as MapIcon, LogOut, ChevronRight, ChevronLeft, Home, ShieldCheck
 } from 'lucide-react';
 import styles from './AdminSidebar.module.css';
 
@@ -39,6 +39,9 @@ export default function AdminSidebar({ onLogout }) {
                 </button>
 
                 <NavLink to="/admin" className={styles.sidebarHeader} onClick={closeOnMobile}>
+                    <span className={styles.brandMark} aria-hidden="true">
+                        <ShieldCheck size={21} strokeWidth={2.2} />
+                    </span>
                     <span className={styles.brandText}>
                         <strong>Painel</strong>
                         <strong>Administrativo</strong>
