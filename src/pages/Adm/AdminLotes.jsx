@@ -52,12 +52,57 @@ export default function AdminLotes({
     getPageItems,
 }) {
     const selectedLotPanelRef = useRef(null);
+    const selectLote = (numero) => onSelectLote(numero);
+    const positionPersonMenu = (event) => {
+        const trigger = event.currentTarget;
+        const menu = trigger.closest('details');
+
+        window.requestAnimationFrame(() => {
+            const panel = menu?.querySelector(`.${styles.lotMenuPanel}`);
+            if (!panel || !menu.open) {
+                panel?.removeAttribute('style');
+                return;
+            }
+
+            if (!window.matchMedia('(max-width: 560px)').matches) return;
+
+            panel.style.position = 'fixed';
+            panel.style.right = 'auto';
+            panel.style.bottom = 'auto';
+            panel.style.visibility = 'hidden';
+
+            const triggerRect = trigger.getBoundingClientRect();
+            const panelRect = panel.getBoundingClientRect();
+            const edge = 8;
+            const spaceBelow = window.innerHeight - triggerRect.bottom - edge;
+            const spaceAbove = triggerRect.top - edge;
+            const opensBelow = spaceBelow >= panelRect.height || spaceBelow >= spaceAbove;
+            const top = opensBelow
+                ? triggerRect.bottom + 6
+                : triggerRect.top - panelRect.height - 6;
+            const maxLeft = Math.max(edge, window.innerWidth - panelRect.width - edge);
+
+            panel.dataset.placement = opensBelow ? 'below' : 'above';
+            panel.style.left = `${Math.min(Math.max(edge, triggerRect.right - panelRect.width), maxLeft)}px`;
+            panel.style.top = `${Math.min(Math.max(edge, top), Math.max(edge, window.innerHeight - panelRect.height - edge))}px`;
+            panel.style.visibility = '';
+        });
+    };
 
     useEffect(() => {
         if (!selectedLote) return;
 
         const frame = window.requestAnimationFrame(() => {
-            selectedLotPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            const panel = selectedLotPanelRef.current;
+            if (!panel) return;
+
+            const { top, height } = panel.getBoundingClientRect();
+            const viewportHeight = window.innerHeight;
+            const targetTop = height >= viewportHeight - 32
+                ? window.scrollY + top - 16
+                : window.scrollY + top - (viewportHeight - height) / 2;
+
+            window.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
         });
 
         return () => window.cancelAnimationFrame(frame);
@@ -115,7 +160,7 @@ export default function AdminLotes({
                             type="button"
                             className={`${styles.lotNumberTile} ${lote.count === 0 ? styles.lotEmpty : lote.count > 1 ? styles.lotMultiple : styles.lotOccupied} ${String(selectedLote) === String(lote.nome) ? styles.lotSelected : ''}`}
                             aria-label={`Lote ${lote.nome}, ${lote.count} ${lote.count === 1 ? 'falecido' : 'falecidos'}`}
-                            onClick={() => onSelectLote(lote.nome)}
+                            onClick={() => selectLote(lote.nome)}
                         >
                             {lote.nome}
                         </button>
@@ -173,8 +218,11 @@ export default function AdminLotes({
                                     <div className={styles.lotHeaderActions}>
                                         <button type="button" className={styles.addButton} aria-label="Adicionar falecido" onClick={onAddFalecido}><Plus size={17} /><span className={styles.lotAddLabel}>Adicionar falecido</span></button>
                                         <button type="button" title="Gerar QR Code" className={`${styles.lotActionButton} ${styles.lotQrButton}`} onClick={() => { if (loteSelecionado) onOpenLoteQrModal({ id: loteSelecionado.id, nome: selectedLote }); }}><QrCode size={17} /></button>
-                                        <details className={styles.lotActionsMenu} ref={lotActionsMenuRef}>
-                                            <summary className={styles.lotMenuTrigger} aria-label="Mais ações do lote" title="Mais ações"><MoreVertical size={19} /></summary>
+                                        <details className={`${styles.lotActionsMenu} ${styles.lotMobileActionsMenu}`} ref={lotActionsMenuRef}>
+                                            <summary className={styles.lotMenuTrigger} aria-label="Mais ações do lote" title="Mais ações" onClick={positionPersonMenu}>
+                                                <MoreVertical className={styles.personMenuDots} size={19} />
+                                                <X className={styles.personMenuCloseIcon} size={19} />
+                                            </summary>
                                             <div className={styles.lotMenuPanel}>
                                                 <button type="button" className={styles.lotMenuQr} onClick={(event) => { event.currentTarget.closest('details').open = false; if (loteSelecionado) onOpenLoteQrModal({ id: loteSelecionado.id, nome: selectedLote }); }}><QrCode size={17} /><span>QR Code</span></button>
                                                 <button type="button" onClick={(event) => { event.currentTarget.closest('details').open = false; onOpenLoteModal(selectedLote); }}><Edit size={17} /><span>Editar lote</span></button>
@@ -183,15 +231,15 @@ export default function AdminLotes({
                                         </details>
                                     </div>
                                     <div className={styles.lotHeaderNavigation}>
-                                        <button type="button" className={styles.lotNavBtn} aria-label="Lote anterior" title="Lote anterior" disabled={indiceLoteSelecionado <= 0} onClick={() => onSelectLote(lotesDaQuadra[indiceLoteSelecionado - 1]?.numero || lotesDaQuadra[indiceLoteSelecionado - 1]?.nome)}><ChevronLeft size={18} /></button>
-                                        <button type="button" className={styles.lotNavBtn} aria-label="Próximo lote" title="Próximo lote" disabled={indiceLoteSelecionado < 0 || indiceLoteSelecionado >= lotesDaQuadra.length - 1} onClick={() => onSelectLote(lotesDaQuadra[indiceLoteSelecionado + 1]?.numero || lotesDaQuadra[indiceLoteSelecionado + 1]?.nome)}><ChevronRight size={18} /></button>
+                                        <button type="button" className={styles.lotNavBtn} aria-label="Lote anterior" title="Lote anterior" disabled={indiceLoteSelecionado <= 0} onClick={() => selectLote(lotesDaQuadra[indiceLoteSelecionado - 1]?.numero || lotesDaQuadra[indiceLoteSelecionado - 1]?.nome)}><ChevronLeft size={18} /></button>
+                                        <button type="button" className={styles.lotNavBtn} aria-label="Próximo lote" title="Próximo lote" disabled={indiceLoteSelecionado < 0 || indiceLoteSelecionado >= lotesDaQuadra.length - 1} onClick={() => selectLote(lotesDaQuadra[indiceLoteSelecionado + 1]?.numero || lotesDaQuadra[indiceLoteSelecionado + 1]?.nome)}><ChevronRight size={18} /></button>
                                         <button type="button" className={styles.lotCloseButton} aria-label="Fechar detalhes do lote" onClick={() => setSelectedLote(null)}><X size={18} /></button>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div className={styles.lotPeopleList}>
+                        <div key={selectedLote} className={styles.lotPeopleList}>
                             {isLoading && <p className={styles.lotPersonEmpty}>Carregando falecidos...</p>}
                             {!isLoading && currentMemoriais.map((falecido) => (
                                 <div key={falecido.id} className={styles.lotPersonRow}>
@@ -209,6 +257,18 @@ export default function AdminLotes({
                                         <button className={styles.iconBtn} title="Visualizar dados" aria-label={`Visualizar dados de ${falecido.nome}`} onClick={() => onViewFalecido(falecido)}><Eye size={17} /></button>
                                         <button className={styles.iconBtn} title="Editar" aria-label={`Editar ${falecido.nome}`} onClick={() => onOpenEditModal(falecido)}><Edit size={17} /></button>
                                         <button className={`${styles.iconBtn} ${styles.deleteBtn}`} title="Excluir" aria-label={`Excluir ${falecido.nome}`} onClick={() => onDeleteFalecido(falecido.id, falecido.nome)}><Trash2 size={17} /></button>
+                                        <details className={`${styles.lotActionsMenu} ${styles.lotPersonMenu} ${styles.lotMobileActionsMenu}`}>
+                                            <summary className={styles.lotMenuTrigger} aria-label={`Ações de ${falecido.nome}`} title="Ações" onClick={positionPersonMenu}>
+                                                <MoreVertical className={styles.personMenuDots} size={19} />
+                                                <X className={styles.personMenuCloseIcon} size={19} />
+                                            </summary>
+                                            <div className={styles.lotMenuPanel}>
+                                                <button type="button" onClick={(event) => { event.currentTarget.closest('details').open = false; onOpenQrModal(falecido); }}><QrCode size={17} /><span>QR Code</span></button>
+                                                <button type="button" onClick={(event) => { event.currentTarget.closest('details').open = false; onViewFalecido(falecido); }}><Eye size={17} /><span>Ver dados</span></button>
+                                                <button type="button" onClick={(event) => { event.currentTarget.closest('details').open = false; onOpenEditModal(falecido); }}><Edit size={17} /><span>Editar</span></button>
+                                                <button type="button" className={styles.lotMenuDelete} onClick={(event) => { event.currentTarget.closest('details').open = false; onDeleteFalecido(falecido.id, falecido.nome); }}><Trash2 size={17} /><span>Excluir</span></button>
+                                            </div>
+                                        </details>
                                     </div>
                                 </div>
                             ))}

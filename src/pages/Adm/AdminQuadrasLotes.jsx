@@ -29,6 +29,7 @@ import personPlaceholder from '../../assets/person-placeholder.svg';
 
 const ITEMS_PER_PAGE = 10;
 const LOTES_PER_PAGE = 100;
+const MOBILE_LOTES_PER_PAGE = 35;
 
 const getToken = () => localStorage.getItem('memorialAdminToken') || '';
 
@@ -64,6 +65,9 @@ export default function AdminQuadrasLotes({ onLogout }) {
     const [falecidos, setFalecidos] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [currentLotePage, setCurrentLotePage] = useState(1);
+    const [lotesPerPage, setLotesPerPage] = useState(() => (
+        window.matchMedia('(max-width: 560px)').matches ? MOBILE_LOTES_PER_PAGE : LOTES_PER_PAGE
+    ));
     const [lotSearchTerm, setLotSearchTerm] = useState('');
     const [lotOccupancyFilter, setLotOccupancyFilter] = useState('all');
     const [isLoading, setIsLoading] = useState(true);
@@ -129,6 +133,18 @@ export default function AdminQuadrasLotes({ onLogout }) {
     useEffect(() => {
         setCurrentLotePage(1);
     }, [selectedQuadra]);
+
+    useEffect(() => {
+        const mobileQuery = window.matchMedia('(max-width: 560px)');
+        const updateLotesPerPage = (event) => {
+            const nextPageSize = event.matches ? MOBILE_LOTES_PER_PAGE : LOTES_PER_PAGE;
+            setLotesPerPage(nextPageSize);
+            setCurrentLotePage(1);
+        };
+
+        mobileQuery.addEventListener('change', updateLotesPerPage);
+        return () => mobileQuery.removeEventListener('change', updateLotesPerPage);
+    }, []);
 
     useEffect(() => {
         if ((isFormModalOpen || viewFalecido) && !location.state?.__sgcModalHistory) {
@@ -392,10 +408,10 @@ export default function AdminQuadrasLotes({ onLogout }) {
         const matchesSearch = String(lote.nome).toLowerCase().includes(lotSearchTerm.trim().toLowerCase());
         return matchesOccupancy && matchesSearch;
     });
-    const totalLotePages = Math.max(1, Math.ceil(lotesVisiveis.length / LOTES_PER_PAGE));
+    const totalLotePages = Math.max(1, Math.ceil(lotesVisiveis.length / lotesPerPage));
     const paginaLoteAtual = Math.min(currentLotePage, totalLotePages);
-    const startLoteIndex = (paginaLoteAtual - 1) * LOTES_PER_PAGE;
-    const lotesDaPagina = lotesVisiveis.slice(startLoteIndex, startLoteIndex + LOTES_PER_PAGE);
+    const startLoteIndex = (paginaLoteAtual - 1) * lotesPerPage;
+    const lotesDaPagina = lotesVisiveis.slice(startLoteIndex, startLoteIndex + lotesPerPage);
     const primeiroLoteDaPagina = lotesDaPagina[0]?.nome;
     const ultimoLoteDaPagina = lotesDaPagina[lotesDaPagina.length - 1]?.nome;
     const loteSelecionado = lotesDaQuadra.find((lote) => String(lote.numero || lote.nome || lote.id) === String(selectedLote)) || null;
@@ -871,8 +887,7 @@ export default function AdminQuadrasLotes({ onLogout }) {
     const selecionarLote = (numero) => {
         if (String(selectedLote) === String(numero)) return;
         const stateUpdates = { __adminQuadra: selectedQuadra, __adminLote: numero };
-        if (location.state?.__adminLote != null) replaceAdminHistory(stateUpdates);
-        else pushAdminHistory(stateUpdates);
+        replaceAdminHistory(stateUpdates);
         setSelectedLote(numero);
         setCurrentPage(1);
     };
@@ -915,7 +930,7 @@ export default function AdminQuadrasLotes({ onLogout }) {
                     )}
                     {nivelAtual === 'inicio' && <AdminQuadras quadras={quadrasComCount} carregando={carregandoQuadras} onSelect={selecionarQuadra} onQrCode={openQuadraQrModal} onEdit={openQuadraModal} onDelete={handleDeleteQuadra} />}
                     {nivelAtual === 'quadra' && <AdminLotes
-                        lotesComCount={lotesComCount} lotesVisiveis={lotesVisiveis} lotesDaPagina={lotesDaPagina} lotesDaQuadra={lotesDaQuadra} lotesPerPage={LOTES_PER_PAGE} carregandoLotes={carregandoLotes}
+                        lotesComCount={lotesComCount} lotesVisiveis={lotesVisiveis} lotesDaPagina={lotesDaPagina} lotesDaQuadra={lotesDaQuadra} lotesPerPage={lotesPerPage} carregandoLotes={carregandoLotes}
                         lotesVazios={lotesVazios} lotesComUmFalecido={lotesComUmFalecido} lotesComMultiplosFalecidos={lotesComMultiplosFalecidos} totalFalecidosNosLotes={totalFalecidosNosLotes} totalLotePages={totalLotePages} paginaLoteAtual={paginaLoteAtual} setCurrentLotePage={setCurrentLotePage}
                         lotSearchTerm={lotSearchTerm} setLotSearchTerm={setLotSearchTerm} lotOccupancyFilter={lotOccupancyFilter} setLotOccupancyFilter={setLotOccupancyFilter} primeiroLoteDaPagina={primeiroLoteDaPagina} ultimoLoteDaPagina={ultimoLoteDaPagina}
                         onSelectLote={selecionarLote} selectedQuadra={selectedQuadra} selectedLote={selectedLote} setSelectedLote={limparLoteSelecionado} loteSelecionado={loteSelecionado} indiceLoteSelecionado={indiceLoteSelecionado} memoriaisDoLote={memoriaisDoLote}

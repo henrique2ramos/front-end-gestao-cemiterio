@@ -1449,6 +1449,8 @@
     gap: 8px;
 }
 
+.lotPersonMenu { display: none; }
+
 .lotNavigationGroup {
     flex-wrap: wrap;
     flex: 0 0 auto;
@@ -1529,6 +1531,7 @@
 .lotMenuTrigger::marker { content: ''; }
 .lotMenuTrigger:hover,
 .lotActionsMenu[open] .lotMenuTrigger { background: #f1f6fc; border-color: #cbd9e8; }
+.personMenuCloseIcon { display: none; }
 
 .lotMenuPanel {
     position: absolute;
@@ -1543,6 +1546,28 @@
     border-radius: 12px;
     background: #fff;
     box-shadow: 0 12px 28px rgba(15, 23, 42, 0.16);
+}
+
+.lotMobileActionsMenu .lotMenuPanel::before {
+    position: absolute;
+    right: 11px;
+    width: 10px;
+    height: 10px;
+    background: #fff;
+    content: '';
+    transform: rotate(45deg);
+}
+
+.lotMobileActionsMenu .lotMenuPanel[data-placement='below']::before {
+    top: -6px;
+    border-top: 1px solid #dbe3ed;
+    border-left: 1px solid #dbe3ed;
+}
+
+.lotMobileActionsMenu .lotMenuPanel[data-placement='above']::before {
+    bottom: -6px;
+    border-right: 1px solid #dbe3ed;
+    border-bottom: 1px solid #dbe3ed;
 }
 
 .lotMenuPanel button {
@@ -1580,6 +1605,16 @@
     display: flex;
     flex-direction: column;
     margin-top: 14px;
+    animation: lotPeopleFadeIn 180ms ease-out both;
+}
+
+@keyframes lotPeopleFadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .lotPeopleList { animation: none; }
 }
 
 .lotPersonRow {
@@ -1861,8 +1896,19 @@
 
     .selectedLotPanel { padding: 14px; }
     .selectedLotHeader { align-items: stretch; }
-    .selectedLotIdentity { align-items: flex-start; }
+    .selectedLotIdentity { align-items: center; }
     .selectedLotMarker { width: 42px; height: 46px; flex-basis: 42px; }
+    .selectedLotTitle {
+        flex: 1;
+        min-width: 0;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 6px;
+        white-space: nowrap;
+    }
+    .selectedLotTitle h2 { font-size: 1rem; white-space: nowrap; }
+    .selectedLotTitle .lotCountBadge { font-size: 0.78rem; white-space: nowrap; }
     .selectedLotHeadingRow { align-items: flex-start; flex-direction: column; gap: 6px; }
     .selectedLotHeadingRow h2 { font-size: 1.08rem; }
     .lotNavigationGroup {
@@ -1909,14 +1955,21 @@
         justify-content: center;
         gap: 3px;
         padding: 0 5px;
-        font-size: 0.66rem;
+        font-size: 0.74rem;
         white-space: nowrap;
     }
     .lotActionButton { min-height: 36px; padding: 0 8px; font-size: 0.76rem; }
-    .lotMenuPanel { width: 180px; }
-    .lotPersonRow { flex-direction: column; align-items: stretch; }
-    .lotPersonDetails { width: 100%; }
-    .lotPersonActions { align-self: flex-end; }
+    .lotMenuPanel {
+        width: min(180px, calc(100vw - 16px));
+    }
+    .lotMobileActionsMenu[open] { z-index: 60; }
+    .lotMobileActionsMenu[open] .personMenuDots { display: none; }
+    .lotMobileActionsMenu[open] .personMenuCloseIcon { display: block; }
+    .lotPersonRow { flex-direction: row; align-items: flex-start; gap: 8px; }
+    .lotPersonDetails { width: auto; flex: 1 1 auto; }
+    .lotPersonActions { align-self: flex-start; margin-left: 0; }
+    .lotPersonActions > .iconBtn { display: none; }
+    .lotPersonMenu { display: block; }
     .lotGridState { justify-content: flex-start; padding: 18px; }
     .lotGridStateText { min-width: 0; }
 }
