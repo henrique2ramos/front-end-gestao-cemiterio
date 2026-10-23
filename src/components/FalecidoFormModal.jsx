@@ -99,6 +99,24 @@ export default function FalecidoFormModal({
                                     <option value="recente">Falecido Recente</option>
                                 </select>
                             </div>
+                        </div>
+                        <div className={styles.formCol}>
+                            <h3 className={styles.sectionTitle}>Biografia e Detalhes</h3>
+                            <div className={styles.formGroup}>
+                                <label>Breve Descrição</label>
+                                <textarea name="descricao" rows="2" placeholder="Uma frase curta que resuma a pessoa..." value={formData.descricao} onChange={onInputChange} />
+                                <small className={styles.inputHelp}>Opcional. Se ficar em branco, a descrição não será exibida.</small>
+                            </div>
+                            <div className={styles.formGroup}>
+                                <label>Biografia Completa</label>
+                                <textarea name="biografia" rows="5" placeholder="Escreva a história completa do falecido aqui..." value={formData.biografia} onChange={onInputChange} />
+                                <small className={styles.inputHelp}>Opcional. Se não houver informação, o memorial mostrará “Biografia não informada”.</small>
+                            </div>
+                        </div>
+
+                        <section className={`${styles.formCol} ${styles.imageSection}`}>
+                            <h3 className={styles.sectionTitle}>Imagens</h3>
+                            <div className={styles.imageFields}>
                                 <div className={styles.formGroup}>
                                 <label>Imagem de Perfil</label>
                                 <div className={styles.fileInputWrapper}>
@@ -134,21 +152,9 @@ export default function FalecidoFormModal({
                                         ))}
                                     </div>
                                 )}
+                                </div>
                             </div>
-                        </div>
-                        <div className={styles.formCol}>
-                            <h3 className={styles.sectionTitle}>Biografia e Detalhes</h3>
-                            <div className={styles.formGroup}>
-                                <label>Breve Descrição</label>
-                                <textarea name="descricao" rows="2" placeholder="Uma frase curta que resuma a pessoa..." value={formData.descricao} onChange={onInputChange} />
-                                <small className={styles.inputHelp}>Opcional. Se ficar em branco, a descrição não será exibida.</small>
-                            </div>
-                            <div className={styles.formGroup}>
-                                <label>Biografia Completa</label>
-                                <textarea name="biografia" rows="8" placeholder="Escreva a história completa do falecido aqui..." value={formData.biografia} onChange={onInputChange} />
-                                <small className={styles.inputHelp}>Opcional. Se não houver informação, o memorial mostrará “Biografia não informada”.</small>
-                            </div>
-                        </div>
+                        </section>
                         <div className={styles.actions}>
                             <button type="button" className={styles.cancelBtn} onClick={onClose}>Cancelar</button>
                             <button type="submit" className={styles.saveBtn}>Salvar Registro</button>

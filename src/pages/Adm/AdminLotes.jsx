@@ -1,4 +1,5 @@
 ﻿import { AlertCircle, ChevronLeft, ChevronRight, Edit, Eye, MoreVertical, Plus, QrCode, Search, Trash2, X } from 'lucide-react';
+import { useEffect, useRef } from 'react';
 import Spinner from '../../components/Spinner';
 import personPlaceholder from '../../assets/person-placeholder.svg';
 import styles from './AdminQuadrasLotes.module.css';
@@ -50,6 +51,18 @@ export default function AdminLotes({
     setCurrentPage,
     getPageItems,
 }) {
+    const selectedLotPanelRef = useRef(null);
+
+    useEffect(() => {
+        if (!selectedLote) return;
+
+        const frame = window.requestAnimationFrame(() => {
+            selectedLotPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+
+        return () => window.cancelAnimationFrame(frame);
+    }, [selectedLote]);
+
     return (
         <>
             <section className={styles.lotExplorer}>
@@ -142,7 +155,7 @@ export default function AdminLotes({
             </section>
 
             <div className={styles.selectedLotInline}>
-                <section className={`${styles.selectedLotPanel} ${!selectedLote ? styles.selectedLotEmpty : ''}`} aria-label="Detalhes do lote selecionado">
+                <section ref={selectedLotPanelRef} className={`${styles.selectedLotPanel} ${!selectedLote ? styles.selectedLotEmpty : ''}`} aria-label="Detalhes do lote selecionado">
                     {!selectedLote ? (
                         <p className={styles.lotPanelHint}>Selecione um lote no mapa acima para ver os falecidos dele.</p>
                     ) : (
@@ -157,18 +170,23 @@ export default function AdminLotes({
                                     <p className={styles.lotCountBadge}>{memoriaisDoLote.length} {memoriaisDoLote.length === 1 ? 'falecido' : 'falecidos'}</p>
                                 </div>
                                 <div className={styles.lotNavigationGroup}>
-                                    <button type="button" className={styles.addButton} onClick={onAddFalecido}><Plus size={17} /> Adicionar falecido</button>
-                                    <button type="button" className={styles.lotActionButton} onClick={() => { if (loteSelecionado) onOpenLoteQrModal({ id: loteSelecionado.id, nome: selectedLote }); }}><QrCode size={17} /></button>
-                                    <details className={styles.lotActionsMenu} ref={lotActionsMenuRef}>
-                                        <summary className={styles.lotMenuTrigger} aria-label="Mais ações do lote" title="Mais ações"><MoreVertical size={19} /></summary>
-                                        <div className={styles.lotMenuPanel}>
-                                            <button type="button" onClick={(event) => { event.currentTarget.closest('details').open = false; onOpenLoteModal(selectedLote); }}><Edit size={17} /><span>Editar lote</span></button>
-                                            <button type="button" className={styles.lotMenuDelete} onClick={(event) => { event.currentTarget.closest('details').open = false; onDeleteLote(selectedLote); }}><Trash2 size={17} /><span>Excluir lote</span></button>
-                                        </div>
-                                    </details>
-                                    <button type="button" className={styles.lotNavBtn} aria-label="Lote anterior" title="Lote anterior" disabled={indiceLoteSelecionado <= 0} onClick={() => onSelectLote(lotesDaQuadra[indiceLoteSelecionado - 1]?.numero || lotesDaQuadra[indiceLoteSelecionado - 1]?.nome)}><ChevronLeft size={18} /></button>
-                                    <button type="button" className={styles.lotNavBtn} aria-label="Próximo lote" title="Próximo lote" disabled={indiceLoteSelecionado < 0 || indiceLoteSelecionado >= lotesDaQuadra.length - 1} onClick={() => onSelectLote(lotesDaQuadra[indiceLoteSelecionado + 1]?.numero || lotesDaQuadra[indiceLoteSelecionado + 1]?.nome)}><ChevronRight size={18} /></button>
-                                    <button type="button" className={styles.lotCloseButton} aria-label="Fechar detalhes do lote" onClick={() => setSelectedLote(null)}><X size={18} /></button>
+                                    <div className={styles.lotHeaderActions}>
+                                        <button type="button" className={styles.addButton} aria-label="Adicionar falecido" onClick={onAddFalecido}><Plus size={17} /><span className={styles.lotAddLabel}>Adicionar falecido</span></button>
+                                        <button type="button" title="Gerar QR Code" className={`${styles.lotActionButton} ${styles.lotQrButton}`} onClick={() => { if (loteSelecionado) onOpenLoteQrModal({ id: loteSelecionado.id, nome: selectedLote }); }}><QrCode size={17} /></button>
+                                        <details className={styles.lotActionsMenu} ref={lotActionsMenuRef}>
+                                            <summary className={styles.lotMenuTrigger} aria-label="Mais ações do lote" title="Mais ações"><MoreVertical size={19} /></summary>
+                                            <div className={styles.lotMenuPanel}>
+                                                <button type="button" className={styles.lotMenuQr} onClick={(event) => { event.currentTarget.closest('details').open = false; if (loteSelecionado) onOpenLoteQrModal({ id: loteSelecionado.id, nome: selectedLote }); }}><QrCode size={17} /><span>QR Code</span></button>
+                                                <button type="button" onClick={(event) => { event.currentTarget.closest('details').open = false; onOpenLoteModal(selectedLote); }}><Edit size={17} /><span>Editar lote</span></button>
+                                                <button type="button" className={styles.lotMenuDelete} onClick={(event) => { event.currentTarget.closest('details').open = false; onDeleteLote(selectedLote); }}><Trash2 size={17} /><span>Excluir lote</span></button>
+                                            </div>
+                                        </details>
+                                    </div>
+                                    <div className={styles.lotHeaderNavigation}>
+                                        <button type="button" className={styles.lotNavBtn} aria-label="Lote anterior" title="Lote anterior" disabled={indiceLoteSelecionado <= 0} onClick={() => onSelectLote(lotesDaQuadra[indiceLoteSelecionado - 1]?.numero || lotesDaQuadra[indiceLoteSelecionado - 1]?.nome)}><ChevronLeft size={18} /></button>
+                                        <button type="button" className={styles.lotNavBtn} aria-label="Próximo lote" title="Próximo lote" disabled={indiceLoteSelecionado < 0 || indiceLoteSelecionado >= lotesDaQuadra.length - 1} onClick={() => onSelectLote(lotesDaQuadra[indiceLoteSelecionado + 1]?.numero || lotesDaQuadra[indiceLoteSelecionado + 1]?.nome)}><ChevronRight size={18} /></button>
+                                        <button type="button" className={styles.lotCloseButton} aria-label="Fechar detalhes do lote" onClick={() => setSelectedLote(null)}><X size={18} /></button>
+                                    </div>
                                 </div>
                             </div>
                         </div>

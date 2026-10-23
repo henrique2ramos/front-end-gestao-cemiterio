@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { CalendarDays, MapPin, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { CalendarDays, ExternalLink, MapPin, X } from 'lucide-react';
 import { fetchFalecidoById, resolveImageUrl } from '../lib/api';
 import personPlaceholder from '../assets/person-placeholder.svg';
 import styles from './FalecidoDetailsModal.module.css';
@@ -68,6 +69,7 @@ export default function FalecidoDetailsModal({ falecido, onClose }) {
   const galleryData = [record.galeria, record.fotosGaleria, record.imagensGaleria, record.photos, record.gallery]
     .find((value) => Array.isArray(value) ? value.length > 0 : Boolean(value));
   const galeria = normalizeGallery(galleryData);
+  const memorialUrl = `/falecidos/${encodeURIComponent(record.id)}`;
 
   return (
     <div className={styles.overlay} onClick={onClose}>
@@ -79,8 +81,19 @@ export default function FalecidoDetailsModal({ falecido, onClose }) {
         onClick={(event) => event.stopPropagation()}
       >
         <header className={styles.header}>
-          <div>
+          <div className={styles.headerTitleGroup}>
             <h2 id="falecido-details-title">Dados do falecido</h2>
+            {record.id != null && (
+              <Link
+                className={styles.memorialLink}
+                to={memorialUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <ExternalLink size={16} aria-hidden="true" />
+                Ver memorial
+              </Link>
+            )}
           </div>
           <button type="button" className={styles.close} onClick={onClose} aria-label="Fechar visualização">
             <X size={21} />
@@ -142,7 +155,6 @@ export default function FalecidoDetailsModal({ falecido, onClose }) {
             )}
           </section>
         </div>
-
       </section>
     </div>
   );

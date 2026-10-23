@@ -169,13 +169,33 @@
 
 @media (max-width: 768px) {
     .sidebar {
+        --drawer-width: min(280px, calc(100vw - 56px));
+    }
+
+    .sidebar {
         position: fixed;
         left: 0;
-        width: 280px;
-        flex-basis: 280px;
+        width: var(--drawer-width);
+        flex-basis: var(--drawer-width);
+        height: 100vh;
+        height: 100dvh;
+        box-sizing: border-box;
+        overflow-x: hidden;
+        overflow-y: auto;
+        overscroll-behavior: contain;
         transform: translateX(-100%);
         box-shadow: 12px 0 40px rgba(0, 0, 0, 0.4);
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .sidebarHeader,
+    .navLabel,
+    .sidebarFooter {
+        flex-shrink: 0;
+    }
+
+    .sidebarNav {
+        flex: 1 0 auto;
     }
 
     .sidebar.open {
@@ -183,22 +203,40 @@
     }
 
     .trayToggle {
-        position: absolute;
+        position: fixed;
+        z-index: 1002;
         top: 50%;
+        left: 0;
         transform: translateY(-50%);
-        right: -40px;
         display: flex;
-        width: 45px;
-        height: 45px;
+        width: 36px;
+        height: 46px;
         align-items: center;
         justify-content: center;
-        border: 0;
-        border-radius: 0 20px 20px 0;
-        background: #093ebb88;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-left: 0;
+        border-radius: 0 50% 50% 0;
+        background: rgba(17, 80, 175, 0.48);
         color: #fff;
         cursor: pointer;
-        box-shadow: 6px 0 16px rgba(0, 0, 0, 0.15);
-        border-left: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 5px 0 18px rgba(7, 28, 65, 0.28);
+        transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .trayToggle:hover {
+        background: rgba(11, 67, 143, 0.66);
+        box-shadow: 6px 0 20px rgba(7, 28, 65, 0.36);
+    }
+
+    .trayToggle:focus-visible {
+        outline: 3px solid #ffdea5;
+        outline-offset: 2px;
+    }
+
+    .trayToggleOpen {
+        left: min(280px, calc(100vw - 56px));
+        background: rgba(17, 80, 175, 0.58);
+        box-shadow: none;
     }
 
     .overlay {

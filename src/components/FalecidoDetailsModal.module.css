@@ -70,6 +70,37 @@
   background: #f7f9fc;
 }
 
+.headerTitleGroup {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.memorialLink {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 12px;
+  border: 1px solid #cbdced;
+  border-radius: 9px;
+  background: #fff;
+  color: #1458a6;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.memorialLink:hover {
+  border-color: #9dbce0;
+  background: #f3f8ff;
+}
+
 .profile {
   display: flex;
   align-items: center;
@@ -145,6 +176,8 @@
   .overlay { padding: 10px; }
   .modal { max-height: 94vh; border-radius: 16px; }
   .header, .body { padding: 18px; }
+  .headerTitleGroup { gap: 8px; }
+  .memorialLink { min-height: 34px; padding: 0 10px; font-size: 0.82rem; }
   .profile { align-items: flex-start; gap: 14px; padding: 16px; }
   .photo { width: 84px; height: 84px; flex-basis: 84px; border-radius: 12px; }
   .photoFallback { width: 84px; height: 84px; flex-basis: 84px; border-radius: 12px; }

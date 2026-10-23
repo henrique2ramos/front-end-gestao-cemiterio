@@ -1,264 +1,293 @@
 .page {
-  background: #fbf9f8;
-  padding-bottom: 40px;
+  min-height: 100vh;
+  padding: 40px 24px 72px;
+  background: #f4f7fb;
+  color: #334155;
 }
 
 .container {
-  max-width: 1000px;
+  width: min(100%, 1120px);
   margin: 0 auto;
-  padding: 0 24px;
 }
 
-.topNav {
-  padding: 30px 0 20px;
+.header {
+  margin-bottom: 28px;
+  padding: 28px 32px 24px;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 8px 28px rgba(15, 40, 75, 0.05);
 }
 
-.backLink {
-  display: inline-flex;
+.eyebrow {
+  margin-bottom: 16px;
+  color: #8a641a;
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.titleRow {
+  display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #775a19;
-  text-decoration: none;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  transition: all 0.2s ease;
+  gap: 16px;
 }
 
-.backLink:hover {
-  color: #002046;
-  transform: translateX(-4px);
-}
-
-.tombHeader {
-  text-align: center;
-  margin-bottom: 48px;
-  padding-top: 48px;
-}
-
-.tombIcon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 72px;
-  height: 72px;
-  background: #fffaf0;
-  border: 2px solid #ffdea5;
-  border-radius: 50%;
-  color: #775a19;
-  margin-bottom: 20px;
-}
-
-.tombTitle {
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
-  font-weight: 800;
-  color: #002046;
-  margin-bottom: 8px;
-  letter-spacing: -0.02em;
-}
-
-.tombSubtitle {
-  font-size: 1rem;
-  color: #666666;
-}
-
-.grid {
+.headerIcon {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 24px;
+  width: 54px;
+  height: 54px;
+  flex: 0 0 54px;
+  place-items: center;
+  border-radius: 15px;
+  background: #fff4d9;
+  color: #9a6c0b;
 }
+
+.titleRow h1 {
+  margin: 0;
+  color: #102d50;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(2rem, 4vw, 2.7rem);
+  font-weight: 600;
+  line-height: 1;
+}
+
+.titleRow p {
+  margin: 8px 0 0;
+  color: #64748b;
+  font-size: 0.96rem;
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 26px;
+  padding-top: 20px;
+  border-top: 1px solid #e8edf3;
+}
+
+.summary > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+  padding: 0 20px;
+  border-right: 1px solid #e8edf3;
+}
+
+.summary > div:first-child { padding-left: 0; }
+.summary > div:last-child { padding-right: 0; border-right: 0; }
+.summary strong { color: #12345b; font-size: 1.2rem; font-weight: 750; font-variant-numeric: tabular-nums; }
+.summary span { color: #64748b; font-size: 0.8rem; }
+
+.explorer,
+.selectedLot,
+.emptyState,
+.stateCard {
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 8px 28px rgba(15, 40, 75, 0.045);
+}
+
+.explorer { padding: 26px; }
+
+.explorerHeading h2,
+.selectedHeader h2 {
+  margin: 0;
+  color: #12345b;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.explorerHeading p {
+  margin: 5px 0 0;
+  color: #64748b;
+  font-size: 0.88rem;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 20px 0 18px;
+}
+
+.search {
+  display: flex;
+  width: min(100%, 320px);
+  min-height: 42px;
+  align-items: center;
+  gap: 9px;
+  padding: 0 12px;
+  border: 1px solid #d9e2ed;
+  border-radius: 10px;
+  background: #fff;
+  color: #718096;
+}
+
+.search:focus-within { border-color: #6aa2df; box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.1); }
+.search svg { flex: 0 0 auto; }
+.search input { width: 100%; min-width: 0; flex: 1; border: 0; outline: 0; background: transparent; color: #334155; font: inherit; font-size: 0.9rem; }
+.search input::placeholder { color: #94a3b8; }
+.searchClear { display: grid; width: 26px; height: 26px; flex: 0 0 26px; place-items: center; padding: 0; border: 0; border-radius: 50%; background: transparent; color: #718096; cursor: pointer; }
+.searchClear:hover { background: #edf3f9; color: #334155; }
+
+.filters { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.filters button {
+  min-height: 40px;
+  padding: 0 13px;
+  border: 1px solid #dbe3ed;
+  border-radius: 999px;
+  background: #fff;
+  color: #475569;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.filters button:hover { border-color: #aac6e6; background: #f7fbff; }
+.filters .filterActive { border-color: #b8d5fa; background: #eaf3ff; color: #1458a6; }
+
+.lotGrid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.lotCard {
+  display: flex;
+  min-width: 0;
+  min-height: 68px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 5px;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.lotCard:hover { transform: translateY(-2px); box-shadow: 0 5px 14px rgba(15, 40, 75, 0.1); }
+.lotNumber { max-width: 100%; overflow: hidden; color: #15365d; font-size: 0.9rem; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.lotOccupancy { display: inline-flex; align-items: center; gap: 5px; color: #586b80; font-size: 0.74rem; white-space: nowrap; }
+.lotEmpty { border-color: #e3e8ef; background: #f8fafc; }
+.lotOccupied { border-color: #c8def7; background: #e8f2ff; }
+.lotMultiple { border-color: #f4dfa2; background: #fff5d9; }
+.lotSelected { outline: 2px solid #216ac0; outline-offset: 1px; box-shadow: 0 4px 14px rgba(21, 101, 192, 0.14); }
+
+.noResults,
+.emptyLot {
+  margin: 0;
+  padding: 22px;
+  border: 1px dashed #d7e0ea;
+  border-radius: 12px;
+  color: #64748b;
+  text-align: center;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #edf1f5;
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+.pageCount { color: #94a3b8; }
+.pageButtons { display: flex; gap: 7px; }
+.pageButtons button { display: grid; width: 36px; height: 36px; place-items: center; border: 1px solid #dbe3ed; border-radius: 9px; background: #fff; color: #174675; cursor: pointer; }
+.pageButtons button:hover:not(:disabled) { border-color: #9dbce0; background: #f3f8ff; }
+.pageButtons button:disabled { color: #aab5c2; cursor: not-allowed; }
+
+.selectedLot { margin-top: 22px; padding: 24px; scroll-margin-top: 20px; }
+.selectedHeader { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-bottom: 18px; border-bottom: 1px solid #e8edf3; }
+.selectedTitle { display: flex; align-items: center; gap: 13px; }
+.selectedTitle p { margin: 5px 0 0; color: #64748b; font-size: 0.84rem; }
+.selectedMarker { display: grid; width: 46px; height: 46px; flex: 0 0 46px; place-items: center; border-radius: 12px; color: #12345b; font-weight: 750; }
+.markerEmpty { background: #f1f5f9; }
+.markerOccupied { background: #dcecff; color: #1458a6; }
+.markerMultiple { background: #fff0bd; color: #8a5a00; }
+
+.viewLotLink { display: inline-flex; align-items: center; gap: 7px; color: #1458a6; font-size: 0.86rem; font-weight: 650; text-decoration: none; white-space: nowrap; }
+.viewLotLink:hover { color: #0b3f7b; text-decoration: underline; }
+.peopleGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding-top: 18px; }
 
 .personCard {
   display: flex;
-  gap: 32px;
-  background: #ffffff;
-  border-radius: 16px;
-  border: 1px solid rgba(196, 198, 207, 0.45);
-  box-shadow: 0 8px 24px rgba(0, 32, 70, 0.06);
-  padding: 32px;
+  min-width: 0;
+  align-items: center;
+  gap: 13px;
+  padding: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 13px;
+  background: #fff;
+  color: inherit;
   text-decoration: none;
-  transition: all 0.3s ease;
-  align-items: flex-start;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 }
 
-.personCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 36px rgba(0, 34, 68, 0.1);
+.personCard:hover { transform: translateY(-1px); border-color: #bfd3e8; box-shadow: 0 5px 16px rgba(15, 40, 75, 0.07); }
+.personImage { width: 54px; height: 54px; flex: 0 0 54px; overflow: hidden; border: 1px solid #e2e8f0; border-radius: 50%; background: #f1f5f9; }
+.personImage img { width: 100%; height: 100%; object-fit: cover; }
+.personInfo { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: 4px; }
+.personInfo strong { overflow: hidden; color: #12345b; font-size: 0.92rem; text-overflow: ellipsis; white-space: nowrap; }
+.personInfo > span { color: #64748b; font-size: 0.78rem; }
+.personInfo .personDescription { display: -webkit-box; overflow: hidden; color: #64748b; line-height: 1.45; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.personArrow { flex: 0 0 auto; color: #94a3b8; }
+
+.emptyState,
+.stateCard { display: flex; min-height: 240px; flex-direction: column; align-items: center; justify-content: center; padding: 28px; color: #64748b; text-align: center; }
+.emptyState > svg,
+.stateCard > svg { color: #a87a17; }
+.emptyState h2,
+.stateCard h1 { margin: 12px 0 4px; color: #12345b; font-size: 1.15rem; }
+.emptyState p,
+.stateCard p { margin: 0; font-size: 0.9rem; }
+
+@media (max-width: 900px) {
+  .lotGrid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 }
 
-.personImage {
-  flex-shrink: 0;
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  overflow: hidden;
-  border: 4px solid #f4f7f9;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  background: #f4f7f9;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.personImage img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-}
-
-.userIcon {
-  color: #999;
-}
-
-.personInfo {
-  flex: 1;
-}
-
-.personName {
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
-  font-weight: 700;
-  color: #002046;
-  margin-bottom: 8px;
-}
-
-.personDates {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-  font-size: 0.95rem;
-  color: #555555;
-  font-weight: 500;
-}
-
-.dateBlock {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.starIcon {
-  color: #d4a017;
-  fill: #d4a017;
-}
-
-.crossIcon {
-  font-size: 1rem;
-  color: #777777;
-  font-weight: 800;
-}
-
-.dateDivider {
-  width: 1px;
-  height: 14px;
-  background-color: #d0d7de;
-}
-
-.personDesc {
-  font-size: 0.95rem;
-  color: #6b7280;
-  line-height: 1.6;
-  margin-bottom: 12px;
-}
-
-.tributeBox {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  background: #fcfcfd;
-  border-left: 2px solid #d9a441;
-  border-radius: 8px;
-  padding: 16px;
-  margin-top: 12px;
-}
-
-.tributeIcon {
-  color: #775a19;
-  opacity: 0.15;
-  flex-shrink: 0;
-  transform: rotate(180deg);
-}
-
-.tributeBox p {
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
-  font-style: italic;
-  font-size: 0.9rem;
-  color: #003366;
-  line-height: 1.6;
-  margin: 0;
-}
-
-.card {
-  background: #ffffff;
-  border-radius: 16px;
-  border: 1px solid #e8edf3;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-}
-
-.footer {
-  text-align: center;
-  margin-top: 60px;
-  padding: 24px 0;
-  border-top: 1px solid #e8edf3;
-  font-size: 0.85rem;
-  color: #999;
-}
-
-@media (max-width: 700px) {
-  .personCard {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding: 24px;
-    gap: 16px;
-  }
-
-  .personImage {
-    width: 100px;
-    height: 100px;
-  }
-
-  .personName {
-    font-size: 1.25rem;
-  }
-
-  .personDates {
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
-  .tributeBox {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .tombTitle {
-    font-size: 1.75rem;
-  }
-}
-
-.loteHeader {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 16px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #e6e6e6;
-}
-
-.loteLink {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #003366;
-    text-decoration: none;
-    white-space: nowrap;
-}
-
-.loteLink:hover {
-    text-decoration: underline;
+@media (max-width: 680px) {
+  .page { padding: 22px 14px 48px; }
+  .header { margin-bottom: 18px; padding: 22px 18px 18px; }
+  .titleRow { align-items: flex-start; gap: 12px; }
+  .headerIcon { width: 44px; height: 44px; flex-basis: 44px; border-radius: 12px; }
+  .titleRow p { font-size: 0.86rem; line-height: 1.45; }
+  .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 15px; margin-top: 20px; padding-top: 16px; }
+  .summary > div { padding: 0 12px; }
+  .summary > div:nth-child(2) { border-right: 0; }
+  .summary > div:nth-child(3) { padding-left: 0; }
+  .summary > div:nth-child(4) { padding-right: 0; }
+  .summary strong { font-size: 1.05rem; }
+  .explorer { padding: 18px 14px; }
+  .controls { align-items: stretch; flex-direction: column; gap: 10px; }
+  .search { width: 100%; box-sizing: border-box; }
+  .filters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .filters button { padding: 0 8px; font-size: 0.75rem; }
+  .lotGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .lotCard { min-height: 62px; padding: 9px; }
+  .lotNumber { font-size: 0.82rem; }
+  .lotOccupancy { font-size: 0.68rem; }
+  .pagination { align-items: flex-start; font-size: 0.75rem; }
+  .pageCount { display: block; margin-top: 3px; }
+  .selectedLot { margin-top: 16px; padding: 18px 14px; }
+  .selectedHeader { align-items: flex-start; flex-direction: column; gap: 12px; }
+  .peopleGrid { grid-template-columns: 1fr; gap: 9px; }
+  .personCard { gap: 10px; padding: 11px; }
+  .personImage { width: 46px; height: 46px; flex-basis: 46px; }
 }

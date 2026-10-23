@@ -75,16 +75,26 @@
 
 .infoWrapper {
   flex: 1;
+  min-width: 0;
+  width: 100%;
 }
 
 .name {
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  white-space: normal;
   font-family: 'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
-  font-size: 2.25rem;
+  font-size: 1.9rem;
   font-weight: 800;
   color: #002046;
   margin-bottom: 10px;
   line-height: 1.1;
   letter-spacing: -0.02em;
+}
+
+.nameQualifier {
+  display: block;
 }
 
 .metadata {
@@ -473,12 +483,33 @@
     border-radius: 12px;
   }
   .name {
-  font-size: 2rem;
+    font-size: 1.65rem;
 }
 
   .locationBadge {
-    padding: 10px 10px;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 42px;
+    height: auto;
+    justify-content: center;
+    padding: 10px 12px;
     font-size: 0.95rem;
+    text-align: center;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .actionButtons {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .actionButtons > button {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    white-space: normal;
   }
 
   .tabNav {

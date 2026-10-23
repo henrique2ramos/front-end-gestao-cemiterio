@@ -8,7 +8,8 @@ export default function AutocompleteInput({ name, value, options = [], onChange,
 
     const filteredOptions = useMemo(() => {
         const query = String(value || '').trim().toLocaleLowerCase('pt-BR');
-        return [...new Set(options.map(option => String(option ?? '')).filter(Boolean))]
+        return [...new Set(options.map(option => String(option ?? '').trim()).filter(Boolean))]
+            .sort((a, b) => a.localeCompare(b, 'pt-BR', { numeric: true, sensitivity: 'base' }))
             .filter(option => !query || option.toLocaleLowerCase('pt-BR').includes(query));
     }, [options, value]);
 

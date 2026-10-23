@@ -92,6 +92,13 @@ export default function AdminQuadrasLotes({ onLogout }) {
         });
     };
 
+    const replaceAdminHistory = (stateUpdates) => {
+        navigate(`${location.pathname}${location.search}${location.hash}`, {
+            replace: true,
+            state: { ...(location.state || {}), ...stateUpdates },
+        });
+    };
+
     const pushModalHistory = () => {
         if (location.state?.__sgcModalHistory || modalHistoryRef.current) return;
         modalHistoryRef.current = true;
@@ -118,6 +125,10 @@ export default function AdminQuadrasLotes({ onLogout }) {
         setSelectedQuadra(location.state?.__adminQuadra || null);
         setSelectedLote(location.state?.__adminLote || null);
     }, [location.key, location.state]);
+
+    useEffect(() => {
+        setCurrentLotePage(1);
+    }, [selectedQuadra]);
 
     useEffect(() => {
         if ((isFormModalOpen || viewFalecido) && !location.state?.__sgcModalHistory) {
@@ -350,7 +361,6 @@ export default function AdminQuadrasLotes({ onLogout }) {
         nome: q.nome,
         count: quantidadeLotesPorQuadra[q.id] ?? 0
     }));
-
     const lotesDaQuadra = (quadraSelecionada && !carregandoLotes)
         ? lotes
             .filter(l => l.quadraId === quadraSelecionada.id)
@@ -843,10 +853,7 @@ export default function AdminQuadrasLotes({ onLogout }) {
     // --- NAVEGAÇÃO ---
     const goBack = () => {
         if (!selectedQuadra) return;
-        if (location.state?.__adminQuadra) {
-            navigate(-1);
-            return;
-        }
+        replaceAdminHistory({ __adminQuadra: null, __adminLote: null });
         setSelectedQuadra(null);
         setSelectedLote(null);
     };
@@ -863,15 +870,16 @@ export default function AdminQuadrasLotes({ onLogout }) {
 
     const selecionarLote = (numero) => {
         if (String(selectedLote) === String(numero)) return;
-        pushAdminHistory({ __adminQuadra: selectedQuadra, __adminLote: numero });
+        const stateUpdates = { __adminQuadra: selectedQuadra, __adminLote: numero };
+        if (location.state?.__adminLote != null) replaceAdminHistory(stateUpdates);
+        else pushAdminHistory(stateUpdates);
         setSelectedLote(numero);
         setCurrentPage(1);
     };
 
     const limparLoteSelecionado = () => {
         if (location.state?.__adminLote != null) {
-            navigate(-1);
-            return;
+            replaceAdminHistory({ __adminQuadra: selectedQuadra, __adminLote: null });
         }
         setSelectedLote(null);
     };
@@ -883,17 +891,28 @@ export default function AdminQuadrasLotes({ onLogout }) {
             <AdminSidebar onLogout={onLogout} />
             <main className={styles.mainContent}>
                 <div className={styles.container}>
-                    <header className={styles.header}>
-                        <div>
-                            {nivelAtual !== 'inicio' && <button className={styles.backBtn} onClick={goBack}><ChevronLeft size={18} />Voltar para Quadras</button>}
-                            <h1 className={styles.title}>{nivelAtual === 'inicio' ? 'Quadras' : 'Quadra ' + selectedQuadra}</h1>
-                            <p className={styles.subtitle}>{nivelAtual === 'inicio' ? 'Selecione uma quadra para ver os lotes.' : lotesComCount.length + ' lote' + (lotesComCount.length !== 1 ? 's' : '') + ' nesta quadra.'}</p>
-                        </div>
-                        <div className={styles.headerActions}>
-                            {nivelAtual === 'inicio' && <button className={styles.addButton} onClick={() => openQuadraModal()}><Plus size={18} />Nova Quadra</button>}
-                            {nivelAtual === 'quadra' && <><button className={styles.bulkCreateButton} onClick={openBulkLotesModal}><Plus size={18} />Criar v&aacute;rios lotes</button><button className={styles.addButton} onClick={() => openLoteModal()}><Plus size={18} />Novo Lote</button></>}
-                        </div>
-                    </header>
+                    {nivelAtual === 'inicio' ? (
+                        <header className={styles.quadrasOverviewHeader}>
+                            <div className={styles.overviewTitleRow}>
+                                <div className={styles.overviewTitleInfo}>
+                                    <h1>Quadras</h1>
+                                    <p>Selecione uma quadra para ver os lotes.</p>
+                                </div>
+                                <button className={styles.addButton} onClick={() => openQuadraModal()}><Plus size={18} />Nova Quadra</button>
+                            </div>
+                        </header>
+                    ) : (
+                        <header className={styles.header}>
+                            <div className={styles.quadraTitleGroup}>
+                                <button className={styles.backBtn} onClick={goBack}><ChevronLeft size={16} />Todas as quadras</button>
+                                <h1 className={styles.title}>Quadra {selectedQuadra}</h1>
+                            </div>
+                            <div className={styles.headerActions}>
+                                <button className={styles.bulkCreateButton} onClick={openBulkLotesModal}><Plus size={18} />Criar v&aacute;rios lotes</button>
+                                <button className={styles.addButton} onClick={() => openLoteModal()}><Plus size={18} />Novo Lote</button>
+                            </div>
+                        </header>
+                    )}
                     {nivelAtual === 'inicio' && <AdminQuadras quadras={quadrasComCount} carregando={carregandoQuadras} onSelect={selecionarQuadra} onQrCode={openQuadraQrModal} onEdit={openQuadraModal} onDelete={handleDeleteQuadra} />}
                     {nivelAtual === 'quadra' && <AdminLotes
                         lotesComCount={lotesComCount} lotesVisiveis={lotesVisiveis} lotesDaPagina={lotesDaPagina} lotesDaQuadra={lotesDaQuadra} lotesPerPage={LOTES_PER_PAGE} carregandoLotes={carregandoLotes}

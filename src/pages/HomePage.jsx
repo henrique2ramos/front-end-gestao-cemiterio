@@ -4,7 +4,7 @@ import { Search, MapPin, ArrowRight, ChevronRight, ChevronLeft } from 'lucide-re
 import FalecidoCard from '../components/FalecidoCard';
 import { fetchFalecidos, resolveImageUrl } from '../lib/api';
 import styles from './HomePage.module.css';
-import mapaImg from '../assets/mapaExemplo.jpg';
+import mapaImg from '../assets/mapaExemplo.png';
 import texturaImg from '../assets/texturaMemorial.jfif';
 import personPlaceholder from '../assets/person-placeholder.svg';
 
@@ -73,7 +73,7 @@ export default function HomePage() {
         ref={ref}
       >
         {items.slice(0, 10).map((falecido) => (
-          <FalecidoCard key={falecido.id} falecido={falecido} showProfilePlaceholder />
+          <FalecidoCard key={falecido.id} falecido={falecido} compactName />
         ))}
       </div>
     );

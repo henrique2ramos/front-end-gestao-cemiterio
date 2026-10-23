@@ -28,16 +28,6 @@ export default function AdminSidebar({ onLogout }) {
             {isOpen && <button type="button" className={styles.overlay} onClick={closeOnMobile} aria-label="Fechar menu" />}
 
             <aside className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}>
-                <button
-                    type="button"
-                    className={styles.trayToggle}
-                    onClick={() => setIsOpen((current) => !current)}
-                    aria-label={isOpen ? 'Fechar menu' : 'Abrir menu'}
-                    aria-expanded={isOpen}
-                >
-                    {isOpen ? <ChevronLeft size={22} /> : <ChevronRight size={22} />}
-                </button>
-
                 <NavLink to="/admin" className={styles.sidebarHeader} onClick={closeOnMobile}>
                     <span className={styles.brandMark} aria-hidden="true">
                         <ShieldCheck size={21} strokeWidth={2.2} />
@@ -76,6 +66,16 @@ export default function AdminSidebar({ onLogout }) {
                     </button>
                 </div>
             </aside>
+
+            <button
+                type="button"
+                className={`${styles.trayToggle} ${isOpen ? styles.trayToggleOpen : ''}`}
+                onClick={() => setIsOpen((current) => !current)}
+                aria-label={isOpen ? 'Fechar menu' : 'Abrir menu'}
+                aria-expanded={isOpen}
+            >
+                {isOpen ? <ChevronLeft size={22} /> : <ChevronRight size={22} />}
+            </button>
         </>
     );
 }

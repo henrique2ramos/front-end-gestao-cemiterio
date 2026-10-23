@@ -1,4 +1,10 @@
 .overlay {
+    --card-bg: #ffffff;
+    --border: #e2e8f0;
+    --text-main: #334155;
+    --brand: #0066cc;
+    --brand-hover: #0052a3;
+    --brand-dark: #003366;
     position: fixed;
     inset: 0;
     z-index: 10001;
@@ -39,7 +45,7 @@
 
 .title {
     margin: 0;
-    color: var(--brand-dark, #12345a);
+    color: var(--brand-dark);
     margin-top: 3px;
     font-size: 1.3rem;
     font-weight: 700;
@@ -77,7 +83,7 @@
 .formGrid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    align-items: start;
+    align-items: stretch;
     gap: 22px;
     padding: 24px 26px 0;
 }
@@ -91,11 +97,26 @@
     box-shadow: 0 2px 8px rgba(18, 52, 90, 0.035);
 }
 
+.imageSection {
+    grid-column: 1 / -1;
+}
+
+.imageFields {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: 24px;
+}
+
+.imageFields .formGroup {
+    min-width: 0;
+    margin-bottom: 0;
+}
+
 .sectionTitle {
     margin: 0 0 20px;
     padding: 0 0 12px;
     border-bottom: 1px solid #e4ebf3;
-    color: var(--brand-dark, #12345a);
+    color: var(--brand-dark);
     font-size: 0.82rem;
     font-weight: 700;
     letter-spacing: 0.06em;
@@ -144,7 +165,7 @@
 .formGroup textarea:focus,
 .formGroup select:focus {
     outline: none;
-    border-color: var(--brand, #1565c0);
+    border-color: var(--brand);
     box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.1);
 }
 
@@ -324,12 +345,12 @@
 }
 
 .saveBtn {
-    background: #1565c0;
+    background: var(--brand);
     color: #fff;
 }
 
 .saveBtn:hover {
-    background: #0d477e;
+    background: var(--brand-hover);
 }
 
 @media (max-width: 700px) {
@@ -349,6 +370,11 @@
     }
 
     .formCol { padding: 18px; }
+
+    .imageFields {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
 
     .formRow {
         flex-direction: column;

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, UserRound } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import { resolveImageUrl } from '../lib/api';
 import personPlaceholder from '../assets/person-placeholder.svg';
 import styles from './FalecidoCard.module.css';
@@ -8,12 +8,12 @@ import styles from './FalecidoCard.module.css';
 export default function FalecidoCard({
   falecido,
   onClick,
-  showProfilePlaceholder = false
+  compactName = false,
 }) {
   const image = resolveImageUrl(falecido.imagem);
   const [imageFailed, setImageFailed] = useState(false);
   const isPlaceholderImage = image === personPlaceholder || /person-placeholder|imagem-indisponivel/i.test(image || '');
-  const hasImage = image && !imageFailed && !(showProfilePlaceholder && isPlaceholderImage);
+  const hasImage = image && !imageFailed && !isPlaceholderImage;
 
   return (
     <Link
@@ -29,17 +29,13 @@ export default function FalecidoCard({
             className={styles.image}
             onError={() => setImageFailed(true)}
           />
-        ) : showProfilePlaceholder ? (
-          <div className={styles.noPhoto} aria-label="Sem foto de perfil">
-            <UserRound size={78} strokeWidth={1.35} aria-hidden="true" />
-          </div>
         ) : (
           <img src={personPlaceholder} alt="Imagem indisponível" className={styles.image} />
         )}
       </div>
 
       <div className={styles.content}>
-        <h3 className={styles.name}>{falecido.nome}</h3>
+        <h3 className={`${styles.name} ${compactName ? styles.nameCompact : ''}`}>{falecido.nome}</h3>
 
         <p className={styles.dates}>
           {falecido.dataNascimento || '—'} — {falecido.dataMorte || '—'}

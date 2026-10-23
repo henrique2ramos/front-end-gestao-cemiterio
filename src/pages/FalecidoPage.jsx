@@ -13,6 +13,10 @@ export default function FalecidoPage() {
   const [activeTab, setActiveTab] = useState('bio');
   const [lightboxIndex, setLightboxIndex] = useState(null);
   const [loading, setLoading] = useState(true);
+  const handleBack = () => {
+    if (window.history.length > 1) navigate(-1);
+    else navigate('/');
+  };
 
   useEffect(() => {
     async function loadFalecido() {
@@ -35,7 +39,7 @@ export default function FalecidoPage() {
       <div className={styles.page}>
         <div className={styles.container}>
           <div className={styles.topNav}>
-            <button onClick={() => navigate(-1)} className={styles.backLink}>
+            <button onClick={handleBack} className={styles.backLink}>
               <ChevronLeft size={20} />
               Voltar
             </button>
@@ -55,7 +59,7 @@ export default function FalecidoPage() {
       <div className={styles.page}>
         <div className={styles.container}>
           <div className={styles.topNav}>
-            <button onClick={() => navigate(-1)} className={styles.backLink}>
+            <button onClick={handleBack} className={styles.backLink}>
               <ChevronLeft size={20} />
               Voltar
             </button>
@@ -76,6 +80,7 @@ export default function FalecidoPage() {
     : falecido.imagem
       ? [{ src: resolveImageUrl(falecido.imagem), caption: falecido.nome }]
       : [];
+  const nomeComComplemento = String(falecido.nome || '').match(/^(.*?)\s*(\([^()]*\))\s*$/);
 
   return (
     <div className={styles.page}>
@@ -83,7 +88,7 @@ export default function FalecidoPage() {
       <div className={styles.container}>
         
         <div className={styles.topNav}>
-          <button onClick={() => navigate(-1)} className={styles.backLink}>
+          <button onClick={handleBack} className={styles.backLink}>
             <ChevronLeft size={20} />
             Voltar
           </button>
@@ -105,7 +110,12 @@ export default function FalecidoPage() {
               </div>
 
               <div className={styles.infoWrapper}>
-                <h1 className={styles.name}>{falecido.nome}</h1>
+                <h1 className={styles.name}>
+                  {nomeComComplemento ? <>
+                    <span>{nomeComComplemento[1]}</span>
+                    <span className={styles.nameQualifier}>{nomeComComplemento[2]}</span>
+                  </> : falecido.nome}
+                </h1>
 
                 <div className={styles.metadata}>
                   <div className={styles.dateWrapper}>

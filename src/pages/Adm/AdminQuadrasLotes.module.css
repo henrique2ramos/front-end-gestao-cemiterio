@@ -51,12 +51,69 @@
     background: #fff;
 }
 
+.quadrasOverviewHeader {
+    display: flex;
+    min-height: 112px;
+    flex-direction: column;
+    justify-content: center;
+    box-sizing: border-box;
+    width: calc(100vw - 260px);
+    margin: 0 0 28px calc(-40px - max(0px, (100vw - 1360px) / 2));
+    padding: 22px calc(40px + max(0px, (100vw - 1360px) / 2));
+    border: 0;
+    border-bottom: 1px solid var(--border);
+    border-radius: 0;
+    background: #fff;
+    box-shadow: none;
+}
+
+.overviewTitleRow {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 16px;
+}
+
+.overviewTitleInfo { min-width: 0; }
+
+.overviewTitleInfo h1 {
+    margin: 0;
+    color: var(--brand-dark);
+    font-family: inherit;
+    font-size: 2.1rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+}
+
+.overviewTitleInfo p {
+    margin: 8px 0 0;
+    color: var(--text-muted);
+    font-size: 0.96rem;
+}
+
+.overviewTitleRow .addButton { min-height: 46px; white-space: nowrap; }
+
 .title {
     font-size: 2.1rem;
     color: var(--brand-dark);
     margin: 0 0 6px 0;
     font-weight: 800;
     letter-spacing: -0.03em;
+}
+
+.quadraTitleGroup {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+}
+
+.quadraTitleGroup .title {
+    margin: 0;
+    font-size: 2.35rem;
+    letter-spacing: -0.04em;
 }
 
 .subtitle {
@@ -92,7 +149,7 @@
     flex-wrap: wrap;
     align-items: center;
     justify-content: flex-end;
-    gap: 12px 32px;
+    gap: 12px;
 }
 
 .bulkCreateButton {
@@ -747,16 +804,18 @@
 /* --- Botão Voltar --- */
 .backBtn {
     display: inline-flex;
+    min-height: 36px;
     align-items: center;
-    gap: 6px;
-    background: none;
-    border: none;
+    gap: 3px;
+    padding: 0 4px;
+    border: 0;
+    background: transparent;
     color: var(--text-muted);
-    font-size: 0.9rem;
+    font: inherit;
+    font-size: 0.86rem;
     font-weight: 600;
     cursor: pointer;
-    padding: 0;
-    margin-bottom: 12px;
+    margin: 0;
     transition: color 0.2s;
 }
 
@@ -1016,25 +1075,29 @@
     align-items: center;
     gap: 6px;
     padding: 5px 8px;
-    border: 1px solid transparent;
+    border: 1px solid #dbe5f0;
     border-radius: 999px;
-    background: transparent;
+    background: #fff;
     color: var(--text-muted);
     font: inherit;
     white-space: nowrap;
     cursor: pointer;
-    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.045);
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 }
 
 .lotLegendFilter:hover {
-    border-color: #dbeafe;
+    border-color: #bfdbfe;
     background: #f8fbff;
+    box-shadow: 0 2px 5px rgba(15, 23, 42, 0.08);
+    transform: translateY(-1px);
 }
 
 .lotLegendFilterActive {
     border-color: #bfdbfe;
     background: #eaf2ff;
     color: var(--brand-dark);
+    box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.06);
 }
 
 .lotLegendFilter strong {
@@ -1290,6 +1353,7 @@
     width: 100%;
     min-height: 0;
     overflow: visible;
+    scroll-margin-top: 20px;
     padding: 20px 24px;
     border: 1px solid #dbe3ed;
     border-radius: 16px;
@@ -1391,6 +1455,13 @@
     gap: 6px;
 }
 
+.lotHeaderActions,
+.lotHeaderNavigation {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
 .lotNavBtn,
 .lotCloseButton {
     display: inline-flex;
@@ -1489,6 +1560,8 @@
     cursor: pointer;
 }
 
+.lotMenuPanel .lotMenuQr { display: none; }
+
 .lotMenuPanel button:hover { background: #f1f6fc; }
 .lotMenuPanel .lotMenuDelete { color: #b42318; }
 .lotMenuPanel .lotMenuDelete:hover { background: #fff1f0; }
@@ -1581,9 +1654,34 @@
         padding: 24px 20px;
     }
 
+    .quadrasOverviewHeader {
+        width: 100vw;
+        min-height: 96px;
+        margin: 0 0 28px -20px;
+        padding: 18px 20px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .overviewTitleRow {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 8px;
+    }
+
+    .overviewTitleInfo p { font-size: 0.86rem; line-height: 1.45; }
+
+    .overviewTitleInfo h1 { font-size: 1.7rem; }
+
+    .overviewTitleRow .addButton {
+        justify-content: center;
+        min-height: 40px;
+        width: 100%;
+    }
+
     .title {
         font-size: 1.7rem;
     }
+
+    .quadraTitleGroup .title { font-size: 1.9rem; }
 
     .header {
         flex-direction: column;
@@ -1593,6 +1691,8 @@
         margin-left: -20px;
         padding: 18px 20px;
     }
+
+    .headerActions { justify-content: flex-start; }
 
     .addButton {
         justify-content: center;
@@ -1671,12 +1771,24 @@
         padding: 18px;
     }
 
-    .selectedLotIdentity { gap: 9px; }
+    .selectedLotIdentity {
+        flex-wrap: wrap;
+        gap: 9px;
+    }
     .selectedLotMarker { width: 42px; height: 46px; flex-basis: 42px; }
     .selectedLotTitle { flex: 1; min-width: 0; }
     .selectedLotHeadingRow h2 { font-size: 1.08rem; }
     .lotSectorLabel { font-size: 0.78rem; }
-    .lotNavigationGroup { gap: 4px; margin-left: auto; }
+    .lotNavigationGroup {
+        width: 100%;
+        flex: 1 1 100%;
+        justify-content: space-between;
+        gap: 6px;
+        margin-left: 0;
+    }
+    .lotHeaderActions { flex: 1 1 220px; min-width: 0; }
+    .lotHeaderActions .addButton { flex: 0 1 auto; min-width: 0; }
+    .lotHeaderNavigation { flex: 0 0 auto; }
     .lotNavigationGroup .lotNavBtn,
     .lotNavigationGroup .lotCloseButton { min-width: 34px; min-height: 36px; width: 36px; }
     .lotPersonRow {
@@ -1721,18 +1833,90 @@
         font-size: 0.78rem;
     }
 
+    .lotSummaryLegend {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .lotLegendFilter {
+        min-width: 0;
+        min-height: 48px;
+        justify-content: flex-start;
+        padding: 8px 9px;
+        border-radius: 12px;
+        font-size: 0.76rem;
+        line-height: 1.25;
+        text-align: left;
+    }
+
+    .lotSummaryTotals {
+        grid-column: 1 / -1;
+        justify-content: center;
+        margin: 2px 0 0;
+        padding-top: 8px;
+        border-top: 1px solid var(--border);
+    }
+
+    .selectedLotPanel { padding: 14px; }
     .selectedLotHeader { align-items: stretch; }
     .selectedLotIdentity { align-items: flex-start; }
     .selectedLotMarker { width: 42px; height: 46px; flex-basis: 42px; }
     .selectedLotHeadingRow { align-items: flex-start; flex-direction: column; gap: 6px; }
     .selectedLotHeadingRow h2 { font-size: 1.08rem; }
-    .lotNavigationGroup { width: 100%; flex: 1 1 100%; justify-content: flex-end; gap: 4px; }
+    .lotNavigationGroup {
+        align-items: center;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        gap: 2px;
+    }
+    .lotHeaderActions { width: auto; flex: 0 0 auto; gap: 2px; }
+    .lotHeaderActions .addButton { flex: 0 0 auto; min-width: 0; white-space: nowrap; }
+    .lotHeaderNavigation {
+        width: auto;
+        align-self: auto;
+        flex: 0 0 auto;
+        justify-content: flex-start;
+        gap: 2px;
+        padding-top: 0;
+        border-top: 0;
+    }
+    .lotQrButton { display: none; }
+    .lotMenuPanel .lotMenuQr { display: flex; }
     .lotNavigationGroup .lotNavBtn,
     .lotNavigationGroup .lotCloseButton,
-    .lotMenuTrigger { min-width: 34px; min-height: 36px; width: 36px; }
-    .lotNavigationGroup .addButton { min-height: 36px; padding: 0 9px; font-size: 0.76rem; }
+    .lotMenuTrigger { min-width: 34px; min-height: 36px; width: 34px; }
+    .lotNavigationGroup .lotNavBtn,
+    .lotNavigationGroup .lotCloseButton {
+        border-color: #cbd5e1;
+        border-radius: 8px;
+        background: #f8fafc;
+        color: #17365f;
+    }
+    .lotNavigationGroup .lotNavBtn svg { width: 20px; height: 20px; }
+    .lotNavigationGroup .lotNavBtn:disabled {
+        opacity: 0.88;
+        background: #eef2f7;
+        color: #64748b;
+    }
+    .lotNavigationGroup .addButton {
+        width: auto;
+        min-width: 0;
+        min-height: 34px;
+        flex: 0 1 auto;
+        justify-content: center;
+        gap: 3px;
+        padding: 0 5px;
+        font-size: 0.66rem;
+        white-space: nowrap;
+    }
     .lotActionButton { min-height: 36px; padding: 0 8px; font-size: 0.76rem; }
     .lotMenuPanel { width: 180px; }
+    .lotPersonRow { flex-direction: column; align-items: stretch; }
+    .lotPersonDetails { width: 100%; }
+    .lotPersonActions { align-self: flex-end; }
     .lotGridState { justify-content: flex-start; padding: 18px; }
     .lotGridStateText { min-width: 0; }
 }

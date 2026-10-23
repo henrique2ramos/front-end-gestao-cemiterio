@@ -1,10 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { MapPin, Quote, Star, User } from 'lucide-react';
+import { CalendarDays, ChevronLeft, ChevronRight, ExternalLink, MapPin, Search, Users } from 'lucide-react';
 import { fetchLote, fetchFalecidosPorLote, resolveImageUrl } from '../lib/api';
 import Spinner from '../components/Spinner';
 import styles from './LotePage.module.css';
 import personPlaceholder from '../assets/person-placeholder.svg';
+
+const PESSOAS_POR_PAGINA = 12;
+
+function getItems(data) {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.items)) return data.items;
+  return [];
+}
 
 export default function LotePage() {
   const { id } = useParams();
@@ -12,6 +20,8 @@ export default function LotePage() {
   const [pessoas, setPessoas] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [erro, setErro] = useState(null);
+  const [busca, setBusca] = useState('');
+  const [pagina, setPagina] = useState(1);
 
   useEffect(() => {
     let cancelado = false;
@@ -21,61 +31,51 @@ export default function LotePage() {
       setErro(null);
 
       try {
-        // O lote e resolvido pelo UUID: renomear a quadra ou o lote nao
-        // invalida mais o link da placa impressa.
         const [dadosLote, dadosMemoriais] = await Promise.all([
           fetchLote(id),
           fetchFalecidosPorLote(id),
         ]);
 
         if (cancelado) return;
-
-        setLote(dadosLote);
-        setPessoas(Array.isArray(dadosMemoriais) ? dadosMemoriais : []);
-      } catch (e) {
+        setLote(dadosLote?.lote || dadosLote?.item || dadosLote);
+        setPessoas(getItems(dadosMemoriais));
+      } catch (error) {
         if (cancelado) return;
-
-        console.error('Erro ao carregar o lote:', e);
+        console.error('Erro ao carregar o lote:', error);
         setLote(null);
         setPessoas([]);
-        setErro(e.message || 'Não foi possível carregar este lote.');
+        setErro(error.message || 'Não foi possível carregar este lote.');
       } finally {
         if (!cancelado) setIsLoading(false);
       }
     }
 
     carregar();
-
     return () => { cancelado = true; };
   }, [id]);
 
-  const titulo = lote ? `Lote ${lote.numero}` : 'Lote';
-  const subtitulo = lote?.quadraNome ? `Quadra ${lote.quadraNome}` : '';
+  const pessoasFiltradas = useMemo(() => pessoas
+    .filter((pessoa) => (pessoa.nome || '').toLocaleLowerCase('pt-BR').includes(busca.trim().toLocaleLowerCase('pt-BR')))
+    .sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'pt-BR', { sensitivity: 'base' })), [pessoas, busca]);
+  const totalPaginas = Math.max(1, Math.ceil(pessoasFiltradas.length / PESSOAS_POR_PAGINA));
+  const paginaAtual = Math.min(pagina, totalPaginas);
+  const inicio = (paginaAtual - 1) * PESSOAS_POR_PAGINA;
+  const pessoasVisiveis = pessoasFiltradas.slice(inicio, inicio + PESSOAS_POR_PAGINA);
+  const nomeQuadra = lote?.quadraNome || lote?.quadra?.nome;
+  const quadraId = lote?.quadraId || lote?.quadra?.id;
 
   if (isLoading) {
-    return (
-      <div className={styles.page}>
-        <div className={styles.container}>
-          <section className={styles.mainSection}>
-            <Spinner label="Carregando lote..." />
-          </section>
-        </div>
-      </div>
-    );
+    return <div className={styles.page}><div className={styles.container}><section className={styles.stateCard}><Spinner label="Carregando lote..." /></section></div></div>;
   }
 
   if (erro || !lote) {
     return (
       <div className={styles.page}>
         <div className={styles.container}>
-          <section className={styles.mainSection}>
-            <div className={styles.card} style={{ padding: '48px', textAlign: 'center' }}>
-              <MapPin size={48} style={{ color: '#ccc', marginBottom: '16px' }} />
-              <h2>Lote não encontrado</h2>
-              <p style={{ color: '#666', marginTop: '12px' }}>
-                {erro || 'Nenhum lote encontrado para este código.'}
-              </p>
-            </div>
+          <section className={styles.stateCard}>
+            <MapPin size={38} aria-hidden="true" />
+            <h1>Lote não encontrado</h1>
+            <p>{erro || 'Nenhum lote encontrado para este código.'}</p>
           </section>
         </div>
       </div>
@@ -84,70 +84,90 @@ export default function LotePage() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.container}>
-
-        <header className={styles.tombHeader}>
-          <div className={styles.tombIcon}>
-            <MapPin size={28} />
+      <main className={styles.container}>
+        <header className={styles.header}>
+          <div className={styles.eyebrow}>Memorial Digital · Cemitério</div>
+          <div className={styles.titleRow}>
+            <span className={styles.headerIcon}><MapPin size={24} aria-hidden="true" /></span>
+            <div className={styles.titleInfo}>
+              {nomeQuadra && <span className={styles.quadraLabel}>Quadra {nomeQuadra}</span>}
+              <h1>Lote {lote.numero ?? lote.nome ?? '—'}</h1>
+              <p>Consulte os memoriais das pessoas sepultadas neste lote.</p>
+            </div>
           </div>
-          <h1 className={styles.tombTitle}>{titulo}</h1>
-          <p className={styles.tombSubtitle}>
-            {subtitulo}
-            {subtitulo ? ' — ' : ''}
-            {pessoas.length} pessoa{pessoas.length !== 1 ? 's' : ''} neste lote
-          </p>
+          <div className={styles.summary}>
+            <span className={styles.summaryIcon}><Users size={18} aria-hidden="true" /></span>
+            <div><strong>{pessoas.length}</strong><span>{pessoas.length === 1 ? 'pessoa sepultada neste lote' : 'pessoas sepultadas neste lote'}</span></div>
+            {quadraId != null && (
+              <Link to={`/quadra/${quadraId}`} className={styles.quadraLink}>
+                <ChevronLeft size={16} aria-hidden="true" /> Ver todos os lotes da quadra
+              </Link>
+            )}
+          </div>
         </header>
 
         {pessoas.length === 0 ? (
-          <div className={styles.card} style={{ padding: '48px', textAlign: 'center' }}>
-            <User size={40} style={{ color: '#ccc', marginBottom: '12px' }} />
-            <h2 style={{ fontSize: '1.1rem' }}>Nenhum falecido neste lote</h2>
-          </div>
+          <section className={styles.emptyState}>
+            <Users size={28} aria-hidden="true" />
+            <h2>Nenhum memorial neste lote</h2>
+            <p>Não há pessoas cadastradas para este lote no momento.</p>
+          </section>
         ) : (
-          <div className={styles.grid}>
-            {pessoas.map((pessoa) => (
-              <Link
-                key={pessoa.id}
-                to={`/falecidos/${pessoa.id}`}
-                className={styles.personCard}
-              >
-                <div className={styles.personImage}>
-                        <img
-                          src={resolveImageUrl(pessoa.imagem) || personPlaceholder}
-                          alt={pessoa.nome}
-                          onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = personPlaceholder; }}
-                        />
-                </div>
+          <section className={styles.peopleSection} aria-label="Memoriais deste lote">
+            <div className={styles.sectionHeader}>
+              <div>
+                <h2>Memoriais</h2>
+                <p>Toque em uma pessoa para abrir o memorial completo.</p>
+              </div>
+              {pessoas.length > 5 && (
+                <label className={styles.search}>
+                  <Search size={18} aria-hidden="true" />
+                  <input
+                    value={busca}
+                    onChange={(event) => { setBusca(event.target.value); setPagina(1); }}
+                    placeholder="Buscar pelo nome"
+                    aria-label="Buscar pessoa pelo nome"
+                  />
+                </label>
+              )}
+            </div>
 
-                <div className={styles.personInfo}>
-                  <h2 className={styles.personName}>{pessoa.nome}</h2>
-
-                  <div className={styles.personDates}>
-                    <span className={styles.dateBlock}>
-                      <Star size={14} className={styles.starIcon} />
-                      {pessoa.dataNascimento || '—'}
+            {pessoasVisiveis.length ? (
+              <div className={styles.peopleList}>
+                {pessoasVisiveis.map((pessoa) => (
+                  <Link key={pessoa.id} to={`/falecidos/${pessoa.id}`} className={styles.personCard}>
+                    <span className={styles.personImage}>
+                      <img src={resolveImageUrl(pessoa.imagem) || personPlaceholder} alt="" onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = personPlaceholder; }} />
                     </span>
-                    <span className={styles.dateDivider}></span>
-                    <span className={styles.dateBlock}>
-                      <span className={styles.crossIcon}>✝</span>
-                      {pessoa.dataMorte || '—'}
+                    <span className={styles.personInfo}>
+                      <strong>{pessoa.nome || 'Nome não informado'}</strong>
+                      <span className={styles.dates}>
+                        <CalendarDays size={15} aria-hidden="true" />
+                        {pessoa.dataNascimento || '—'} <span aria-hidden="true">—</span> {pessoa.dataMorte || '—'}
+                      </span>
+                      {pessoa.descricao && <span className={styles.personDescription}>{pessoa.descricao}</span>}
                     </span>
-                  </div>
+                    <span className={styles.openMemorial}>Abrir memorial <ExternalLink size={15} aria-hidden="true" /></span>
+                    <ChevronRight className={styles.personArrow} size={18} aria-hidden="true" />
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className={styles.noResults}>Nenhuma pessoa encontrada com esse nome.</div>
+            )}
 
-                  {pessoa.descricao && <p className={styles.personDesc}>{pessoa.descricao}</p>}
-
-                  {pessoa.mensagemFamilia && (
-                    <blockquote className={styles.tributeBox}>
-                      <Quote size={20} className={styles.tributeIcon} />
-                      <p>"{pessoa.mensagemFamilia}"</p>
-                    </blockquote>
-                  )}
+            {pessoasFiltradas.length > PESSOAS_POR_PAGINA && (
+              <div className={styles.pagination}>
+                <span>Pessoas {inicio + 1}–{Math.min(inicio + PESSOAS_POR_PAGINA, pessoasFiltradas.length)} de {pessoasFiltradas.length}<span className={styles.pageCount}> · Página {paginaAtual} de {totalPaginas}</span></span>
+                <div className={styles.pageButtons}>
+                  <button type="button" disabled={paginaAtual === 1} onClick={() => setPagina((current) => Math.max(1, current - 1))} aria-label="Página anterior"><ChevronLeft size={18} /></button>
+                  <button type="button" disabled={paginaAtual === totalPaginas} onClick={() => setPagina((current) => Math.min(totalPaginas, current + 1))} aria-label="Próxima página"><ChevronRight size={18} /></button>
                 </div>
-              </Link>
-            ))}
-          </div>
+              </div>
+            )}
+          </section>
         )}
-      </div>
+      </main>
     </div>
   );
 }

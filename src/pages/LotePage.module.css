@@ -1,242 +1,99 @@
 .page {
-  background: #fbf9f8;
-  padding-bottom: 40px;
+  min-height: 100vh;
+  padding: 40px 24px 72px;
+  background: #f4f7fb;
+  color: #334155;
 }
 
-.container {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 0 24px;
+.container { width: min(100%, 980px); margin: 0 auto; }
+
+.header,
+.peopleSection,
+.emptyState,
+.stateCard {
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 8px 28px rgba(15, 40, 75, 0.05);
 }
 
-.topNav {
-  padding: 30px 0 20px;
-}
+.header { margin-bottom: 24px; padding: 28px 32px 22px; }
+.eyebrow { margin-bottom: 16px; color: #8a641a; font-size: 0.72rem; font-weight: 750; letter-spacing: 0.14em; text-transform: uppercase; }
+.titleRow { display: flex; align-items: center; gap: 16px; }
+.headerIcon { display: grid; width: 54px; height: 54px; flex: 0 0 54px; place-items: center; border-radius: 15px; background: #fff4d9; color: #9a6c0b; }
+.titleInfo { min-width: 0; }
+.quadraLabel { display: block; margin-bottom: 4px; color: #8a641a; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.04em; }
+.titleRow h1 { margin: 0; color: #102d50; font-family: 'Cormorant Garamond', Georgia, serif; font-size: clamp(2rem, 4vw, 2.7rem); font-weight: 600; line-height: 1; }
+.titleRow p { margin: 8px 0 0; color: #64748b; font-size: 0.96rem; }
 
-.backLink {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #775a19;
-  text-decoration: none;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  transition: all 0.2s ease;
-}
+.summary { display: flex; align-items: center; gap: 12px; margin-top: 24px; padding-top: 18px; border-top: 1px solid #e8edf3; }
+.summaryIcon { display: grid; width: 38px; height: 38px; flex: 0 0 38px; place-items: center; border-radius: 11px; background: #eaf3ff; color: #1458a6; }
+.summary > div { display: flex; min-width: 0; flex-direction: column; gap: 2px; }
+.summary strong { color: #12345b; font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+.summary > div span { color: #64748b; font-size: 0.82rem; }
+.quadraLink { display: inline-flex; min-height: 38px; align-items: center; gap: 5px; margin-left: auto; padding: 0 12px; border: 1px solid #d9e4ef; border-radius: 9px; color: #1458a6; font-size: 0.82rem; font-weight: 650; text-decoration: none; transition: background 0.15s ease, border-color 0.15s ease; }
+.quadraLink:hover { border-color: #a9c6e6; background: #f3f8ff; }
 
-.backLink:hover {
-  color: #002046;
-  transform: translateX(-4px);
-}
+.peopleSection { padding: 26px; }
+.sectionHeader { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin-bottom: 18px; }
+.sectionHeader h2 { margin: 0; color: #12345b; font-size: 1.15rem; }
+.sectionHeader p { margin: 5px 0 0; color: #64748b; font-size: 0.86rem; }
 
-.tombHeader {
-  text-align: center;
-  margin-bottom: 48px;
-  padding-top: 48px;
-}
+.search { display: flex; width: min(100%, 280px); min-height: 40px; align-items: center; gap: 8px; padding: 0 11px; border: 1px solid #d9e2ed; border-radius: 10px; background: #fff; color: #718096; }
+.search:focus-within { border-color: #6aa2df; box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.1); }
+.search svg { flex: 0 0 auto; }
+.search input { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: #334155; font: inherit; font-size: 0.88rem; }
+.search input::placeholder { color: #94a3b8; }
 
-.tombIcon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 72px;
-  height: 72px;
-  background: #fffaf0;
-  border: 2px solid #ffdea5;
-  border-radius: 50%;
-  color: #775a19;
-  margin-bottom: 20px;
-}
+.peopleList { display: grid; gap: 10px; }
+.personCard { display: flex; min-width: 0; align-items: center; gap: 14px; padding: 14px 16px; border: 1px solid #e2e8f0; border-radius: 13px; background: #fff; color: inherit; text-decoration: none; transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease; }
+.personCard:hover { transform: translateY(-1px); border-color: #bfd3e8; box-shadow: 0 5px 16px rgba(15, 40, 75, 0.07); }
+.personImage { width: 58px; height: 58px; flex: 0 0 58px; overflow: hidden; border: 1px solid #e2e8f0; border-radius: 50%; background: #f1f5f9; }
+.personImage img { width: 100%; height: 100%; object-fit: cover; }
+.personInfo { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: 5px; }
+.personInfo strong { overflow: hidden; color: #12345b; font-size: 0.94rem; text-overflow: ellipsis; white-space: nowrap; }
+.dates { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 5px; color: #64748b; font-size: 0.8rem; }
+.dates svg { flex: 0 0 auto; color: #8a9aab; }
+.personDescription { display: -webkit-box; overflow: hidden; color: #64748b; font-size: 0.81rem; line-height: 1.45; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.openMemorial { display: inline-flex; align-items: center; gap: 5px; color: #1458a6; font-size: 0.78rem; font-weight: 650; white-space: nowrap; }
+.personArrow { display: none; flex: 0 0 auto; color: #94a3b8; }
 
-.tombTitle {
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
-  font-weight: 800;
-  color: #002046;
-  margin-bottom: 8px;
-  letter-spacing: -0.02em;
-}
+.pagination { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 18px; padding-top: 16px; border-top: 1px solid #edf1f5; color: #64748b; font-size: 0.82rem; }
+.pageCount { color: #94a3b8; }
+.pageButtons { display: flex; gap: 7px; }
+.pageButtons button { display: grid; width: 36px; height: 36px; place-items: center; border: 1px solid #dbe3ed; border-radius: 9px; background: #fff; color: #174675; cursor: pointer; }
+.pageButtons button:hover:not(:disabled) { border-color: #9dbce0; background: #f3f8ff; }
+.pageButtons button:disabled { color: #aab5c2; cursor: not-allowed; }
+.noResults { padding: 22px; border: 1px dashed #d7e0ea; border-radius: 12px; color: #64748b; text-align: center; }
 
-.tombSubtitle {
-  font-size: 1rem;
-  color: #666666;
-}
+.emptyState,
+.stateCard { display: flex; min-height: 240px; flex-direction: column; align-items: center; justify-content: center; padding: 28px; color: #64748b; text-align: center; }
+.emptyState > svg,
+.stateCard > svg { color: #a87a17; }
+.emptyState h2,
+.stateCard h1 { margin: 12px 0 4px; color: #12345b; font-size: 1.15rem; }
+.emptyState p,
+.stateCard p { margin: 0; font-size: 0.9rem; }
 
-.grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 24px;
-}
-
-.personCard {
-  display: flex;
-  gap: 32px;
-  background: #ffffff;
-  border-radius: 16px;
-  border: 1px solid rgba(196, 198, 207, 0.45);
-  box-shadow: 0 8px 24px rgba(0, 32, 70, 0.06);
-  padding: 32px;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  align-items: flex-start;
-}
-
-.personCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 36px rgba(0, 34, 68, 0.1);
-}
-
-.personImage {
-  flex-shrink: 0;
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  overflow: hidden;
-  border: 4px solid #f4f7f9;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  background: #f4f7f9;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.personImage img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-}
-
-.userIcon {
-  color: #999;
-}
-
-.personInfo {
-  flex: 1;
-}
-
-.personName {
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
-  font-weight: 700;
-  color: #002046;
-  margin-bottom: 8px;
-}
-
-.personDates {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-  font-size: 0.95rem;
-  color: #555555;
-  font-weight: 500;
-}
-
-.dateBlock {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.starIcon {
-  color: #d4a017;
-  fill: #d4a017;
-}
-
-.crossIcon {
-  font-size: 1rem;
-  color: #777777;
-  font-weight: 800;
-}
-
-.dateDivider {
-  width: 1px;
-  height: 14px;
-  background-color: #d0d7de;
-}
-
-.personDesc {
-  font-size: 0.95rem;
-  color: #6b7280;
-  line-height: 1.6;
-  margin-bottom: 12px;
-}
-
-.tributeBox {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  background: #fcfcfd;
-  border-left: 2px solid #d9a441;
-  border-radius: 8px;
-  padding: 16px;
-  margin-top: 12px;
-}
-
-.tributeIcon {
-  color: #775a19;
-  opacity: 0.15;
-  flex-shrink: 0;
-  transform: rotate(180deg);
-}
-
-.tributeBox p {
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
-  font-style: italic;
-  font-size: 0.9rem;
-  color: #003366;
-  line-height: 1.6;
-  margin: 0;
-}
-
-.card {
-  background: #ffffff;
-  border-radius: 16px;
-  border: 1px solid #e8edf3;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-}
-
-.footer {
-  text-align: center;
-  margin-top: 60px;
-  padding: 24px 0;
-  border-top: 1px solid #e8edf3;
-  font-size: 0.85rem;
-  color: #999;
-}
-
-@media (max-width: 700px) {
-  .personCard {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding: 24px;
-    gap: 16px;
-  }
-
-  .personImage {
-    width: 100px;
-    height: 100px;
-  }
-
-  .personName {
-    font-size: 1.25rem;
-  }
-
-  .personDates {
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
-  .tributeBox {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .tombTitle {
-    font-size: 1.75rem;
-  }
+@media (max-width: 680px) {
+  .page { padding: 22px 14px 48px; }
+  .header { margin-bottom: 16px; padding: 22px 18px 18px; }
+  .titleRow { align-items: flex-start; gap: 12px; }
+  .headerIcon { width: 44px; height: 44px; flex-basis: 44px; border-radius: 12px; }
+  .titleRow p { font-size: 0.86rem; line-height: 1.45; }
+  .summary { align-items: flex-start; flex-wrap: wrap; gap: 10px; margin-top: 18px; padding-top: 15px; }
+  .summary > div { flex: 1; padding-top: 2px; }
+  .quadraLink { width: 100%; justify-content: center; margin: 3px 0 0; }
+  .peopleSection { padding: 18px 13px; }
+  .sectionHeader { align-items: stretch; flex-direction: column; gap: 12px; margin-bottom: 14px; }
+  .search { width: 100%; box-sizing: border-box; }
+  .personCard { gap: 10px; padding: 11px; }
+  .personImage { width: 48px; height: 48px; flex-basis: 48px; }
+  .personInfo strong { font-size: 0.86rem; }
+  .dates { font-size: 0.73rem; }
+  .personDescription { font-size: 0.76rem; }
+  .openMemorial { display: none; }
+  .personArrow { display: block; }
+  .pagination { align-items: flex-start; font-size: 0.74rem; }
+  .pageCount { display: block; margin-top: 3px; }
 }

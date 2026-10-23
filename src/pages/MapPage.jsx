@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { ZoomIn, ZoomOut, RotateCcw, ChevronLeft, ChevronRight, Search, ArrowLeft } from 'lucide-react';
 import { fetchFalecidos, fetchLotes, fetchQuadras, resolveImageUrl } from '../lib/api';
 import styles from './MapPage.module.css';
-import mapaImg from '../assets/mapaExemplo.jpg';
+import mapaImg from '../assets/mapaExemplo.png';
 import personPlaceholder from '../assets/person-placeholder.svg';
 
 const MAX_ZOOM = 3;
@@ -11,7 +11,7 @@ const LOTS_PER_PAGE = 48;
 const lotNumberCollator = new Intl.Collator('pt-BR', { numeric: true, sensitivity: 'base' });
 
 const SECTORS = [
-    { id: 'A', name: 'Quadra A', x: 73, y: 95 },
+    { id: 'A', name: 'Quadra A', x: 70, y: 92 },
     { id: 'B', name: 'Quadra B', x: 62, y: 75 },
     { id: 'C', name: 'Quadra C', x: 55, y: 60 },
     { id: 'D', name: 'Quadra D', x: 49, y: 48 },
@@ -76,6 +76,7 @@ export default function MapPage() {
     const calibrar =
         typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('calibrar');
     const mapRef = useRef(null);
+    const panelRef = useRef(null);
     const dragRef = useRef(null);
 
     useEffect(() => {
@@ -141,7 +142,7 @@ export default function MapPage() {
         );
 
         handledTargetRef.current = targetKey;
-        selectSector(quadra);
+        selectSector(quadra, false);
         setSelectedLoteId(lote?.id ?? null);
         setBuscaLote('');
         setPaginaLotes(1);
@@ -297,7 +298,7 @@ export default function MapPage() {
         setOffset({ x: 0, y: 0 });
     }
 
-    function selectSector(item) {
+    function selectSector(item, scrollToPanel = true) {
         if (selected === item.id) {
             setSelected(null);
             setSelectedLoteId(null);
@@ -309,8 +310,15 @@ export default function MapPage() {
         setBuscaLote('');
         setPaginaLotes(1);
 
+        if (scrollToPanel) {
+            window.requestAnimationFrame(() => {
+                panelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+        }
+
         const el = mapRef.current;
-        const position = SECTORS.find((sectorItem) => sectorItem.id === normalizeQuadraId(item.nome));
+        const position = pins.find((pin) => String(pin.id) === String(item.id))
+            || pins.find((pin) => pin.code === normalizeQuadraId(item.nome));
         if (!position) return;
         const z = Math.max(zoom, 2);
         setZoom(z);
@@ -443,7 +451,7 @@ export default function MapPage() {
                     </div>
 
                     
-                    <aside className={styles.panel}>
+                    <aside ref={panelRef} className={styles.panel}>
                         {sector ? (
                             <>
                                 <nav className={styles.panelBreadcrumb} aria-label="Navegação do mapa">
@@ -624,12 +632,14 @@ export default function MapPage() {
                                 </ul>
                             </>
                         )}
-                        <div className={styles.mapLegend} aria-label="Legenda do mapa">
-                            <span><i className={styles.legendQuadra} /> Quadra no mapa</span>
-                            <span><i className={styles.legendOccupied} /> Lote com 1 falecido</span>
-                            <span><i className={styles.legendMultiple} /> Lote com 2 ou mais</span>
-                            <span><i className={styles.legendEmpty} /> Lote sem pessoas</span>
-                        </div>
+                        {!loteSelecionado && (
+                            <div className={styles.mapLegend} aria-label="Legenda do mapa">
+                                <span><i className={styles.legendQuadra} /> Quadra no mapa</span>
+                                <span><i className={styles.legendOccupied} /> Lote com 1 falecido</span>
+                                <span><i className={styles.legendMultiple} /> Lote com 2 ou mais</span>
+                                <span><i className={styles.legendEmpty} /> Lote sem pessoas</span>
+                            </div>
+                        )}
                     </aside>
                 </div>
             </main>

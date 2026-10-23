@@ -107,6 +107,8 @@
     position: relative;
     flex: 1 0 auto;
     width: 100%;
+    height: 100%;
+    min-height: 0;
     aspect-ratio: var(--ratio, 1.6);
     overflow: hidden;
     border-radius: 14px 0 0 14px;
@@ -188,7 +190,7 @@
     width: 100%;
     height: 100%;
     border: 0;
-    object-fit: contain;
+    object-fit: fill;
     pointer-events: none;
 }
 
@@ -750,6 +752,7 @@
 
     .map {
         flex: none;
+        height: auto;
         aspect-ratio: var(--ratio, 1.6);
         border-radius: 8px;
     }
@@ -776,5 +779,17 @@
 
     .panel {
         padding: 28px 22px;
+    }
+
+    .mapLegend {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-top: 26px;
+        padding-top: 20px;
+    }
+
+    .mapLegend span {
+        min-width: 0;
+        line-height: 1.4;
     }
 }

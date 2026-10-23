@@ -38,15 +38,6 @@
   transition: transform 0.5s ease;
 }
 
-.noPhoto {
-  display: grid;
-  width: 100%;
-  height: 100%;
-  place-items: center;
-  background: #f1f5f9;
-  color: #94a3b8;
-}
-
 .content {
   flex: 1;
   display: flex;
@@ -56,20 +47,27 @@
 }
 
 .name {
+  width: 100%;
+  height: 2.4em;
+  min-height: 2.4em;
+  max-height: 2.4em;
+  overflow: hidden;
   font-family: 'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
   font-size: 1.2rem;
-  line-height: 1.2; 
+  line-height: 1.2;
   font-weight: 600;
   color: #002952;
   margin-bottom: 4px;
-  min-height: 3.12rem;
-  display: flex;
-  align-items: center; 
-  justify-content: center;
-  overflow: hidden;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.nameCompact {
+  font-size: 1.08rem;
 }
 
 .dates {
