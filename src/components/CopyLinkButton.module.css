@@ -34,3 +34,7 @@
 .copiado:hover:not(:disabled) {
     background: #d3ebdc;
 }
+
+@media print {
+    .button { display: none !important; }
+}

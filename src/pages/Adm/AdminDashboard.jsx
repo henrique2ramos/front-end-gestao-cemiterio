@@ -552,7 +552,7 @@ export default function AdminDashboard({ onLogout }) {
                     selectedImageFile={selectedImageFile}
                     onRemoveImage={removeProfileImage}
                     selectedGalleryFiles={selectedGalleryFiles}
-                    onGalleryUpload={(event) => setSelectedGalleryFiles(Array.from(event.target.files || []))}
+                    onGalleryUpload={(files) => setSelectedGalleryFiles((current) => [...current, ...files].slice(0, 10))}
                     onRemoveGalleryImage={(index) => setSelectedGalleryFiles((files) => files.filter((_, fileIndex) => fileIndex !== index))}
                 />
             )}

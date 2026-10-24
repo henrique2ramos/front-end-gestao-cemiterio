@@ -11,6 +11,7 @@ import MapPage from "../src/pages/MapPage";
 import AdminDashboard from "../src/pages/Adm/AdminDashboard";
 import AdminFalecidos from "../src/pages/Adm/AdminFalecidos";
 import AdminQuadrasLotes from "../src/pages/Adm/AdminQuadrasLotes";
+import AdminQrCodes from "../src/pages/Adm/AdminQrCodes";
 import LoginPage from "./pages/LoginPage";
 import HelpPage from './pages/HelpPage';
 
@@ -95,6 +96,14 @@ function App() {
           element={(
             <AdminRoute isAuthenticated={isAuthenticated}>
               <AdminQuadrasLotes onLogout={handleLogout} />
+            </AdminRoute>
+          )}
+        />
+        <Route
+          path="admin/qrcodes"
+          element={(
+            <AdminRoute isAuthenticated={isAuthenticated}>
+              <AdminQrCodes onLogout={handleLogout} />
             </AdminRoute>
           )}
         />

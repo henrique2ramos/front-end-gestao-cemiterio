@@ -678,8 +678,9 @@
 
 /* --- QR Code Modal --- */
 .qrHeader {
+    position: relative;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     padding: 24px;
     border-bottom: 1px solid var(--border);
@@ -689,6 +690,16 @@
     font-size: 1.2rem;
     color: var(--brand-dark);
     margin: 0;
+    max-width: calc(100% - 56px);
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+
+.qrHeader .closeBtn {
+    position: absolute;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 .qrContainer {
@@ -703,6 +714,42 @@
     color: var(--text-muted);
     margin-bottom: 24px;
     font-size: 0.95rem;
+}
+
+.qrExportActions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 10px;
+    width: 100%;
+}
+
+.qrExportButtonGroup {
+    min-width: 0;
+    width: 100%;
+    margin: 0;
+}
+
+.qrCopyLinkRow { margin-bottom: 14px; }
+
+.qrExportActions > .saveBtn {
+    display: inline-flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-width: 0;
+    height: 40px;
+    box-sizing: border-box;
+    padding: 0 8px;
+    font-size: 0.88rem;
+    white-space: nowrap;
+}
+
+@media (max-width: 420px) {
+    .qrExportActions { gap: 6px; }
+    .qrExportActions > .saveBtn { font-size: 0.78rem; }
+    .qrExportButtonGroup button { gap: 5px; font-size: 0.78rem; }
 }
 
 .loteQrCount {
@@ -1026,7 +1073,7 @@
 .lotToolsCard {
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 12px;
 }
 
 .lotSummary {
@@ -1063,10 +1110,10 @@
     align-items: center;
     justify-content: flex-start;
     width: 100%;
-    margin-top: 12px;
-    padding-top: 20px;
+    margin-top: 8px;
+    padding-top: 12px;
     border-top: 1px solid var(--border);
-    gap: 8px 30px;
+    gap: 8px 14px;
     font-size: 0.82rem;
 }
 
@@ -1129,7 +1176,7 @@
     display: grid;
     grid-template-columns: minmax(170px, 0.85fr) minmax(220px, 1.8fr) auto;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
 }
 
 @media (max-width: 900px) {
@@ -2010,8 +2057,31 @@
         margin: 0 !important;
     }
 
+    .qrHeader {
+        justify-content: center !important;
+        text-align: center !important;
+    }
+
+    .qrHeader h2 {
+        width: 100%;
+        text-align: center !important;
+    }
+
+    .qrContainer,
+    .qrContainer > p {
+        width: 100%;
+        align-items: center !important;
+        text-align: center !important;
+    }
+
     .loteQrCount,
     .loteQrCopy {
         display: none !important;
     }
+}
+
+@media (min-width: 769px) and (max-width: 1440px) {
+    .overviewTitleInfo h1,
+    .title { font-size: 1.8rem; }
+    .quadraTitleGroup .title { font-size: 2rem; }
 }

@@ -35,6 +35,7 @@ export default function FalecidoFormModal({
     const required = requiredFields ? ' *' : '';
     const [uploadedGalleryPreviews, setUploadedGalleryPreviews] = useState([]);
     const [removedExistingGallery, setRemovedExistingGallery] = useState([]);
+    const [galleryLimitReached, setGalleryLimitReached] = useState(false);
     const galleryInputRef = useRef(null);
 
     useEffect(() => {
@@ -44,9 +45,21 @@ export default function FalecidoFormModal({
     }, [selectedGalleryFiles]);
 
     const existingGallery = Array.isArray(selectedFalecido?.galeria) ? selectedFalecido.galeria.filter(Boolean) : [];
+    const activeExistingGallery = existingGallery.filter((_, index) => !removedExistingGallery.includes(index));
+    const galleryImageCount = activeExistingGallery.length + selectedGalleryFiles.length;
     useEffect(() => setRemovedExistingGallery([]), [selectedFalecido?.id]);
+    const handleGallerySelection = (event) => {
+        const files = Array.from(event.target.files || []);
+        const availableSlots = Math.max(0, 10 - galleryImageCount);
+        const acceptedFiles = files.slice(0, availableSlots);
+
+        if (acceptedFiles.length > 0) onGalleryUpload?.(acceptedFiles);
+        setGalleryLimitReached(files.length > availableSlots);
+        event.target.value = '';
+    };
     const removeUploadedGalleryImage = (index) => {
         onRemoveGalleryImage?.(index);
+        setGalleryLimitReached(false);
         if (galleryInputRef.current) galleryInputRef.current.value = '';
     };
 
@@ -133,15 +146,19 @@ export default function FalecidoFormModal({
                                 <div className={styles.formGroup}>
                                 <label>Fotos da Galeria</label>
                                 <div className={styles.fileInputWrapper}>
-                                    <input ref={galleryInputRef} type="file" accept="image/*" multiple onChange={onGalleryUpload} />
+                                    <input ref={galleryInputRef} type="file" accept="image/*" multiple onChange={handleGallerySelection} />
                                 </div>
-                                <small className={styles.inputHelp}>{galleryHelpText}</small>
+                                <small className={styles.inputHelp} aria-live="polite">
+                                    {galleryLimitReached
+                                        ? 'O limite é de 10 imagens. Remova uma foto para adicionar outra.'
+                                        : `${galleryImageCount} de 10 imagens. ${galleryHelpText}`}
+                                </small>
                                 {(existingGallery.length > 0 || uploadedGalleryPreviews.length > 0) && (
                                     <div className={styles.galleryPreview} aria-label="Prévia das fotos da galeria">
                                         {existingGallery.map((src, index) => removedExistingGallery.includes(index) ? null : (
                                             <div key={`existing-gallery-${index}`} className={styles.galleryPreviewItem}>
                                                 <img src={resolveImage(src)} alt={`Foto ${index + 1} da galeria`} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = personPlaceholder; }} />
-                                                <button type="button" className={styles.removeImageBtn} aria-label={`Remover foto ${index + 1} da galeria`} title="Remover foto da prévia" onClick={() => setRemovedExistingGallery((current) => [...current, index])}><X size={15} /></button>
+                                                <button type="button" className={styles.removeImageBtn} aria-label={`Remover foto ${index + 1} da galeria`} title="Remover foto da prévia" onClick={() => { setRemovedExistingGallery((current) => [...current, index]); setGalleryLimitReached(false); }}><X size={15} /></button>
                                             </div>
                                         ))}
                                         {uploadedGalleryPreviews.map((src, index) => (

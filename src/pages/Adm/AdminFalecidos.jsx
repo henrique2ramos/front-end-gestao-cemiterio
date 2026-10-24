@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Plus, Edit, Trash2, Search, X, QrCode, Eye, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, X, QrCode, Eye, ChevronLeft, ChevronRight, AlertCircle, Printer } from 'lucide-react';
 import QRCode from 'react-qr-code';
 import {
     fetchFalecidos,
@@ -15,6 +15,7 @@ import AdminSidebar from './AdminSidebar';
 import CopyLinkButton from '../../components/CopyLinkButton';
 import FalecidoFormModal from '../../components/FalecidoFormModal';
 import FalecidoDetailsModal from '../../components/FalecidoDetailsModal';
+import QrImageDownloadButtons from '../../components/QrImageDownloadButtons';
 import { unwrapPage, getPageItems } from './../../data/adminPagination';
 import styles from './AdminFalecidos.module.css';
 import personPlaceholder from '../../assets/person-placeholder.svg';
@@ -66,6 +67,7 @@ export default function AdminFalecidos({ onLogout }) {
     const nascimentoDatePickerRef = useRef(null);
     const morteDatePickerRef = useRef(null);
     const imageInputRef = useRef(null);
+    const qrCodeBoxRef = useRef(null);
     const [quadrasDisponiveis, setQuadrasDisponiveis] = useState([]);
     const [lotesDisponiveis, setLotesDisponiveis] = useState([]);
 
@@ -283,7 +285,7 @@ export default function AdminFalecidos({ onLogout }) {
             input.click();
         }
     };
-    const handleGalleryUpload = (e) => setSelectedGalleryFiles(Array.from(e.target.files || []));
+    const handleGalleryUpload = (files) => setSelectedGalleryFiles((current) => [...current, ...files].slice(0, 10));
     const removeGalleryImage = (index) => setSelectedGalleryFiles((files) => files.filter((_, fileIndex) => fileIndex !== index));
 
     const openNewModal = () => {
@@ -565,18 +567,19 @@ export default function AdminFalecidos({ onLogout }) {
                 <div className={styles.modalOverlay} onClick={() => setIsQrModalOpen(false)}>
                     <div className={styles.modalContentSmall} onClick={(e) => e.stopPropagation()}>
                         <div className={styles.qrHeader}>
-                            <h2>QR Code do Falecido</h2>
+                            <h2>{selectedFalecido.nome}</h2>
                             <button className={styles.closeBtn} onClick={() => setIsQrModalOpen(false)}><X size={24} /></button>
                         </div>
                         <div className={styles.qrContainer}>
-                            <p>Escaneie para acessar a página de <strong>{selectedFalecido.nome}</strong></p>
-                            <div className={styles.qrCodeBox}>
-                                <QRCode value={qrCodeUrl} size={200} fgColor="#0f172a" />
+                            <p>Escaneie para acessar a página de <strong>{selectedFalecido.nome}</strong>{selectedFalecido.localizacao && <><br />{selectedFalecido.localizacao}</>}</p>
+                            <div className={styles.qrCodeBox} ref={qrCodeBoxRef}>
+                                <QRCode value={qrCodeUrl} size={200} fgColor="#000000" />
                             </div>
-                            <CopyLinkButton url={qrCodeUrl} />
-                            <button className={styles.saveBtn} style={{ marginTop: '16px', width: '100%' }} onClick={() => window.print()}>
-                                Imprimir Placa
-                            </button>
+                            <div className={styles.qrCopyLinkRow}><CopyLinkButton url={qrCodeUrl} /></div>
+                            <div className={styles.qrExportActions}>
+                                <QrImageDownloadButtons className={styles.qrExportButtonGroup} containerRef={qrCodeBoxRef} fileName={`falecido-${selectedFalecido.nome}-${selectedFalecido.localizacao || ''}`} title={selectedFalecido.nome} subtitle={selectedFalecido.localizacao || ''} />
+                                <button className={styles.saveBtn} onClick={() => window.print()}><Printer size={16} /> Imprimir Placa</button>
+                            </div>
                         </div>
                     </div>
                 </div>

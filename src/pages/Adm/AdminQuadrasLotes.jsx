@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plus, X, ChevronLeft, AlertCircle } from 'lucide-react';
+import { Plus, X, ChevronLeft, AlertCircle, Printer } from 'lucide-react';
 import QRCode from 'react-qr-code';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -21,6 +21,7 @@ import AdminSidebar from './AdminSidebar';
 import CopyLinkButton from '../../components/CopyLinkButton';
 import FalecidoFormModal from '../../components/FalecidoFormModal';
 import FalecidoDetailsModal from '../../components/FalecidoDetailsModal';
+import QrImageDownloadButtons from '../../components/QrImageDownloadButtons';
 import { getPageItems } from './../../data/adminPagination';
 import styles from './AdminQuadrasLotes.module.css';
 import AdminQuadras from './AdminQuadras';
@@ -62,6 +63,9 @@ export default function AdminQuadrasLotes({ onLogout }) {
     const nascimentoDatePickerRef = useRef(null);
     const morteDatePickerRef = useRef(null);
     const lotActionsMenuRef = useRef(null);
+    const deceasedQrBoxRef = useRef(null);
+    const lotQrBoxRef = useRef(null);
+    const quadraQrBoxRef = useRef(null);
     const [falecidos, setFalecidos] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [currentLotePage, setCurrentLotePage] = useState(1);
@@ -569,14 +573,8 @@ export default function AdminQuadrasLotes({ onLogout }) {
         reader.readAsDataURL(file);
     };
 
-    const handleGalleryUpload = (e) => {
-        const files = Array.from(e.target.files || []);
-        if (!files.length) {
-            setSelectedGalleryFiles([]);
-            return;
-        }
-
-        setSelectedGalleryFiles(files);
+    const handleGalleryUpload = (files) => {
+        if (files.length > 0) setSelectedGalleryFiles((current) => [...current, ...files].slice(0, 10));
     };
     const removeGalleryImage = (index) => setSelectedGalleryFiles((files) => files.filter((_, fileIndex) => fileIndex !== index));
 
@@ -1040,18 +1038,19 @@ export default function AdminQuadrasLotes({ onLogout }) {
                 <div className={styles.modalOverlay} onClick={() => setIsQrModalOpen(false)}>
                     <div className={styles.modalContentSmall} onClick={(e) => e.stopPropagation()}>
                         <div className={styles.qrHeader}>
-                            <h2>QR Code do Falecido</h2>
+                            <h2>{selectedFalecido.nome}</h2>
                             <button className={styles.closeBtn} onClick={() => setIsQrModalOpen(false)}><X size={24} /></button>
                         </div>
                         <div className={styles.qrContainer}>
-                            <p>Escaneie para acessar o falecido de <strong>{selectedFalecido.nome}</strong></p>
-                            <div className={styles.qrCodeBox}>
-                                <QRCode value={qrCodeUrl} size={200} fgColor="#0f172a" />
+                            <p>Escaneie para acessar o falecido de <strong>{selectedFalecido.nome}</strong><br />{selectedFalecido.localizacao || `Quadra ${selectedQuadra}, Lote ${selectedLote}`}</p>
+                            <div className={styles.qrCodeBox} ref={deceasedQrBoxRef}>
+                                <QRCode value={qrCodeUrl} size={200} fgColor="#000000" />
                             </div>
-                            <CopyLinkButton url={qrCodeUrl} />
-                            <button className={styles.saveBtn} style={{ marginTop: '16px', width: '100%' }} onClick={() => window.print()}>
-                                Imprimir Placa
-                            </button>
+                            <div className={styles.qrCopyLinkRow}><CopyLinkButton url={qrCodeUrl} /></div>
+                            <div className={styles.qrExportActions}>
+                                <QrImageDownloadButtons className={styles.qrExportButtonGroup} containerRef={deceasedQrBoxRef} fileName={`falecido-${selectedFalecido.nome}-${selectedFalecido.localizacao || `Quadra ${selectedQuadra}, Lote ${selectedLote}`}`} title={selectedFalecido.nome} subtitle={selectedFalecido.localizacao || `Quadra ${selectedQuadra}, Lote ${selectedLote}`} />
+                                <button className={styles.saveBtn} onClick={() => window.print()}><Printer size={16} /> Imprimir Placa</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1062,21 +1061,29 @@ export default function AdminQuadrasLotes({ onLogout }) {
                 <div className={styles.modalOverlay} onClick={() => setIsLoteQrModalOpen(false)}>
                     <div className={styles.modalContentSmall} onClick={(e) => e.stopPropagation()}>
                         <div className={styles.qrHeader}>
-                            <h2>QR Code do Lote</h2>
+                            <h2>Lote {loteQrData.nome}</h2>
                             <button className={styles.closeBtn} onClick={() => setIsLoteQrModalOpen(false)}><X size={24} /></button>
                         </div>
                         <div className={styles.qrContainer}>
-                            <p>Lote {loteQrData.nome}</p>
                             <p className={styles.loteQrCount}>
                                 {loteQrData.people.length} {loteQrData.people.length === 1 ? 'falecido' : 'falecidos'} neste lote
                             </p>
-                            <div className={styles.qrCodeBox}>
-                                <QRCode value={loteQrUrl} size={200} fgColor="#0f172a" />
+                            <div className={styles.qrCodeBox} ref={lotQrBoxRef}>
+                                <QRCode value={loteQrUrl} size={200} fgColor="#000000" />
                             </div>
-                            <div className={styles.loteQrCopy}>
+                            <div className={`${styles.loteQrCopy} ${styles.qrCopyLinkRow}`}>
                                 <CopyLinkButton url={loteQrUrl} />
                             </div>
-                            <button className={styles.saveBtn} style={{ marginTop: '16px', width: '100%' }} onClick={() => window.print()}>Imprimir Placa</button>
+                            <div className={styles.qrExportActions}>
+                                <QrImageDownloadButtons
+                                    className={styles.qrExportButtonGroup}
+                                    containerRef={lotQrBoxRef}
+                                    fileName={`quadra-${selectedQuadra}-lote-${loteQrData.nome}`}
+                                    title={`Lote ${loteQrData.nome}`}
+                                    subtitle={`Quadra ${selectedQuadra} · Lote ${loteQrData.nome}`}
+                                />
+                                <button className={styles.saveBtn} onClick={() => window.print()}><Printer size={16} /> Imprimir Placa</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1087,19 +1094,26 @@ export default function AdminQuadrasLotes({ onLogout }) {
                 <div className={styles.modalOverlay} onClick={() => setIsQuadraQrModalOpen(false)}>
                     <div className={styles.modalContentSmall} onClick={(e) => e.stopPropagation()}>
                         <div className={styles.qrHeader}>
-                            <h2>QR Code da Quadra</h2>
+                            <h2>Quadra {quadraQrData.nome}</h2>
                             <button className={styles.closeBtn} onClick={() => setIsQuadraQrModalOpen(false)}><X size={24} /></button>
                         </div>
                         <div className={styles.qrContainer}>
-                            <p>Quadra {quadraQrData.nome}</p>
                             <p style={{ fontSize: '0.85rem', color: '#888', marginBottom: '16px' }}>
                                 {quadraQrData.loteCount} {quadraQrData.loteCount === 1 ? 'lote' : 'lotes'} nesta quadra
                             </p>
-                            <div className={styles.qrCodeBox}>
-                                <QRCode value={quadraQrUrl} size={200} fgColor="#0f172a" />
+                            <div className={styles.qrCodeBox} ref={quadraQrBoxRef}>
+                                <QRCode value={quadraQrUrl} size={200} fgColor="#000000" />
                             </div>
-                            <CopyLinkButton url={quadraQrUrl} />
-                            <button className={styles.saveBtn} style={{ marginTop: '16px', width: '100%' }} onClick={() => window.print()}>Imprimir Placa</button>
+                            <div className={styles.qrCopyLinkRow}><CopyLinkButton url={quadraQrUrl} /></div>
+                            <div className={styles.qrExportActions}>
+                                <QrImageDownloadButtons
+                                    className={styles.qrExportButtonGroup}
+                                    containerRef={quadraQrBoxRef}
+                                    fileName={`quadra-${quadraQrData.nome}`}
+                                    title={`Quadra ${quadraQrData.nome}`}
+                                />
+                                <button className={styles.saveBtn} onClick={() => window.print()}><Printer size={16} /> Imprimir Placa</button>
+                            </div>
                         </div>
                     </div>
                 </div>

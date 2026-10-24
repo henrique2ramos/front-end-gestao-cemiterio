@@ -51,8 +51,15 @@ async function request(path, options = {}) {
   return data;
 }
 
-export async function fetchFalecidos() {
-  const data = await request('/api/falecidos');
+export async function fetchFalecidos({ page, limit } = {}) {
+  const params = new URLSearchParams();
+  if (page != null) params.set('page', String(page));
+  if (limit != null) params.set('limit', String(limit));
+  const queryString = params.toString();
+  const query = queryString ? `?${queryString}` : '';
+  const data = await request(`/api/falecidos${query}`);
+
+  if (page != null || limit != null) return data;
 
   if (Array.isArray(data)) return data;
   if (Array.isArray(data?.items)) return data;
