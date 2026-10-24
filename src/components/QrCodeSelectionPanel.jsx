@@ -195,7 +195,11 @@ export default function QrCodeSelectionPanel({ items = [], quadras = [] }) {
             if (controller.signal.aborted) throw new DOMException('Geração cancelada.', 'AbortError');
             await callback(controller.signal);
         } catch (exportError) {
-            if (exportError.name === 'AbortError') setExportNotice('Geração cancelada. Nenhum arquivo foi baixado.');
+            if (exportError.name === 'AbortError') {
+                setExportNotice(action === 'print'
+                    ? 'Impressão cancelada.'
+                    : 'Download cancelado. Nenhum arquivo foi baixado.');
+            }
             else setError(exportError.message || 'Não foi possível preparar os QR Codes.');
         } finally {
             if (exportControllerRef.current === controller) exportControllerRef.current = null;
@@ -495,19 +499,16 @@ export default function QrCodeSelectionPanel({ items = [], quadras = [] }) {
                     <button type="button" onClick={() => requestExport('print')} disabled={!selectedItems.length || Boolean(busyAction)}><Printer size={17} />{busyAction === 'print' ? 'Preparando...' : 'Imprimir / PDF'}</button>
                     <button type="button" onClick={downloadSheets} disabled={!selectedItems.length || Boolean(busyAction)}><Download size={17} />{busyAction === 'png' ? 'Gerando...' : 'Folhas PNG'}</button>
                     <button type="button" onClick={downloadIndividualPngs} disabled={!selectedItems.length || Boolean(busyAction)}><Download size={17} />{busyAction === 'zip' ? 'Gerando ZIP...' : 'PNG individuais (ZIP)'}</button>
+                    {exportProgress && <button type="button" onClick={cancelGeneration} disabled={exportProgress.startsWith('Cancelando')}>
+                        {exportProgress.startsWith('Cancelando')
+                            ? 'Cancelando...'
+                            : busyAction === 'print' ? 'Cancelar impressão' : 'Cancelar download'}
+                    </button>}
                 </div>
                 {exportProgress && <div className={styles.exportProgressRow}>
                     <p className={styles.exportProgress} role="status" aria-live="polite">
                         {exportProgress} <span>Não atualize nem feche a página durante a geração.</span>
                     </p>
-                    <button
-                        type="button"
-                        className={styles.cancelExportButton}
-                        onClick={cancelGeneration}
-                        disabled={exportProgress.startsWith('Cancelando')}
-                    >
-                        {exportProgress.startsWith('Cancelando') ? 'Cancelando...' : 'Cancelar geração'}
-                    </button>
                 </div>}
                 {exportNotice && <p className={styles.exportNotice} role="status">{exportNotice}</p>}
                 <p className={styles.exportHint}>As folhas comportam {PAGE_SIZE} QR Codes; com mais registros, o download reúne as folhas em um ZIP.</p>
