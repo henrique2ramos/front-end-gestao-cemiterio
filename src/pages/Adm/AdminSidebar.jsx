@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
-    LayoutDashboard, Users, Map as MapIcon, LogOut, ChevronRight, ChevronLeft, Home, ShieldCheck, QrCode
+    LayoutDashboard, Users, Map as MapIcon, LogOut, ChevronRight, ChevronLeft, Home, QrCode
 } from 'lucide-react';
 import styles from './AdminSidebar.module.css';
 
@@ -31,11 +31,15 @@ export default function AdminSidebar({ onLogout }) {
             <aside className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}>
                 <NavLink to="/admin" className={styles.sidebarHeader} onClick={closeOnMobile}>
                     <span className={styles.brandMark} aria-hidden="true">
-                        <ShieldCheck size={21} strokeWidth={2.2} />
+                        <svg viewBox="0 0 24 24" width="30" height="40" fill="none" aria-hidden="true">
+                            <path d="M5 21V9a7 7 0 0 1 14 0v12H5Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+                            <path d="M12 7v7M9.5 9.5h5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                            <path d="M9 21v-2h6v2" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+                        </svg>
                     </span>
                     <span className={styles.brandText}>
-                        <strong>Painel</strong>
-                        <strong>Administrativo</strong>
+                        <strong>SGC</strong>
+                        <span>Sistema de Gestão<br />de Cemitério</span>
                     </span>
                 </NavLink>
 

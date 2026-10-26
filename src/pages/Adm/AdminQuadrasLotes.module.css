@@ -854,7 +854,8 @@
     min-height: 36px;
     align-items: center;
     gap: 3px;
-    padding: 0 4px;
+    margin-left: -19px;
+    padding: 0;
     border: 0;
     background: transparent;
     color: var(--text-muted);
@@ -863,6 +864,7 @@
     font-weight: 600;
     cursor: pointer;
     margin: 0;
+    transform: none;
     transition: color 0.2s;
 }
 
@@ -873,8 +875,8 @@
 /* --- Grid de Quadras/Lotes --- */
 .setoresGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
 }
 
 .lotesGrid {
@@ -973,13 +975,16 @@
 .setorCard:focus-within { z-index: 6; }
 
 .setorCardBtn {
-    display: flex;
+    display: grid;
+    grid-template-columns: 50px minmax(0, 1fr);
+    grid-template-rows: auto auto;
     align-items: center;
-    gap: 14px;
+    column-gap: 12px;
+    row-gap: 8px;
     width: 100%;
-    min-height: 112px;
+    min-height: 108px;
     position: relative;
-    padding: 20px 62px 20px 18px;
+    padding: 16px 56px 16px 16px;
     border-radius: 13px;
     background: transparent;
     border: none;
@@ -1007,17 +1012,21 @@
 }
 
 .setorIcon {
-    width: 52px;
-    height: 52px;
-    border-radius: 13px;
+    width: 50px;
+    height: 60px;
+    border-radius: 10px;
     background: #eff6ff;
     color: var(--brand);
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
     box-shadow: inset 0 1px 3px rgba(0, 102, 204, 0.06);
-    flex: 0 0 52px;
+    font-size: 2.2rem;
+    font-weight: 400;
+    line-height: 1;
 }
 
 .setorOpenIcon {
@@ -1030,9 +1039,12 @@
 
 .setorCard:hover .setorOpenIcon { color: var(--brand); transform: translateX(2px); }
 
+.setorInfo { display: flex; min-width: 0; grid-column: 2; grid-row: 1 / span 2; flex-direction: column; align-items: stretch; justify-content: center; gap: 8px; padding-block: 2px; }
+.setorInfoHeader { display: flex; min-width: 0; align-items: center; justify-content: flex-start; gap: 10px; }
+
 .setorInfo h3 {
     font-size: 1.08rem;
-    font-weight: 700;
+    font-weight: 750;
     color: var(--brand-dark);
     margin: 0;
     letter-spacing: -0.01em;
@@ -1041,15 +1053,26 @@
 .setorLotCount {
     display: inline-flex;
     width: fit-content;
+    flex: 0 0 auto;
     align-items: center;
-    margin-top: 7px;
-    padding: 3px 8px;
-    border-radius: 999px;
-    background: #f1f5f9;
+    margin-top: 0;
     color: var(--text-muted);
     font-size: 0.76rem;
     font-weight: 600;
 }
+
+.setorOccupancy { display: flex; width: 100%; min-width: 0; flex-direction: column; gap: 6px; }
+.setorOccupancyBarRow { display: flex; min-width: 0; align-items: center; gap: 9px; }
+.setorOccupancyBar { display: block; width: 100%; height: 8px; flex: 1 1 auto; overflow: hidden; border-radius: 999px; background: #e7edf4; }
+.setorOccupancyBar > span { display: block; height: 100%; border-radius: inherit; background: #4a90e2; transition: width 180ms ease; }
+.setorOccupancyPercent { flex: 0 0 auto; color: var(--brand); font-size: 0.8rem; }
+.setorLotStats { display: flex; width: 100%; flex-wrap: wrap; align-items: center; justify-content: flex-start; gap: 6px 12px; margin-top: 0; color: var(--text-muted); font-size: 0.78rem; font-weight: 500; }
+.setorLotStats > span { display: inline-flex; min-width: 0; align-items: center; gap: 6px; }
+.setorLotStats strong { color: var(--text-main); font-weight: 700; }
+.setorLotStats i { width: 8px; height: 8px; flex: 0 0 8px; border-radius: 50%; }
+.lotStatsOccupied { background: #4a90e2; }
+.lotStatsEmpty { border: 1px solid #94a3b8; background: transparent; }
+.quadrasPagination { display: flex; grid-column: 1 / -1; align-items: center; justify-content: flex-end; gap: 14px; padding-top: 10px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.84rem; }
 
 .loteSearch {
     margin-bottom: 24px;
@@ -1812,6 +1835,8 @@
     .setoresGrid {
         grid-template-columns: 1fr;
     }
+
+    .quadrasPagination { flex-direction: column; justify-content: center; gap: 6px; }
 
     .setorCardBtn { padding-right: 62px; }
 

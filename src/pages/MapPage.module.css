@@ -1,6 +1,6 @@
 .page {
     min-height: 100vh;
-    background: #f3f0ee;
+    background: #ffffff;
     color: #44474e;
     font-family: 'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
 }
@@ -87,8 +87,9 @@
     max-width: 1240px;
     margin: 0 auto;
     border-radius: 14px;
-    background: #fffdfd;
-    box-shadow: none;
+    background: #ffffff;
+    border: 1px solid #e3eaf2;
+    box-shadow: 0 4px 18px rgba(0, 32, 70, 0.07);
 }
 
 .mapWrapper {
@@ -745,9 +746,9 @@
     .mapWrapper {
         display: block;
         padding: 12px;
-        border: 1px solid rgba(19, 43, 77, 0.08);
+        border: 1px solid #e3eaf2;
         border-radius: 14px;
-        box-shadow: 0 18px 44px rgba(40, 30, 20, 0.12);
+        box-shadow: 0 4px 16px rgba(0, 32, 70, 0.07);
     }
 
     .map {
@@ -759,7 +760,8 @@
 
     .panel {
         border-radius: 14px;
-        box-shadow: 0 18px 44px rgba(40, 30, 20, 0.12);
+        border: 1px solid #e3eaf2;
+        box-shadow: 0 4px 16px rgba(0, 32, 70, 0.07);
     }
 
     .panel {

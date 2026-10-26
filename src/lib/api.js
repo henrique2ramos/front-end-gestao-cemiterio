@@ -1,3 +1,5 @@
+import { normalizeFalecidoNames, normalizeFalecidoPayload } from './falecidoName';
+
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export function resolveImageUrl(value) {
@@ -59,12 +61,12 @@ export async function fetchFalecidos({ page, limit } = {}) {
   const query = queryString ? `?${queryString}` : '';
   const data = await request(`/api/falecidos${query}`);
 
-  if (page != null || limit != null) return data;
+  if (page != null || limit != null) return normalizeFalecidoNames(data);
 
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.items)) return data;
-  if (Array.isArray(data?.falecidos)) return data.falecidos;
-  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data)) return normalizeFalecidoNames(data);
+  if (Array.isArray(data?.items)) return normalizeFalecidoNames(data.items);
+  if (Array.isArray(data?.falecidos)) return normalizeFalecidoNames(data.falecidos);
+  if (Array.isArray(data?.data)) return normalizeFalecidoNames(data.data);
 
   console.warn('A API retornou um formato inesperado para a lista de falecidos.');
 
@@ -72,15 +74,15 @@ export async function fetchFalecidos({ page, limit } = {}) {
 }
 
 export async function fetchFalecidoById(id) {
-  return request(`/api/falecidos/${id}`);
+  return normalizeFalecidoNames(await request(`/api/falecidos/${id}`));
 }
 
 export async function fetchFalecidosPorLote(loteId) {
-  return request(`/api/falecidos?loteId=${encodeURIComponent(loteId)}`);
+  return normalizeFalecidoNames(await request(`/api/falecidos?loteId=${encodeURIComponent(loteId)}`));
 }
 
 export async function fetchFalecidosPorQuadra(quadraId) {
-  return request(`/api/falecidos?quadraId=${encodeURIComponent(quadraId)}`);
+  return normalizeFalecidoNames(await request(`/api/falecidos?quadraId=${encodeURIComponent(quadraId)}`));
 }
 
 export async function fetchLote(id) {
@@ -99,19 +101,19 @@ export async function loginAdmin(email, password) {
 }
 
 export async function createFalecido(payload, token) {
-  return request('/api/falecidos', {
+  return normalizeFalecidoNames(await request('/api/falecidos', {
     method: 'POST',
-    body: payload,
+    body: normalizeFalecidoPayload(payload),
     authToken: token,
-  });
+  }));
 }
 
 export async function updateFalecido(id, payload, token) {
-  return request(`/api/falecidos/${id}`, {
+  return normalizeFalecidoNames(await request(`/api/falecidos/${id}`, {
     method: 'PUT',
-    body: payload,
+    body: normalizeFalecidoPayload(payload),
     authToken: token,
-  });
+  }));
 }
 
 export async function deleteFalecido(id, token) {

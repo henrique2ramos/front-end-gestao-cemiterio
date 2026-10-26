@@ -1,6 +1,6 @@
 .page {
     min-height: 100vh;
-    background: #f3f0ee;
+    background: #ffffff;
     color: #44474e;
     font-family: 'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
 }
@@ -135,7 +135,7 @@
 
 .filterSection {
     padding: 40px 0 16px;
-    background: #f3f0ee;
+    background: #ffffff;
 }
 
 .controlCenter {

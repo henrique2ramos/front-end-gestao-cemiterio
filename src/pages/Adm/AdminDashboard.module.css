@@ -356,7 +356,7 @@
 
 .secondaryAction {
     flex: 0 0 184px;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--line);
     background: #fff;
     color: var(--ink);
     box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);

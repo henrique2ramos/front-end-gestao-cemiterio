@@ -86,6 +86,7 @@ export default function AdminQuadrasLotes({ onLogout }) {
     const [quadras, setQuadras] = useState([]);
     const [lotes, setLotes] = useState([]);
     const [quantidadeLotesPorQuadra, setQuantidadeLotesPorQuadra] = useState({});
+    const [ocupacaoLotesPorQuadra, setOcupacaoLotesPorQuadra] = useState({});
     const [carregandoQuadras, setCarregandoQuadras] = useState(true);
     const [quadraDosLotes, setQuadraDosLotes] = useState(null);
 
@@ -309,20 +310,28 @@ export default function AdminQuadrasLotes({ onLogout }) {
             const resultados = await Promise.all(quadras.map(async (quadra) => {
                 try {
                     const data = await fetchLotes(quadra.id);
-                    return [quadra.id, Array.isArray(data) ? data.length : 0];
+                    const lotesDaQuadra = Array.isArray(data) ? data : [];
+                    const ocupados = lotesDaQuadra.filter((lote) => falecidos.some((falecido) =>
+                        (falecido.loteId != null && lote.id != null && String(falecido.loteId) === String(lote.id))
+                        || falecido.localizacao === `Quadra ${quadra.nome}, Lote ${lote.numero}`
+                    )).length;
+                    return [quadra.id, { total: lotesDaQuadra.length, ocupados, vazios: lotesDaQuadra.length - ocupados }];
                 } catch (error) {
                     console.error(`Erro ao contar lotes da quadra ${quadra.nome}:`, error);
-                    return [quadra.id, 0];
+                    return [quadra.id, { total: 0, ocupados: 0, vazios: 0 }];
                 }
             }));
 
-            if (!cancelado) setQuantidadeLotesPorQuadra(Object.fromEntries(resultados));
+            if (!cancelado) {
+                setQuantidadeLotesPorQuadra(Object.fromEntries(resultados.map(([id, resumo]) => [id, resumo.total])));
+                setOcupacaoLotesPorQuadra(Object.fromEntries(resultados.map(([id, resumo]) => [id, resumo])));
+            }
         }
 
         if (quadras.length > 0) carregarContagemLotes();
 
         return () => { cancelado = true; };
-    }, [quadras]);
+    }, [quadras, falecidos]);
 
     useEffect(() => {
         const quadra = quadras.find(q => q.nome === selectedQuadra);
@@ -376,10 +385,26 @@ export default function AdminQuadrasLotes({ onLogout }) {
         });
     };
 
+    const ajustarResumoLotes = (quadraId, total, ocupados, vazios) => {
+        setOcupacaoLotesPorQuadra((resumos) => {
+            const atual = resumos[quadraId] || { total: lotes.length, ocupados: 0, vazios: lotes.length };
+            return {
+                ...resumos,
+                [quadraId]: {
+                    total: Math.max(0, atual.total + total),
+                    ocupados: Math.max(0, atual.ocupados + ocupados),
+                    vazios: Math.max(0, atual.vazios + vazios),
+                },
+            };
+        });
+    };
+
     const quadrasComCount = quadras.map(q => ({
         id: q.id,
         nome: q.nome,
-        count: quantidadeLotesPorQuadra[q.id] ?? 0
+        count: quantidadeLotesPorQuadra[q.id] ?? 0,
+        ocupados: ocupacaoLotesPorQuadra[q.id]?.ocupados ?? 0,
+        vazios: ocupacaoLotesPorQuadra[q.id]?.vazios ?? 0,
     }));
     const lotesDaQuadra = (quadraSelecionada && !carregandoLotes)
         ? lotes
@@ -764,6 +789,7 @@ export default function AdminQuadrasLotes({ onLogout }) {
             setLotOccupancyFilter('all');
             setIsBulkLotesModalOpen(false);
             ajustarContagemLotes(quadraSelecionada.id, lotesCriados);
+            ajustarResumoLotes(quadraSelecionada.id, lotesCriados, 0, lotesCriados);
             await recarregarLotes();
             if (existentesIgnorados > 0) {
                 window.alert(`${lotesCriados} lotes criados. ${existentesIgnorados} número(s) que já existiam foram ignorados.`);
@@ -771,6 +797,7 @@ export default function AdminQuadrasLotes({ onLogout }) {
         } catch (error) {
             if (lotesCriados > 0) {
                 ajustarContagemLotes(quadraSelecionada.id, lotesCriados);
+                ajustarResumoLotes(quadraSelecionada.id, lotesCriados, 0, lotesCriados);
                 await recarregarLotes();
             }
             window.alert(error.message || 'Não foi possível criar os lotes.');
@@ -799,6 +826,7 @@ export default function AdminQuadrasLotes({ onLogout }) {
             } else {
                 await createLote(quadraSelecionada.id, nome, getToken());
                 ajustarContagemLotes(quadraSelecionada.id, 1);
+                ajustarResumoLotes(quadraSelecionada.id, 1, 0, 1);
                 await recarregarLotes();
                 setSelectedLote(nome);
             }
@@ -818,10 +846,15 @@ export default function AdminQuadrasLotes({ onLogout }) {
             async () => {
                 const alvo = lotes.find(l => l.numero === lote);
                 if (!alvo) return;
+                const estavaOcupado = falecidos.some((falecido) =>
+                    (falecido.loteId != null && alvo.id != null && String(falecido.loteId) === String(alvo.id))
+                    || falecido.localizacao === `Quadra ${selectedQuadra}, Lote ${lote}`
+                );
 
                 try {
                     const resultado = await deleteLote(alvo.id, getToken());
                     ajustarContagemLotes(quadraSelecionada.id, -1);
+                    ajustarResumoLotes(quadraSelecionada.id, -1, estavaOcupado ? -1 : 0, estavaOcupado ? 0 : -1);
                     await recarregarLotes();
                     await recarregarMemoriais();
 

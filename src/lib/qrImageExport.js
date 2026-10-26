@@ -47,7 +47,7 @@ export async function svgToRasterBlob(svgNode, format = 'png', size = 720) {
     }
 }
 
-export async function svgToLabeledRasterBlob(svgNode, title, subtitle = '', size = 720, signal) {
+export async function svgToLabeledRasterBlob(svgNode, title, subtitle = '', size = 720, signal, onProgress) {
     if (!svgNode) throw new Error('QR Code não encontrado.');
 
     const svg = svgNode.cloneNode(true);
@@ -66,7 +66,8 @@ export async function svgToLabeledRasterBlob(svgNode, title, subtitle = '', size
         const image = new Image();
         image.src = source;
         await image.decode();
-        if (signal?.aborted) throw new DOMException('GeraÃ§Ã£o cancelada.', 'AbortError');
+        if (signal?.aborted) throw new DOMException('Geração cancelada.', 'AbortError');
+        onProgress?.(1, 3);
 
         const padding = 60;
         const width = size + padding * 2;
@@ -121,9 +122,17 @@ export async function svgToLabeledRasterBlob(svgNode, title, subtitle = '', size
 
         context.imageSmoothingEnabled = false;
         context.drawImage(image, padding, qrTop, size, size);
+        onProgress?.(2, 3);
 
         return await new Promise((resolve, reject) => {
-            canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('Falha ao gerar a imagem.')), 'image/png');
+            canvas.toBlob((blob) => {
+                if (!blob) {
+                    reject(new Error('Falha ao gerar a imagem.'));
+                    return;
+                }
+                onProgress?.(3, 3);
+                resolve(blob);
+            }, 'image/png');
         });
     } finally {
         URL.revokeObjectURL(source);
@@ -160,7 +169,26 @@ function dosDateTime() {
     };
 }
 
-export async function createZipBlob(files, signal) {
+/* Garante nomes únicos dentro do ZIP: o segundo "joao.png" vira "joao-2.png", e assim por diante. */
+function uniqueFileNames(files) {
+    const used = new Set();
+    return files.map((file) => {
+        const dot = file.name.lastIndexOf('.');
+        const base = dot > 0 ? file.name.slice(0, dot) : file.name;
+        const extension = dot > 0 ? file.name.slice(dot) : '';
+        let name = file.name;
+        let counter = 1;
+        while (used.has(name.toLowerCase())) {
+            counter += 1;
+            name = `${base}-${counter}${extension}`;
+        }
+        used.add(name.toLowerCase());
+        return name === file.name ? file : { ...file, name };
+    });
+}
+
+export async function createZipBlob(inputFiles, signal) {
+    const files = uniqueFileNames(inputFiles);
     const encoder = new TextEncoder();
     const localParts = [];
     const centralParts = [];
@@ -168,10 +196,10 @@ export async function createZipBlob(files, signal) {
     let localOffset = 0;
 
     for (const file of files) {
-        if (signal?.aborted) throw new DOMException('GeraÃ§Ã£o cancelada.', 'AbortError');
+        if (signal?.aborted) throw new DOMException('Geração cancelada.', 'AbortError');
         const name = encoder.encode(file.name);
         const data = new Uint8Array(await file.blob.arrayBuffer());
-        if (signal?.aborted) throw new DOMException('GeraÃ§Ã£o cancelada.', 'AbortError');
+        if (signal?.aborted) throw new DOMException('Geração cancelada.', 'AbortError');
         const checksum = crc32(data);
 
         const localHeader = new Uint8Array(30 + name.length);
@@ -241,7 +269,7 @@ export async function createQrSheetBlob(items, svgNodes, format = 'png', onProgr
     context.textBaseline = 'top';
 
     for (let index = 0; index < items.length; index += 1) {
-        if (signal?.aborted) throw new DOMException('GeraÃ§Ã£o cancelada.', 'AbortError');
+        if (signal?.aborted) throw new DOMException('Geração cancelada.', 'AbortError');
         const column = index % columns;
         const row = Math.floor(index / columns);
         const x = margin + column * (cardWidth + gap);
@@ -274,7 +302,7 @@ export async function createQrSheetBlob(items, svgNodes, format = 'png', onProgr
             const image = new Image();
             image.src = svgUrl;
             await image.decode();
-            if (signal?.aborted) throw new DOMException('GeraÃ§Ã£o cancelada.', 'AbortError');
+            if (signal?.aborted) throw new DOMException('Geração cancelada.', 'AbortError');
             const codeSize = 300;
             context.imageSmoothingEnabled = false;
             context.drawImage(image, x + (cardWidth - codeSize) / 2, y + 150, codeSize, codeSize);

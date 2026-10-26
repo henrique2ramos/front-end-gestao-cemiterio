@@ -1,6 +1,6 @@
 .page {
   min-height: 100vh;
-  background: #fbf9f8;
+  background: #ffffff;
   font-family: 'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
 }
 
@@ -222,7 +222,7 @@
 
 .section {
   padding: 88px 0;
-  background: #fbf9f8;
+  background: #ffffff;
 }
 
 .sectionHeader {

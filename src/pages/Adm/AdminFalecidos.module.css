@@ -127,6 +127,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
     gap: 14px;
     padding: 20px 24px;
     border-bottom: 1px solid var(--border);
@@ -134,6 +135,31 @@
 
 .toolbar .searchBox { flex: 1; }
 .toolbar > button:disabled { cursor: not-allowed; opacity: 0.55; }
+
+.searchFilters {
+    display: grid;
+    width: 100%;
+    grid-template-columns: minmax(240px, 1.4fr) minmax(160px, 0.8fr) minmax(160px, 0.8fr);
+    align-items: end;
+    gap: 12px;
+}
+
+.searchFilterField { display: grid; min-width: 0; gap: 5px; color: var(--text-muted); font-size: 0.78rem; font-weight: 650; }
+.searchFilterField > select,
+.searchFilterField > input { width: 100%; min-width: 0; height: 46px; box-sizing: border-box; padding: 0 12px; border: 1px solid var(--border); border-radius: 12px; background: #fff; color: var(--text-main); font: inherit; font-size: 0.9rem; font-weight: 400; }
+.searchFilterField > select { appearance: none; padding-right: 38px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-size: 16px; cursor: pointer; }
+.searchFilterField > input:disabled { background: #f4f6f8; color: #94a3b8; cursor: not-allowed; }
+.searchFilterField > select:focus-visible,
+.searchFilterField > input:focus-visible { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1); outline: 0; }
+.searchFilterField .searchBox { width: 100%; max-width: none; height: 46px; box-sizing: border-box; }
+.toolbar > .searchFilters,
+.toolbar > .filterChips { flex: 0 0 100%; }
+.filterChips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.filterChip { display: inline-flex; min-height: 24px; align-items: center; gap: 4px; padding: 1px 3px 1px 7px; border: 1px solid #c6dcf3; border-radius: 4px; background: #f1f7ff; color: #14599c; font-size: 0.76rem; font-weight: 500; }
+.filterChip button { display: grid; width: 15px; height: 15px; flex: 0 0 15px; place-items: center; padding: 0; border: 0; border-radius: 50%; background: transparent; color: #14599c; cursor: pointer; }
+.filterChip button:hover { background: #dcecff; }
+.clearFilterChips { padding: 0; border: 0; background: transparent; color: #0866c6; font: inherit; font-size: 0.84rem; font-weight: 600; cursor: pointer; }
+.clearFilterChips:hover { text-decoration: underline; }
 
 .searchBox {
     display: flex;
@@ -946,6 +972,7 @@
 @media (max-width: 768px) {
     .toolbar { align-items: stretch; flex-direction: column; }
     .toolbar .searchBox { max-width: none; }
+    .searchFilters { grid-template-columns: minmax(0, 1fr); }
     .toolbar > button { justify-content: center; }
     .container {
         padding: 24px 20px;

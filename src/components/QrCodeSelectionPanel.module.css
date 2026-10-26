@@ -68,18 +68,19 @@
     background: #f5f9ff;
     color: #0759a5;
 }
-.typeTabs .backToSearchTab {
-    display: inline-flex;
-    width: max-content;
+.typeTabs .selectedHeaderTab {
+    display: flex;
+    flex: 0 0 auto;
+    min-height: 42px;
     align-items: center;
-    gap: 4px;
-    padding: 0 6px 0 0;
-    border-bottom-color: #0866c6;
+    padding: 0 17px;
+    border-bottom: 3px solid #0866c6;
+    border-radius: 9px 9px 0 0;
     background: #f5f9ff;
     color: #0759a5;
+    font-size: 0.9rem;
+    font-weight: 650;
 }
-
-
 .selectionBar {
     display: flex;
     justify-content: space-between;
@@ -89,25 +90,7 @@
     color: #64748b;
     font-size: 0.88rem;
 }
-.selectionBarSelected { padding-top: 20px; padding-bottom: 20px; }
-
-.selectAll { position: relative; display: inline-flex; align-items: center; gap: 9px; color: #17365d; font-weight: 650; cursor: pointer; }
-.selectAll input { width: 17px; height: 17px; accent-color: #0866c6; }
-.selectAllDanger { color: #b42318; }
-.selectAllInputHidden { position: absolute; width: 17px !important; height: 17px !important; margin: 0; opacity: 0; }
-.selectAllInputHidden:focus-visible + .clearSelectionIcon { outline: 2px solid #fda29b; outline-offset: 2px; }
-.selectedListStart { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
-.clearSelectionButton { display: inline-flex; align-items: center; gap: 7px; padding: 0; border: 0; background: transparent; color: #b42318; font: inherit; font-size: 0.84rem; font-weight: 600; cursor: pointer; }
-.clearSelectionButton:hover:not(:disabled) { color: #912018; text-decoration: underline; }
 .clearSelectionButton:disabled { cursor: not-allowed; opacity: 0.55; }
-.clearSelectionIcon { display: inline-flex; width: 16px; height: 16px; align-items: center; justify-content: center; border: 1px solid #b42318; border-radius: 3px; background: #b42318; color: #fff; }
-.reviewLabel { color: #17365d; font-size: 1.05rem; font-weight: 650; }
-.selectionControls { display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
-.selectionReview { display: inline-flex; align-items: center; gap: 3px; min-height: 0; padding: 0; border: 0; background: transparent; color: #0866c6; font: inherit; font-size: 0.84rem; font-weight: 650; cursor: pointer; white-space: nowrap; }
-.selectionReview:hover:not(:disabled) { color: #0052a3; text-decoration: underline; }
-.selectionReview:disabled { cursor: not-allowed; opacity: 0.5; }
-.selectionReviewCallout { min-height: 34px; padding: 0 11px; border: 1px solid #d5e1ef; border-radius: 8px; background: #f7faff; color: #0759a5; }
-.selectionReviewCallout:hover:not(:disabled) { border-color: #b8cde4; background: #edf5ff; color: #0759a5; text-decoration: none; }
 
 .filterTools {
     display: flex;
@@ -221,6 +204,14 @@
 .list::-webkit-scrollbar-thumb:hover { background: #7f9bb9; }
 .listSelected { height: 530px; }
 
+.paginationControls { position: relative; z-index: 2; display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; padding: 8px 18px 10px; border-top: 1px solid #e6e9ee; }
+.pageSizeControl { display: flex; align-items: center; gap: 6px; color: #64748b; font-size: 0.78rem; }
+.pageSizeControl select { width: 54px; min-width: 54px; height: 28px; padding: 0 4px; border: 1px solid #c6dcf3; border-radius: 6px; background: #fff; color: #17365d; font: inherit; font-size: 0.76rem; }
+.listPagination { display: flex; align-items: center; justify-content: center; gap: 8px; color: #64748b; font-size: 0.8rem; }
+.listPagination button { display: grid; width: 28px; height: 28px; place-items: center; border: 1px solid #c6dcf3; border-radius: 6px; background: #fff; color: #0759a5; cursor: pointer; }
+.listPagination button:hover:not(:disabled) { background: #f1f7ff; }
+.listPagination button:disabled { cursor: not-allowed; opacity: 0.45; }
+
 .item {
     position: relative;
     display: flex;
@@ -231,6 +222,7 @@
     border-bottom: 1px solid #edf1f6;
     cursor: pointer;
 }
+.listBusy { opacity: 0.48; transition: opacity 160ms ease; }
 .listBusy .item,
 .listBusy .item input { cursor: not-allowed; }
 .item input { position: absolute; top: 50%; left: 10px; z-index: 1; width: 17px; height: 17px; margin: 0; transform: translateY(-50%); opacity: 0; }
@@ -243,57 +235,11 @@
 .itemUnselectHover .checkboxMinus { display: block; }
 
 .itemText { display: flex; flex: 1; min-width: 0; align-items: baseline; gap: 8px; }
-.itemText strong { flex: 0 1 auto; max-width: 55%; min-width: 0; overflow: hidden; color: #102c50; font-size: 0.94rem; text-overflow: ellipsis; white-space: nowrap; }
-.itemText small { flex: 0 1 auto; min-width: 0; overflow: hidden; color: #718096; font-size: 0.78rem; text-overflow: ellipsis; white-space: nowrap; }
+.itemText > strong { flex: 0 1 auto; max-width: 55%; min-width: 0; overflow: hidden; color: #102c50; font-size: 0.94rem; text-overflow: ellipsis; white-space: nowrap; }
+.itemText > small { flex: 0 1 auto; min-width: 0; overflow: hidden; color: #718096; font-size: 0.78rem; text-overflow: ellipsis; white-space: nowrap; }
 .empty { padding: 24px 0; color: #64748b; text-align: center; }
 .empty p { margin: 0 0 8px; }
 .empty .linkButton { margin: 0 5px; }
-
-.paginationControls {
-    position: relative;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    flex-wrap: wrap;
-    gap: 6px;
-    padding: 4px 12px;
-}
-
-.pageSizeControl {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: #64748b;
-    font-size: 0.78rem;
-}
-
-.pageSizeControl select {
-    width: 50px;
-    min-width: 50px;
-    height: 24px;
-    padding: 0 3px;
-    border: 1px solid #dce5ef;
-    border-radius: 8px;
-    background: #fff;
-    color: #17365d;
-    font: inherit;
-    font-size: 0.7rem;
-}
-.pageSizeControl select option { padding: 1px 4px; font-size: 0.7rem; }
-
-.listPagination {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 9px;
-    padding: 0;
-    color: #64748b;
-    font-size: 0.8rem;
-}
-
-.listPagination button { display: grid; width: 26px; height: 26px; place-items: center; border: 1px solid #dce5ef; border-radius: 7px; background: #fff; color: #17365d; cursor: pointer; }
-.listPagination button:disabled { cursor: not-allowed; opacity: 0.45; }
 
 .actions {
     display: flex;
@@ -324,11 +270,9 @@
 .actions button:first-child { border-color: #0866c6; background: #0866c6; color: #fff; }
 .actions button:hover:not(:disabled) { filter: brightness(0.97); }
 .actions button:disabled { cursor: not-allowed; opacity: 0.55; }
-.exportProgressRow { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 26px 8px; }
 .exportProgress { margin: 0; padding: 0; color: #14599c; font-size: 0.82rem; }
 .exportProgress span { color: #718096; }
 .exportNotice { margin: 0; padding: 0 26px 8px; color: #475569; font-size: 0.82rem; }
-.exportHint { margin: 0; padding: 13px 26px 12px; color: #718096; font-size: 0.8rem; }
 .error { margin: 0; padding: 0 26px 18px; color: #b42318; font-size: 0.88rem; }
 .printDocument { display: none; }
 
@@ -343,11 +287,184 @@
 .exportModalActions .exportModalContinue { border-color: #0866c6; background: #0866c6; color: #fff; }
 .exportModalActions .exportModalContinue:hover { background: #0759a5; }
 
+/* Catálogo em duas colunas: a rolagem fica restrita à lista. */
+.panel { border-radius: 10px; box-shadow: none; }
+.typeTabsHeader { padding: 14px 22px 0; }
+.typeTabs button { min-height: 40px; border-radius: 0; color: #64748b; }
+.typeTabs button:hover:not(:disabled) { background: transparent; color: #334155; }
+.typeTabs .typeTabActive { border-bottom-color: #0866c6; background: #f5f9ff; color: #0759a5; }
+.catalogColumns { display: flex; flex: 1 1 0; min-width: 0; min-height: 0; }
+.catalogMain { display: flex; min-width: 0; min-height: 0; flex: 1 1 auto; flex-direction: column; overflow: hidden; }
+.selectionAside {
+    display: flex;
+    width: clamp(230px, 25%, 280px);
+    min-width: 230px;
+    flex: 0 0 clamp(230px, 25%, 280px);
+    flex-direction: column;
+    gap: 15px;
+    box-sizing: border-box;
+    padding: 20px 17px;
+    border-left: 1px solid #e2e8f0;
+    background: #f1f7ff;
+}
+.selectionSummary { display: flex; flex-direction: row; align-items: baseline; flex-wrap: wrap; gap: 7px; margin-bottom: 8px; color: #64748b; }
+.selectionSummary strong { color: #0866c6; font-size: 28px; font-weight: 650; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.selectionSummary span { font-size: 0.85rem; }
+.selectionPanelActions { display: flex; flex-direction: column; gap: 8px; }
+.selectionPanelActions button,
+.actions button {
+    display: inline-flex;
+    width: 100%;
+    min-height: 40px;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-sizing: border-box;
+    padding: 7px 10px;
+    border: 1px solid #b8d1ec;
+    border-radius: 5px;
+    background: #fff;
+    color: #0759a5;
+    font: inherit;
+    font-size: 0.86rem;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+}
+.selectionPanelActions button:hover:not(:disabled),
+.actions button:hover:not(:disabled) { border-color: #0866c6; background: #e8f2ff; }
+.selectionPanelActions button:disabled,
+.actions button:disabled { cursor: not-allowed; opacity: 0.55; }
+.selectionDivider { height: 1px; flex: 0 0 1px; background: #e2e8f0; }
+.selectionBar { position: relative; z-index: 5; min-height: 48px; box-sizing: border-box; padding: 11px 26px; border-bottom: 1px solid #e6e9ee; }
+.selectionBarSelected { padding-top: 16px; padding-bottom: 12px; }
+.selectedListHeading { display: flex; flex-direction: column; align-items: flex-start; gap: 7px; margin: 2px 0 4px 2px; }
+.selectedListHeading .clearSelectionButton { display: inline-flex; width: auto; min-height: 32px; align-items: center; justify-content: flex-start; gap: 8px; padding: 3px 0; border: 1px solid transparent; border-radius: 4px; background: transparent; color: #334b65; font: inherit; font-size: 0.81rem; font-weight: 600; text-align: left; cursor: pointer; }
+.selectedListHeading .clearSelectionButton:hover:not(:disabled) { border-color: transparent; background: transparent; color: #0759a5; }
+.resultCount { color: #697684; font-size: 0.84rem; }
+.resultActions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 6px 12px; margin-left: auto; }
+.selectionMode { position: relative; z-index: 6; flex: 0 0 auto; }
+.selectionModeTrigger { display: inline-flex; min-height: 32px; align-items: center; gap: 8px; padding: 0; border: 0; border-radius: 3px; background: transparent; color: #17365d; font: inherit; font-size: 0.84rem; font-weight: 600; text-align: left; cursor: pointer; }
+.selectionModeTrigger:hover:not(:disabled) { color: #0759a5; }
+.selectionModeTrigger:focus-visible { outline: 2px solid rgb(8 102 198 / 35%); outline-offset: 2px; }
+.selectionModeTrigger:disabled { cursor: not-allowed; opacity: 0.5; }
+.selectionModeMenu { position: absolute; top: 100%; left: 0; z-index: 20; display: grid; width: 272px; max-width: min(272px, calc(100vw - 36px)); gap: 2px; padding: 5px; border: 1px solid #c6dcf3; border-radius: 7px; background: #fff; box-shadow: 0 8px 20px rgb(15 23 42 / 13%); }
+.selectionModeMenu button { display: grid; min-height: 40px; grid-template-columns: 18px minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 5px 8px; border: 0; border-radius: 4px; background: transparent; color: #334b65; font: inherit; font-size: 0.81rem; text-align: left; cursor: pointer; }
+.selectionModeMenu button:hover:not(:disabled) { background: #f1f7ff; color: #0759a5; }
+.selectionModeMenu button:focus-visible { outline: 2px solid rgb(8 102 198 / 35%); outline-offset: -1px; }
+.selectionModeMenu button:disabled { cursor: not-allowed; opacity: 0.5; }
+.selectionModeMenu button small { color: #718096; font-size: 0.76rem; font-variant-numeric: tabular-nums; }
+.selectionModeCheckbox { display: grid; width: 16px; height: 16px; place-items: center; box-sizing: border-box; border: 1px solid #94a3b8; border-radius: 3px; background: #fff; color: #fff; }
+.selectionModeCheckboxChecked { border-color: #b42318; background: #b42318; color: #fff; }
+.list, .listSelected { width: 100%; height: 0; min-height: 0; max-height: none; flex: 1 1 0; margin: 0; padding: 0 20px 10px; scrollbar-gutter: stable; }
+.list::-webkit-scrollbar-thumb { border-color: #fff; background: #b9c0c8; background-clip: content-box; }
+.list::-webkit-scrollbar-thumb:hover { background: #8b949e; }
+.item { min-height: 58px; gap: 10px; padding: 7px 8px; }
+.itemText { align-items: flex-start; flex-direction: column; gap: 3px; }
+.itemTextInline { align-items: baseline; flex-direction: row; gap: 8px; }
+.itemText > strong { max-width: 100%; color: #26384b; font-size: 0.9rem; font-weight: 500; }
+.itemText > small { max-width: 100%; color: #737f8b; font-size: 0.78rem; }
+.itemTextInline > strong { max-width: 55%; }
+.itemTextInline > small { max-width: 45%; }
+.itemCheckboxSelected { border-color: #1268c4; background: #1268c4; }
+.itemUnselectHover .itemCheckboxSelected { border-color: #b42318; background: #b42318; }
+.itemMeta { display: flex; flex: 0 0 auto; align-items: center; gap: 8px; margin-left: auto; }
+.itemType { color: #7a8591; font-size: 0.75rem; }
+.itemLocation { color: #65768a; font-size: 0.77rem; white-space: nowrap; }
+.empty { padding: 22px 8px; color: #697684; }
+.empty .linkButton { color: #0866c6; }
+.chip { min-height: 24px; border-color: #c6dcf3; border-radius: 4px; background: #f1f7ff; color: #14599c; font-weight: 500; }
+.chip button { color: #14599c; }
+.activeFilters { padding-bottom: 10px; }
+.selectionAside .actions { display: flex; flex-direction: column; gap: 8px; padding: 0; border: 0; background: transparent; }
+.selectionAside .actions button:first-child { border-color: #0866c6; background: #0866c6; color: #fff; }
+.selectionAside .actions button:first-child:hover:not(:disabled) { border-color: #0759a5; background: #0759a5; }
+
+.selectionAside .actions button { min-height: 48px; line-height: 1.25; }
+.selectionAside .actions button { display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; }
+.selectionAside .actions .actionButtonContent { display: inline-flex; width: max-content; max-width: 100%; min-width: 0; align-items: center; justify-content: center; gap: 8px; justify-self: center; }
+.selectionAside .actions .actionButtonContent > span { max-width: calc(100% - 25px); min-width: 0; flex: 0 1 158px; overflow-wrap: anywhere; text-align: center; }
+.selectionAside .actions .actionButtonContentMultiline { flex-direction: column; gap: 0; }
+.selectionAside .actions .actionButtonContentMultiline > span { max-width: 100%; flex: 0 0 auto; }
+.selectionAside .actions .actionButtonFirstLine { display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; }
+.selectionAside .actions .actionButtonFirstLine > span { max-width: none; }
+.actionButtonContent svg { flex: 0 0 auto; }
+
+.previewOverlay { position: fixed; inset: 0; z-index: 3100; display: grid; place-items: center; padding: 20px; background: rgb(15 23 42 / 48%); }
+.previewModal { display: flex; width: min(540px, 88vw); aspect-ratio: 210 / 297; max-height: 92dvh; min-height: 0; flex-direction: column; gap: 14px; overflow: hidden; padding: 18px; border: 1px solid #dce5ef; border-radius: 12px; background: #fff; box-shadow: 0 18px 48px rgb(15 23 42 / 22%); }
+.previewHeader { display: flex; flex: 0 0 auto; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.previewHeader h2 { margin: 0; color: #17365d; font-size: 1.1rem; font-weight: 650; }
+.previewHeader p { margin: 4px 0 0; color: #64748b; font-size: 0.84rem; }
+.previewHeader button { display: grid; width: 34px; height: 34px; flex: 0 0 34px; place-items: center; border: 1px solid #d6e1ef; border-radius: 6px; background: #fff; color: #36516d; cursor: pointer; }
+.previewHeader button:hover { background: #f1f7ff; }
+.previewSheet { display: grid; min-height: 0; flex: 1 1 auto; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(3, minmax(0, 1fr)); gap: 10px; overflow: auto; }
+.previewCard { display: flex; min-width: 0; min-height: 0; flex-direction: column; align-items: center; justify-content: center; gap: 5px; overflow: hidden; padding: 8px; border: 1px dashed #aebfd3; text-align: center; }
+.previewCard h3 { max-width: 100%; margin: 0; overflow: hidden; color: #17365d; font-size: 0.82rem; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+.previewCard p { max-width: 100%; margin: 0; overflow: hidden; color: #64748b; font-size: 0.7rem; text-overflow: ellipsis; white-space: nowrap; }
+.previewCard svg { display: block; width: min(96px, 32%); height: auto; aspect-ratio: 1; }
+.previewControls { display: flex; flex: 0 0 auto; justify-content: flex-end; gap: 8px; }
+.previewControls button { display: inline-flex; min-height: 36px; align-items: center; justify-content: center; gap: 5px; padding: 0 10px; border: 1px solid #b8d1ec; border-radius: 5px; background: #fff; color: #0759a5; font: inherit; font-size: 0.82rem; cursor: pointer; }
+.previewControls button:hover:not(:disabled) { background: #e8f2ff; }
+.previewControls button:disabled { cursor: not-allowed; opacity: 0.5; }
+.nextPreviewIcon { transform: rotate(180deg); }
+
+@media (max-width: 560px) {
+    .previewOverlay { padding: 10px; }
+    .previewModal { width: calc(100vw - 20px); max-height: 94dvh; gap: 10px; padding: 12px; }
+    .previewSheet { gap: 6px; }
+    .previewCard { gap: 3px; padding: 5px; }
+    .previewCard h3 { font-size: 0.68rem; }
+    .previewCard p { font-size: 0.6rem; }
+    .previewCard svg { width: min(70px, 36%); }
+}
+.filterSearch,
+.loteSearchControl { border-color: #c6dcf3; color: #0866c6; }
+.locationFilters label { color: #37638f; }
+.locationFilters select,
+.locationFilters input { border-color: #c6dcf3; }
+.locationFilters select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%230866c6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); }
+.filterSearch:focus-within,
+.loteSearchControl:focus-within,
+.locationFilters select:focus-visible,
+.locationFilters input:focus-visible { border-color: #5b9be0; box-shadow: 0 0 0 3px rgb(8 102 198 / 11%); outline: 0; }
+.locationFilters .loteSearchControl input:focus-visible { border: 0; box-shadow: none; outline: 0; }
+.filterSearch button,
+.loteSearchControl button { color: #0866c6; }
+.filterSearch button:hover:not(:disabled),
+.loteSearchControl button:hover:not(:disabled) { background: #e5f1ff; color: #0759a5; }
+.chip button:hover:not(:disabled) { background: #dcecff; }
+.exportProgress { margin: 0; color: #566473; font-size: 0.8rem; line-height: 1.45; }
+.exportProgress span { display: block; margin-top: 4px; color: #7b8792; }
+.exportNotice { margin: 0; padding: 0; color: #566473; font-size: 0.82rem; }
+.exportModalIcon { background: #f1f3f5; color: #596674; }
+.exportModalActions .exportModalContinue { border-color: #0866c6; background: #0866c6; color: #fff; }
+.exportModalActions .exportModalContinue:hover { border-color: #0759a5; background: #0759a5; color: #fff; }
+
+@media (min-width: 561px) {
+    .panel .catalogColumns { flex: 1 1 0; min-height: 0; }
+    .panel .catalogMain { flex: 1 1 auto; min-height: 0; }
+    .panel .catalogMain .list { height: 0; min-height: 0; max-height: none; flex: 1 1 0; }
+}
+
+@media (max-width: 720px) {
+    .catalogColumns { flex-direction: column; flex: 0 0 auto; }
+    .catalogMain { overflow: visible; }
+    .catalogMain .list { height: 340px; min-height: 0; flex: 0 0 340px; }
+    .selectionAside { width: 100%; min-width: 0; flex: 0 0 auto; gap: 12px; padding: 16px 20px; border-top: 1px solid #e2e8f0; border-left: 0; }
+    .selectionSummary { flex-direction: row; align-items: baseline; gap: 7px; }
+    .selectionSummary strong { font-size: 23px; }
+    .selectionPanelActions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .selectionPanelActions > button:first-child { grid-column: 1 / -1; }
+    .selectionAside .actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .selectionAside .actions button:nth-child(3),
+    .selectionAside .actions button:nth-child(4) { grid-column: 1 / -1; }
+}
+
 @media (min-width: 561px) {
     .workspaceRoot { display: flex; flex: 1 1 0px; min-height: 0; }
     .panel { flex: 1 1 0px; min-height: 0; overflow: hidden; }
     .panel .list, .panel .listSelected { flex: 1 1 0px; height: 0; min-height: 0; max-height: none; }
-    .list { width: calc(100% - 12px); margin-right: 12px; scrollbar-gutter: stable both-edges; }
+    .list { scrollbar-gutter: stable; }
 }
 
 @media (min-width: 769px) {
@@ -358,7 +475,6 @@
 @media (min-width: 769px) and (max-width: 1440px) and (max-height: 850px) {
     .typeTabsHeader { padding-top: 12px; }
     .selectionBar { padding-top: 14px; padding-bottom: 14px; }
-    .selectionBarSelected { padding-top: 14px; padding-bottom: 14px; }
     .deceasedFiltersRow { gap: 8px; padding-top: 13px; padding-bottom: 8px; }
     .deceasedFiltersRow .filterFieldLabel { margin-bottom: 3px; }
     .locationFilters label { gap: 3px; }
@@ -371,19 +487,16 @@
         padding-bottom: 8px;
     }
     .listSelected { height: 370px; }
-    .paginationControls { padding-top: 5px; padding-bottom: 5px; }
     .actions { padding-top: 10px; padding-bottom: 8px; }
     .actions button { min-height: 38px; }
-    .exportHint { padding-top: 8px; padding-bottom: 8px; }
 }
 
 @media (max-width: 560px) {
     .panel { min-height: 0; border-radius: 13px; }
     .typeTabsHeader { flex-wrap: wrap; gap: 8px; padding: 18px 17px 0; }
     .typeTabs { flex: 1 1 100%; }
-    .typeTabsHeader .selectionReview { margin: 0 0 9px auto; }
     .selectionBar { align-items: flex-start; padding: 16px 17px; }
-    .selectionControls { flex-wrap: wrap; justify-content: flex-start; gap: 8px; }
+    .selectedListHeading { margin-left: 8px; }
     .filterTools { align-items: stretch; flex-direction: column; padding: 16px 17px 12px; }
     .deceasedFiltersRow { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; padding: 14px 17px 12px; }
     .deceasedFiltersRow .filterTools { grid-column: 1 / -1; padding: 0; }
@@ -398,16 +511,17 @@
     .listSelected { height: 440px; }
     .item { min-height: 44px; padding: 5px 8px; }
     .itemText { align-items: flex-start; flex-direction: column; gap: 2px; }
-    .itemText strong { flex: 0 1 auto; max-width: 100%; }
-    .itemText small { flex: 0 1 auto; max-width: 100%; }
-    .paginationControls { gap: 5px; padding: 4px 10px; }
-    .listPagination { gap: 7px; }
+    .itemTextInline { align-items: baseline; flex-direction: row; gap: 7px; }
+    .itemText > strong { flex: 0 1 auto; max-width: 100%; }
+    .itemText > small { flex: 0 1 auto; max-width: 100%; }
+    .itemTextInline > strong { max-width: 55%; }
+    .itemTextInline > small { max-width: 45%; }
+    .paginationControls { justify-content: center; gap: 7px; padding: 8px 10px; }
+    .listPagination { gap: 6px; }
     .actions { display: grid; grid-template-columns: 1fr; padding: 16px 17px 12px; }
     .actions button { padding: 0 8px; font-size: 0.8rem; }
     .exportProgress { padding: 0 17px 8px; }
-    .exportProgressRow { align-items: flex-start; padding: 0 17px 8px; }
     .exportNotice { padding: 0 17px 8px; }
-    .exportHint { padding: 12px 17px; }
 }
 
 @media print {
@@ -456,4 +570,27 @@
     .printCard p { max-width: 100%; margin: 0; font: 10pt Arial, sans-serif; }
     .printCard svg { display: block; width: 45mm; height: 45mm; }
     .printCard small { font: 8pt Arial, sans-serif; color: #475569; }
+}
+
+/* Ajustes finais para manter a coluna de ações visível em telas estreitas. */
+.panel .catalogMain .list,
+.panel .catalogMain .listSelected { width: 100%; margin-right: 0; }
+.selectionAside .actions button:first-child { border-color: #0866c6; background: #0866c6; color: #fff; }
+.selectionAside .actions button:first-child:hover:not(:disabled) { border-color: #0759a5; background: #0759a5; }
+
+@media (min-width: 561px) and (max-width: 720px) {
+    .panel { overflow: visible; }
+    .catalogMain .list,
+    .catalogMain .listSelected { height: 340px; min-height: 0; flex: 0 0 340px; }
+}
+
+@media (max-width: 560px) {
+    .catalogColumns { flex-direction: column; }
+    .catalogMain .list,
+    .catalogMain .listSelected { height: 280px; min-height: 0; flex: 0 0 280px; }
+    .selectionAside { padding: 16px 17px; }
+    .selectionAside .actions { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 0; }
+    .selectionAside .actions button:nth-child(3),
+    .selectionAside .actions button:nth-child(4) { grid-column: 1 / -1; }
+    .selectionAside .actions button { min-height: 42px; font-size: 0.82rem; }
 }

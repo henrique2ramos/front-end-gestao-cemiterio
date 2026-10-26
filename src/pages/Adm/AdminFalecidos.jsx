@@ -16,7 +16,7 @@ import CopyLinkButton from '../../components/CopyLinkButton';
 import FalecidoFormModal from '../../components/FalecidoFormModal';
 import FalecidoDetailsModal from '../../components/FalecidoDetailsModal';
 import QrImageDownloadButtons from '../../components/QrImageDownloadButtons';
-import { unwrapPage, getPageItems } from './../../data/adminPagination';
+import { getPageItems } from './../../data/adminPagination';
 import styles from './AdminFalecidos.module.css';
 import personPlaceholder from '../../assets/person-placeholder.svg';
 
@@ -59,6 +59,8 @@ export default function AdminFalecidos({ onLogout }) {
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState(location.state?.search || '');
     const [debouncedSearch, setDebouncedSearch] = useState(location.state?.search || '');
+    const [filterQuadra, setFilterQuadra] = useState('');
+    const [filterLote, setFilterLote] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [total, setTotal] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
@@ -70,6 +72,7 @@ export default function AdminFalecidos({ onLogout }) {
     const qrCodeBoxRef = useRef(null);
     const [quadrasDisponiveis, setQuadrasDisponiveis] = useState([]);
     const [lotesDisponiveis, setLotesDisponiveis] = useState([]);
+    const [falecidosPorQuadra, setFalecidosPorQuadra] = useState({});
 
     const [selectedImageFile, setSelectedImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState('');
@@ -134,12 +137,34 @@ export default function AdminFalecidos({ onLogout }) {
         async function loadPage() {
             try {
                 const res = await fetchFalecidos();
-                const page = unwrapPage(res, { page: currentPage, limit: itemsPerPage, search: debouncedSearch });
+                const term = debouncedSearch.trim().toLocaleLowerCase('pt-BR');
+                const quadraTerm = filterQuadra.trim().toLocaleLowerCase('pt-BR');
+                const loteTerm = filterLote.trim().toLocaleLowerCase('pt-BR');
+                const counts = {};
+                res.forEach((item) => {
+                    const nome = String(item.nome || '').toLocaleLowerCase('pt-BR');
+                    const { quadra, lote } = parseLocalizacao(item.localizacao || '');
+                    if ((!term || nome.includes(term)) && (!loteTerm || lote.toLocaleLowerCase('pt-BR') === loteTerm) && quadra) {
+                        const key = quadra.toLocaleLowerCase('pt-BR');
+                        counts[key] = (counts[key] || 0) + 1;
+                    }
+                });
+                const filtered = res.filter((item) => {
+                    const nome = String(item.nome || '').toLocaleLowerCase('pt-BR');
+                    const { quadra, lote } = parseLocalizacao(item.localizacao || '');
+                    return (!term || nome.includes(term))
+                        && (!quadraTerm || quadra.toLocaleLowerCase('pt-BR') === quadraTerm)
+                        && (!loteTerm || lote.toLocaleLowerCase('pt-BR') === loteTerm);
+                });
+                const nextTotal = filtered.length;
+                const nextTotalPages = Math.max(1, Math.ceil(nextTotal / itemsPerPage));
+                const pageItems = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
                 if (cancelado) return;
-                setFalecidos(normalizeFalecidosFromApi(page.items));
-                setTotal(page.total);
-                setTotalPages(page.totalPages);
-                if (currentPage > page.totalPages && page.totalPages > 0) setCurrentPage(page.totalPages);
+                setFalecidosPorQuadra(counts);
+                setFalecidos(normalizeFalecidosFromApi(pageItems));
+                setTotal(nextTotal);
+                setTotalPages(nextTotalPages);
+                if (currentPage > nextTotalPages) setCurrentPage(nextTotalPages);
             } catch (error) {
                 console.error('Erro ao buscar falecidos:', error);
                 if (!cancelado) { setFalecidos([]); setTotal(0); setTotalPages(1); }
@@ -150,7 +175,7 @@ export default function AdminFalecidos({ onLogout }) {
 
         loadPage();
         return () => { cancelado = true; };
-    }, [currentPage, debouncedSearch, itemsPerPage, reloadKey]);
+    }, [currentPage, debouncedSearch, filterQuadra, filterLote, itemsPerPage, reloadKey]);
 
     const reload = () => {
         setIsLoading(true);
@@ -160,6 +185,19 @@ export default function AdminFalecidos({ onLogout }) {
     const handleSearchChange = (value) => {
         setIsLoading(true);
         setSearchTerm(value);
+    };
+
+    const handleQuadraFilterChange = (value) => {
+        setIsLoading(true);
+        setCurrentPage(1);
+        setFilterQuadra(value);
+        setFilterLote('');
+    };
+
+    const handleLoteFilterChange = (value) => {
+        setIsLoading(true);
+        setCurrentPage(1);
+        setFilterLote(value);
     };
 
     const changePage = (page) => {
@@ -360,20 +398,61 @@ export default function AdminFalecidos({ onLogout }) {
 
                     <div className={styles.card}>
                         <div className={styles.toolbar}>
-                            <div className={styles.searchBox}>
-                                <Search size={18} className={styles.searchIcon} />
-                                <input
-                                    type="text"
-                                    placeholder="Buscar falecido pelo nome..."
-                                    value={searchTerm}
-                                    onChange={(e) => handleSearchChange(e.target.value)}
-                                />
-                                {searchTerm && (
-                                    <button type="button" className={styles.clearSearchBtn} aria-label="Limpar busca" onClick={() => handleSearchChange('')}>
-                                        <X size={16} />
-                                    </button>
-                                )}
+                            <div className={styles.searchFilters}>
+                                <label className={styles.searchFilterField}>
+                                    <span>Nome</span>
+                                    <div className={styles.searchBox}>
+                                        <Search size={18} className={styles.searchIcon} />
+                                        <input
+                                            type="text"
+                                            placeholder="Buscar falecido pelo nome..."
+                                            value={searchTerm}
+                                            onChange={(e) => handleSearchChange(e.target.value)}
+                                        />
+                                        {searchTerm && (
+                                            <button type="button" className={styles.clearSearchBtn} aria-label="Limpar busca" onClick={() => handleSearchChange('')}>
+                                                <X size={16} />
+                                            </button>
+                                        )}
+                                    </div>
+                                </label>
+                                <label className={styles.searchFilterField}>
+                                    <span>Quadra</span>
+                                    <select value={filterQuadra} onChange={(event) => handleQuadraFilterChange(event.target.value)}>
+                                        <option value="">Todas as quadras</option>
+                                        {quadrasDisponiveis.map((quadra) => <option key={quadra.id ?? quadra.nome} value={quadra.nome}>{`Quadra ${quadra.nome} (${falecidosPorQuadra[String(quadra.nome).toLocaleLowerCase('pt-BR')] || 0})`}</option>)}
+                                    </select>
+                                </label>
+                                <label className={styles.searchFilterField}>
+                                    <span>Lote</span>
+                                    <input
+                                        type="search"
+                                        value={filterLote}
+                                        onChange={(event) => handleLoteFilterChange(event.target.value)}
+                                        placeholder={filterQuadra ? 'Digite o número do lote' : 'Selecione uma quadra primeiro'}
+                                        disabled={!filterQuadra}
+                                    />
+                                </label>
                             </div>
+                            {(searchTerm.trim() || filterQuadra || filterLote) && <div className={styles.filterChips} aria-label="Filtros ativos">
+                                {searchTerm.trim() && <span className={styles.filterChip}>
+                                    Nome: “{searchTerm.trim()}”
+                                    <button type="button" aria-label="Remover filtro de nome" onClick={() => handleSearchChange('')}><X size={13} /></button>
+                                </span>}
+                                {filterQuadra && <span className={styles.filterChip}>
+                                    Quadra {filterQuadra}
+                                    <button type="button" aria-label="Remover filtro de quadra" onClick={() => handleQuadraFilterChange('')}><X size={13} /></button>
+                                </span>}
+                                {filterLote && <span className={styles.filterChip}>
+                                    Lote {filterLote}
+                                    <button type="button" aria-label="Remover filtro de lote" onClick={() => handleLoteFilterChange('')}><X size={13} /></button>
+                                </span>}
+                                {[searchTerm.trim(), filterQuadra, filterLote].filter(Boolean).length > 1 && <button type="button" className={styles.clearFilterChips} onClick={() => {
+                                    handleSearchChange('');
+                                    handleQuadraFilterChange('');
+                                    handleLoteFilterChange('');
+                                }}>Limpar tudo</button>}
+                            </div>}
                         </div>
 
                         <div className={styles.tableContainer}>

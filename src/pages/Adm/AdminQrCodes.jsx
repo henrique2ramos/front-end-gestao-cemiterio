@@ -57,7 +57,7 @@ async function fetchAllPages(fetchPage, limit = PAGE_LIMIT, itemKeys = ['items']
 
         if (total != null && items.length >= total) break;
         if (pages != null && page >= pages) break;
-        if (total == null && pages == null && currentItems.length < limit) break;
+        if (currentItems.length < limit) break;
         page += 1;
     }
 
@@ -76,6 +76,35 @@ const relationName = (value, keys) => {
         if (entry != null && String(entry).trim()) return String(entry).trim();
     }
     return '';
+};
+
+const getPersonLocation = (person) => {
+    const fallback = parseLocation(typeof person.localizacao === 'string' ? person.localizacao : '');
+    return {
+        quadra: relationName(person.quadra, ['nome', 'name']) || String(person.quadraNome || fallback.quadra).trim(),
+        lote: relationName(person.lote, ['numero', 'nome', 'number']) || String(person.loteNumero || fallback.lote).trim(),
+    };
+};
+
+const locationKey = (quadra, lote) => `${String(quadra).trim().toLocaleLowerCase('pt-BR')}|${String(lote).trim().toLocaleLowerCase('pt-BR')}`;
+
+// Conta os falecidos de cada lote numa só passada (antes era um filtro completo para cada lote).
+const countPeopleByLote = (people) => {
+    const byId = new Map();
+    const byLocation = new Map();
+    people.forEach((person) => {
+        const loteId = person.loteId ?? person.lote?.id;
+        if (loteId != null) {
+            const key = String(loteId);
+            byId.set(key, (byId.get(key) || 0) + 1);
+            return;
+        }
+        const { quadra, lote } = getPersonLocation(person);
+        if (!quadra || !lote) return;
+        const key = locationKey(quadra, lote);
+        byLocation.set(key, (byLocation.get(key) || 0) + 1);
+    });
+    return (lote, quadra, numero) => (byId.get(String(lote.id)) || 0) + (byLocation.get(locationKey(quadra.nome, numero)) || 0);
 };
 
 const makeCountWarning = (loaded, total, label) => (
@@ -107,6 +136,7 @@ export default function AdminQrCodes({ onLogout }) {
         setError('');
         setWarnings([]);
         try {
+            // TODO: trocar pelo endpoint de catálogo com busca e paginação no servidor.
             const [peopleResult, quadrasData] = await Promise.all([
                 fetchAllPages((page, limit) => fetchFalecidos({ page, limit }), PAGE_LIMIT, ['items', 'falecidos', 'data']),
                 fetchQuadras(),
@@ -138,12 +168,10 @@ export default function AdminQrCodes({ onLogout }) {
                 if (lotWarning) nextWarnings.push(lotWarning);
             });
 
+            const countFalecidosNoLote = countPeopleByLote(people);
             const items = [
                 ...people.filter((person) => person.id != null).map((person) => {
-                    const location = typeof person.localizacao === 'string' ? person.localizacao : '';
-                    const fallback = parseLocation(location);
-                    const quadra = relationName(person.quadra, ['nome', 'name']) || String(person.quadraNome || fallback.quadra).trim();
-                    const lote = relationName(person.lote, ['numero', 'nome', 'number']) || String(person.loteNumero || fallback.lote).trim();
+                    const { quadra, lote } = getPersonLocation(person);
                     const subtitle = [quadra && `Quadra ${quadra}`, lote && `Lote ${lote}`]
                         .filter(Boolean).join(' · ') || 'Sem localização';
                     return {
@@ -171,16 +199,7 @@ export default function AdminQrCodes({ onLogout }) {
                     .filter((lote) => lote.id != null)
                     .map((lote) => {
                         const numero = String(lote.numero ?? lote.nome ?? lote.id);
-                        const falecidosNoLote = people.filter((person) => {
-                            const personLoteId = person.loteId ?? person.lote?.id;
-                            if (personLoteId != null) return String(personLoteId) === String(lote.id);
-
-                            const fallback = parseLocation(typeof person.localizacao === 'string' ? person.localizacao : '');
-                            const personQuadra = relationName(person.quadra, ['nome', 'name']) || String(person.quadraNome || fallback.quadra).trim();
-                            const personLote = relationName(person.lote, ['numero', 'nome', 'number']) || String(person.loteNumero || fallback.lote).trim();
-                            return personQuadra.toLocaleLowerCase('pt-BR') === String(quadra.nome).toLocaleLowerCase('pt-BR')
-                                && personLote.toLocaleLowerCase('pt-BR') === numero.toLocaleLowerCase('pt-BR');
-                        }).length;
+                        const falecidosNoLote = countFalecidosNoLote(lote, quadra, numero);
                         return {
                             id: `lote-${quadra.id}-${lote.id}`,
                             type: 'lote',
@@ -237,6 +256,7 @@ export default function AdminQrCodes({ onLogout }) {
                                 <QrCodeSelectionPanel
                                     items={catalog.items}
                                     quadras={catalog.quadras}
+                                    exportWarnings={warnings}
                                 />
                             </div>
                         </div>

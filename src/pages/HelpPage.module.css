@@ -1,6 +1,6 @@
 .page {
   min-height: 100vh;
-  background: #f3f0ee;
+  background: #ffffff;
   color: #44474e;
   font-family: 'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
 }
@@ -95,11 +95,10 @@
 
 .sheet {
   padding: 48px 52px 40px;
-  background: #fffefd;
-  border-radius: 3px;
-  box-shadow:
-    0 1px 2px rgba(60, 40, 20, 0.08),
-    0 14px 40px rgba(40, 30, 20, 0.12);
+  background: #ffffff;
+  border: 1px solid #e4eaf1;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 32, 70, 0.07);
 }
 
 .sheetTitle {
@@ -280,7 +279,7 @@
   border-radius: 3px;
   color: #ffffff;
   background: #1565c0;
-  box-shadow: 0 14px 40px rgba(0, 20, 50, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 20, 50, 0.14);
 }
 
 .asideTitle {
