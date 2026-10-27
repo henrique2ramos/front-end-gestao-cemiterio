@@ -1,10 +1,11 @@
 .page {
   background: #ffffff;
-  padding-bottom: 40px;
+  padding-bottom: 0;
+  overflow-x: clip;
 }
 
 .container {
-  max-width: 1000px;
+  max-width: 1100px;
   margin: 0 auto;
   padding: 0 24px;
 }
@@ -12,6 +13,18 @@
 .topNav {
   padding: 30px 0 20px;
 }
+
+.profileHeader .topNav {
+  position: absolute;
+  top: 18px;
+  left: max(40px, calc((100vw - 1100px) / 2 - 80px));
+  z-index: 1;
+}
+
+.breadcrumb { display: flex; min-width: 0; align-items: center; gap: 8px; padding: 26px 0 8px; color: #9b7a3e; font-size: 0.88rem; }
+.breadcrumb a { color: #80601f; text-decoration: none; }
+.breadcrumb a:hover { text-decoration: underline; }
+.breadcrumb > span { overflow: hidden; color: #80601f; text-overflow: ellipsis; white-space: nowrap; }
 
 .backLink {
   display: inline-flex;
@@ -33,37 +46,79 @@
   transform: translateX(-4px);
 }
 
+.profileHeader .backLink { color: #ffffff; }
+.profileHeader .backLink:hover { color: #ffdea5; }
+
 .mainSection {
-  position: relative;
-  z-index: 10;
-  margin-bottom: 80px;
+  margin-bottom: 0;
 }
 
 .profileCard {
-  background: #ffffff;
-  position: relative;
-  overflow: hidden;
-  border-radius: 20px;
-  border: 1px solid rgba(196, 198, 207, 0.45);
-  box-shadow: 0 6px 22px rgba(0, 32, 70, .07);
+  background: transparent;
 }
 
 .profileHeader {
+  position: relative;
+  overflow: hidden;
   display: flex;
-  gap: 48px;
-  padding: 56px 48px 48px;
+  flex-direction: row;
+  gap: 40px;
+  width: 100vw;
+  box-sizing: border-box;
+  margin: 0 0 0 calc(50% - 50vw);
+  padding: 72px max(24px, calc((100vw - 1100px) / 2)) 48px;
   align-items: center;
+  justify-content: center;
+  text-align: left;
+  background:
+    radial-gradient(ellipse 52% 95% at 4% 0%, rgba(255, 255, 255, 0.14), transparent 68%),
+    radial-gradient(ellipse 48% 78% at 96% 100%, rgba(7, 70, 144, 0.2), transparent 72%),
+    #1565c0;
+  border-bottom: 0;
+}
+
+.memorialLeaf {
+  position: absolute;
+  z-index: 0;
+  top: 50%;
+  right: 4%;
+  width: auto;
+  height: 88%;
+  opacity: 0.2;
+  filter: brightness(0) invert(1);
+  object-fit: contain;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.memorialLeafLeft {
+  top: -28%;
+  left: 2%;
+  right: auto;
+  height: 88%;
+  opacity: 0.13;
+  transform: scaleY(-1) rotate(-12deg);
+}
+
+.memorialLeafRight {
+  top: auto;
+  right: -3%;
+  bottom: -32%;
+  height: 96%;
+  transform: none;
 }
 
 .photoWrapper {
+  position: relative;
+  z-index: 1;
   flex-shrink: 0;
-  width: 220px;
-  height: 220px;
+  width: 250px;
+  height: 250px;
   border-radius: 50%;
-  box-shadow: 0 12px 32px rgba(0, 34, 68, 0.08);
+  box-shadow: 0 8px 22px rgba(0, 34, 68, 0.14);
   background: #f4f7f9;
   overflow: hidden;
-  border: 6px solid #ffffff;
+  border: 3px solid #ffd283;
 }
 
 .photo {
@@ -74,9 +129,15 @@
 }
 
 .infoWrapper {
-  flex: 1;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  flex: 0 1 750px;
   min-width: 0;
-  width: 100%;
+  width: min(100%, 750px);
 }
 
 .name {
@@ -84,26 +145,34 @@
   min-width: 0;
   overflow-wrap: anywhere;
   white-space: normal;
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
-  font-size: 1.9rem;
-  font-weight: 800;
-  color: #002046;
-  margin-bottom: 10px;
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: clamp(1.9rem, 3.2vw, 2.65rem);
+  font-weight: 500;
+  color: #ffd283;
+  margin: 0 0 24px;
   line-height: 1.1;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
+  text-align: left;
 }
 
 .nameQualifier {
-  display: block;
+  display: inline;
 }
 
 .metadata {
   display: flex;
+  width: fit-content;
+  max-width: 100%;
   flex-wrap: wrap;
-  gap: 16px;
+  justify-content: flex-start;
+  gap: 14px 40px;
   margin-bottom: 24px;
-  align-items: center;
+  align-items: flex-start;
 }
+
+.metaItem { display: flex; min-width: max-content; flex-direction: column; gap: 6px; }
+.metaLabel { color: #ffdea5; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.metaValue { color: #ffffff; font-size: 1rem; line-height: 1.35; }
 
 .dateWrapper {
   display: flex;
@@ -144,9 +213,36 @@
   display: flex;
   flex-wrap: wrap;
   gap: 12px; 
+  justify-content: flex-start;
   align-items: center; 
   width: 100%;
 }
+
+.shareButton {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  border-radius: 20px;
+  background: transparent;
+  color: #ffffff;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease;
+}
+.shareButton:hover { border-color: #ffffff; background: rgba(255, 255, 255, 0.12); }
+
+.actionButtons .mapButton {
+  border-color: #ffffff;
+  background: #ffffff;
+  color: #1565c0;
+}
+.actionButtons .mapButton:hover { border-color: #eaf2fc; background: #eaf2fc; }
 
 .locationBadge {
   display: inline-flex;
@@ -178,81 +274,79 @@
   font-weight: 500;
 }
 
+.memorialSections {
+  width: 100vw;
+  min-height: 40vh;
+  box-sizing: border-box;
+  margin-left: calc(50% - 50vw);
+  background: #f7f9fc;
+}
+
+.tabContent {
+  width: min(100%, 1100px);
+  box-sizing: border-box;
+  margin: 0 auto;
+  padding: 18px 24px 44px;
+}
+
 .tabNavWrapper {
   display: flex;
+  width: 100%;
+  box-sizing: border-box;
   justify-content: center;
   padding: 0;
-  background: #f3f7fc;
-  border-top: 1px solid #e3ebf5;
-  border-bottom: 1px solid #e3ebf5;
-  margin: 0 48px;
-  margin: 32px 0 0 0;
+  border-bottom: 1px solid #e3eaf2;
+  background: transparent;
 }
 
 .tabNav {
   display: flex;
-  background: transparent;
-  padding: 0;
-  border-radius: 0;
   gap: 40px;
 }
 
 .tabBtn {
-  padding: 20px 8px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #64748b;
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.10em;
-  cursor: pointer;
   position: relative;
-  transition: color 0.3s ease;
-}
-
-.tabBtn:hover {
-  color: #1458a6;
-}
-
-.tabBtn::after {
-  content: '';
-  position: absolute;
-  bottom: 0px;
-  left: 0;
-  width: 100%;
-  height: 3px;
+  padding: 15px 12px;
+  border: 0;
   background: transparent;
-  transition: background-color 0.3s ease;
+  color: #718096;
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  cursor: pointer;
+  transition: color 0.2s ease;
 }
 
-.tabActive {
-  color: #002046;
-  font-weight: 700;
-  background: transparent;
-  border-radius: 0;
-  box-shadow: none;
-}
+.tabBtn:hover { color: #1458a6; }
+.tabBtn::after { position: absolute; right: 0; bottom: 0; left: 0; height: 3px; background: transparent; content: ''; }
+.tabActive { color: #173b66; font-weight: 600; }
+.tabActive::after { background: #1565c0; }
+.tabCount { display: inline-grid; min-width: 20px; height: 20px; margin-left: 7px; padding: 0 5px; place-items: center; border-radius: 10px; background: #e4edf8; color: #315f8c; font-family: 'Inter', 'Segoe UI', Arial, sans-serif; font-size: 0.72rem; font-weight: 600; line-height: 1; }
+.tabActive .tabCount { background: #dce9f8; color: #1458a6; }
 
-.tabActive::after {
-  display: block;
-  background-color: #1565c0;
-}
-
-.tabContent {
-  padding: 56px 48px;
-  min-height: 300px;
-}
+.contentTitle { margin: 0; color: #102b57; font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.75rem; font-weight: 600; line-height: 1.2; }
+.bioTextWrap { position: relative; margin-top: 12px; padding: 14px 18px; border: 1px solid #edf1f6; border-radius: 9px; background: rgba(255, 255, 255, 0.55); }
+.bioTextWrap .contentTitle { margin-bottom: 16px; color: #1565c0; text-align: center; }
+.bioTextWrap .bioText { text-align: center; }
+.bioCollapsed { max-height: 12.8em; overflow: hidden; }
+.bioCollapsed::after { position: absolute; right: 1px; bottom: 1px; left: 1px; height: 2.5em; border-radius: 0 0 11px 11px; background: linear-gradient(transparent, #ffffff); content: ''; pointer-events: none; }
+.readMore { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; padding: 0; border: 0; background: transparent; color: #1565c0; font: inherit; font-weight: 700; cursor: pointer; }
+.readMore svg { transform: rotate(90deg); transition: transform 160ms ease; }
+.readMore .readMoreExpanded { transform: rotate(-90deg); }
+.gallerySection { margin-top: 16px; }
+.galleryHeader { display: flex; align-items: baseline; gap: 16px; margin-bottom: 18px; }
+.galleryHeader .contentTitle { color: #1565c0; }
+.galleryHeader > span { color: #778394; font-size: 0.88rem; }
 
 .bioText {
-  font-size: 1.1rem;
-  color: #444444;
-  text-align: justify;
+  font-size: 0.98rem;
+  color: #566273;
+  text-align: left;
   white-space: pre-wrap;
-  margin: 0 auto;
-  max-width:860px;
-  line-height:1.9;
+  margin: 0;
+  max-width: none;
+  line-height: 1.8;
 }
 
 .tributeBox {
@@ -306,7 +400,7 @@
 
 .galleryThumb {
   position: relative;
-  aspect-ratio: 1;
+  aspect-ratio: 4 / 3;
   border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
@@ -317,8 +411,8 @@
 }
 
 .galleryThumb:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 16px rgba(0, 34, 68, 0.12);
 }
 
 .galleryThumb img {
@@ -463,13 +557,19 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
-    padding: 48px 24px;
-    gap: 32px;
+    padding: 72px 24px 42px;
+    gap: 24px;
   }
 
+  .infoWrapper { width: 100%; flex: 0 1 auto; align-items: center; }
+  .name { text-align: center; }
+
   .metadata {
+    width: 100%;
     justify-content: center;
   }
+
+  .metaItem { align-items: center; }
 
   .actionButtons {
     justify-content: center;
@@ -481,12 +581,27 @@
 }
 
 @media (max-width: 600px) {
-  .profileCard {
-    border-radius: 12px;
-  }
+  .memorialSections { width: 100%; min-height: 34vh; margin-left: 0; }
+  .container { padding: 0; }
+  .profileHeader { width: 100%; margin-left: 0; padding: 72px 18px 32px; gap: 20px; }
+  .profileHeader .topNav { top: 18px; left: 18px; }
+  .memorialLeaf { display: none; }
+
+  .photoWrapper { width: 176px; height: 176px; }
+  .infoWrapper { width: 100%; }
   .name {
-    font-size: 1.65rem;
-}
+    width: 100%;
+    margin-bottom: 18px;
+    font-size: clamp(1.5rem, 7vw, 1.8rem);
+    overflow-wrap: anywhere;
+  }
+
+  .breadcrumb { padding: 18px 18px 8px; font-size: 0.82rem; }
+  .metadata { display: flex; width: fit-content; max-width: 100%; flex-direction: row; justify-content: center; gap: 12px 12px; }
+  .metaItem { display: flex; min-width: calc(50% - 12px); flex-direction: column; align-items: center; gap: 1px; text-align: center; }
+  .metaValue { max-width: 100%; font-size: 1rem; text-align: center; overflow-wrap: anywhere; }
+  .contentTitle { font-size: 1.55rem; }
+  .gallerySection { margin-top: 14px; }
 
   .locationBadge {
     box-sizing: border-box;
@@ -510,19 +625,12 @@
   .actionButtons > button {
     box-sizing: border-box;
     width: 100%;
+    min-width: 0;
     max-width: 100%;
     white-space: normal;
   }
 
-  .tabNav {
-    width: 100%;
-    flex-direction: column;
-    border-radius: 12px;
-  }
-
-  .tabNavWrapper {
-    margin: 32px 0 0 0;
-  }
+  .shareButton { padding-right: 16px; padding-left: 16px; }
 
   .lightboxClose {
     top: 16px;
@@ -531,22 +639,13 @@
     height: 44px;
   }
 
-  .tabNav {
-    width: 100%;
-    flex-direction: row;
-    justify-content: center;
-    gap: 24px;
-  }
-
-  .tabBtn {
-    width: auto;
-    padding: 16px 0;
-    font-size: 0.8rem;
-  }
-
   .tabContent {
-    padding: 32px 20px;
+    width: 100%;
+    padding: 14px 18px 32px;
   }
+
+  .tabNav { width: 100%; justify-content: center; gap: clamp(16px, 7vw, 28px); }
+  .tabBtn { padding: 14px 0; font-size: 0.78rem; }
 
   .tributeBox {
     flex-direction: column;
@@ -556,8 +655,11 @@
   }
 
   .galleryGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
   }
+
+  .thumbOverlay { padding: 10px; font-size: 0.78rem; }
 
   .lightboxNav {
     font-size: 2rem;
@@ -571,4 +673,7 @@
   .lightboxNext {
     right: 10px;
   }
+
+  .lightboxInner { max-width: calc(100vw - 32px); }
+  .lightboxInner img { max-width: 100%; max-height: 68vh; }
 }

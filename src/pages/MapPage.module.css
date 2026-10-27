@@ -403,7 +403,7 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 6px;
-    margin: -10px 0 30px;
+    margin: -10px 0 16px;
     padding-bottom: 14px;
     border-bottom: 1px solid #e4dfdb;
     color: #596273;
@@ -478,14 +478,16 @@
     line-height: 1.1;
 }
 
-.selectedLotTitle {
+.lotPanelHeading h2.selectedLotTitle {
+    font-family: 'Cormorant Garamond', 'Georgia', serif;
     font-size: 2rem;
+    font-weight: 600;
 }
 
 .selectedLotNumber {
-    font-family: 'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+    font-family: 'Cormorant Garamond', 'Georgia', serif;
     font-size: 0.82em;
-    font-weight: 400;
+    font-weight: 600;
     font-variant-numeric: lining-nums tabular-nums;
 }
 

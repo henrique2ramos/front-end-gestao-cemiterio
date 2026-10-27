@@ -491,6 +491,10 @@
     .actions button { min-height: 38px; }
 }
 
+@media (min-width: 769px) {
+    .item { min-height: 40px; padding-top: 4px; padding-bottom: 4px; }
+}
+
 @media (max-width: 560px) {
     .panel { min-height: 0; border-radius: 13px; }
     .typeTabsHeader { flex-wrap: wrap; gap: 8px; padding: 18px 17px 0; }

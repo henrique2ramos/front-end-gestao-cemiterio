@@ -53,10 +53,11 @@
   min-height: 2.4em;
   max-height: 2.4em;
   overflow: hidden;
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
-  font-size: 1.2rem;
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: 1.24rem;
   line-height: 1.2;
-  font-weight: 600;
+  font-weight: 700;
+  -webkit-text-stroke: 0.2px currentColor;
   color: #002952;
   margin-bottom: 4px;
   display: -webkit-box;
@@ -68,7 +69,10 @@
 }
 
 .nameCompact {
-  font-size: 1.08rem;
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-size: 1.24rem;
+  font-weight: 700;
+  -webkit-text-stroke: 0.2px currentColor;
 }
 
 .dates {
