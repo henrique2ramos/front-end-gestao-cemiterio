@@ -65,8 +65,16 @@ export default function FalecidoDetailsModal({ falecido, onClose }) {
 
   const imagem = resolveImageUrl(record.imagem) || personPlaceholder;
   const possuiImagem = Boolean(record.imagem && record.imagem !== personPlaceholder);
-  const biografia = record.biografia || record.descricao || 'Biografia não informada.';
-  const galleryData = [record.galeria, record.fotosGaleria, record.imagensGaleria, record.photos, record.gallery]
+  const biografia = record.biografia || 'Biografia não informada.';
+  const descricao = String(record.descricao || '').trim();
+  const biografiaNormalizada = String(record.biografia || '').trim().replace(/\s+/g, ' ');
+  const descricaoRepetidaNaBiografia = Boolean(
+    descricao && biografiaNormalizada && descricao.replace(/\s+/g, ' ') === biografiaNormalizada
+  );
+  const galleryData = [
+    record.galeria, record.fotosGaleria, record.imagensGaleria, record.photos, record.gallery,
+    falecido.galeria, falecido.fotosGaleria, falecido.imagensGaleria, falecido.photos, falecido.gallery,
+  ]
     .find((value) => Array.isArray(value) ? value.length > 0 : Boolean(value));
   const galeria = normalizeGallery(galleryData);
   const memorialUrl = `/falecidos/${encodeURIComponent(record.id)}`;
@@ -125,10 +133,10 @@ export default function FalecidoDetailsModal({ falecido, onClose }) {
             </div>
           </div>
 
-          <section className={styles.section}>
+          {!descricaoRepetidaNaBiografia && <section className={styles.section}>
               <h4>Breve descrição</h4>
-            <p>{record.descricao || 'Descri\u00e7\u00e3o n\u00e3o informada.'}</p>
-          </section>
+            <p>{descricao || 'Descrição não informada.'}</p>
+          </section>}
 
           <section className={styles.section}>
             <h4>Biografia</h4>
@@ -136,7 +144,10 @@ export default function FalecidoDetailsModal({ falecido, onClose }) {
           </section>
 
           <section className={styles.section}>
-            <h4>Galeria de fotos</h4>
+            <h4 className={styles.galleryTitle}>
+              Galeria de fotos
+              <span>{galeria.length} {galeria.length === 1 ? 'foto' : 'fotos'}</span>
+            </h4>
             {galeria.length > 0 ? (
               <div className={styles.gallery}>
                 {galeria.map((src, index) => (

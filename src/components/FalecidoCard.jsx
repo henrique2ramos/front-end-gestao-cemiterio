@@ -41,8 +41,6 @@ export default function FalecidoCard({
           {falecido.dataNascimento || '—'} — {falecido.dataMorte || '—'}
         </p>
 
-        {falecido.descricao && <p className={styles.description}>{falecido.descricao}</p>}
-
         <div className={styles.metaData}>
           <div className={styles.location}>
             <MapPin size={16} className={styles.iconLocation} />

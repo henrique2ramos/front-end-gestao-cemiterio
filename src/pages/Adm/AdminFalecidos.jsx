@@ -98,7 +98,7 @@ export default function AdminFalecidos({ onLogout }) {
             tipo: item.tipo || 'historica',
             imagem: resolveOnce(item.imagem) || galeria[0] || personPlaceholder,
             galeria,
-            descricao: item.descricao || item.biografia || '',
+            descricao: item.descricao || '',
             dataNascimento: item.dataNascimento || '',
             dataMorte: item.dataMorte || '',
         };

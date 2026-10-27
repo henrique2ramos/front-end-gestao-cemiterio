@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { ChevronLeft, X, Map, Quote, Share2 } from 'lucide-react';
+import { ChevronLeft,ChevronRight, X, Map, Quote, Share2 } from 'lucide-react';
 import { fetchFalecidoById, resolveImageUrl } from '../lib/api';
 import styles from './FalecidoPage.module.css';
 import Button from '../components/Button';
@@ -128,8 +128,9 @@ export default function FalecidoPage() {
       ? [{ src: resolveImageUrl(falecido.imagem), caption: falecido.nome }]
       : [];
   const nomeComComplemento = String(falecido.nome || '').match(/^(.*?)\s*(\([^()]*\))\s*$/);
-  const bioText = falecido.biografia || falecido.descricao || 'Biografia não informada.';
+  const bioText = falecido.biografia || '';
   const shouldCollapseBio = bioText.length > 300;
+  const idadeFalecido = calculateAge(falecido.dataNascimento || falecido.anoNascimento, falecido.dataMorte || falecido.anoMorte);
 
   return (
     <div className={styles.page}>
@@ -139,13 +140,12 @@ export default function FalecidoPage() {
         <section className={styles.mainSection}>
           <div className={styles.profileCard}>
 
-            
             <div className={styles.profileHeader}>
               <MemorialFloralMark className={`${styles.memorialLeaf} ${styles.memorialLeafLeft}`} />
               <MemorialFloralMark className={`${styles.memorialLeaf} ${styles.memorialLeafRight}`} />
-              <div className={styles.topNav}>
+              <div className={`${styles.topNav} ${styles.profileBackNav}`}>
                 <button onClick={handleBack} className={styles.backLink}>
-                  <ChevronLeft size={20} />
+                  <ChevronLeft size={17} />
                   Voltar
                 </button>
               </div>
@@ -167,7 +167,7 @@ export default function FalecidoPage() {
                   </> : falecido.nome}
                 </h1>
 
-                <div className={styles.metadata}>
+                <div className={`${styles.metadata} ${idadeFalecido !== null ? styles.metadataHasAge : ''}`}>
                   <div className={styles.metaItem}>
                     <span className={styles.metaLabel}>Nascimento</span>
                     <span className={styles.metaValue}>{displayDate(falecido.dataNascimento || falecido.anoNascimento)}</span>
@@ -176,14 +176,14 @@ export default function FalecidoPage() {
                     <span className={styles.metaLabel}>Falecimento</span>
                     <span className={styles.metaValue}>{displayDate(falecido.dataMorte || falecido.anoMorte)}</span>
                   </div>
-                  {calculateAge(falecido.dataNascimento || falecido.anoNascimento, falecido.dataMorte || falecido.anoMorte) !== null && (
+                  {idadeFalecido !== null && (
                     <div className={styles.metaItem}>
                       <span className={styles.metaLabel}>Idade</span>
-                      <span className={styles.metaValue}>{calculateAge(falecido.dataNascimento || falecido.anoNascimento, falecido.dataMorte || falecido.anoMorte)} anos</span>
+                      <span className={styles.metaValue}>{idadeFalecido} anos</span>
                     </div>
                   )}
                   {falecido.localizacao && (
-                    <div className={styles.metaItem}>
+                    <div className={`${styles.metaItem} ${styles.metaLocation}`}>
                       <span className={styles.metaLabel}>Localização</span>
                       <span className={styles.metaValue}>{falecido.localizacao}</span>
                     </div>
@@ -212,22 +212,10 @@ export default function FalecidoPage() {
             <div className={styles.memorialSections}>
               <div className={styles.tabNavWrapper}>
                 <div className={styles.tabNav} role="tablist" aria-label="Conteúdo do memorial">
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected={activeTab === 'bio'}
-                    className={`${styles.tabBtn} ${activeTab === 'bio' ? styles.tabActive : ''}`}
-                    onClick={() => setActiveTab('bio')}
-                  >
+                  <button type="button" role="tab" id="memorial-bio-tab" aria-controls="memorial-bio-panel" aria-selected={activeTab === 'bio'} className={`${styles.tabBtn} ${activeTab === 'bio' ? styles.tabActive : ''}`} onClick={() => setActiveTab('bio')}>
                     Biografia
                   </button>
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected={activeTab === 'gallery'}
-                    className={`${styles.tabBtn} ${activeTab === 'gallery' ? styles.tabActive : ''}`}
-                    onClick={() => setActiveTab('gallery')}
-                  >
+                  <button type="button" role="tab" id="memorial-gallery-tab" aria-controls="memorial-gallery-panel" aria-selected={activeTab === 'gallery'} className={`${styles.tabBtn} ${activeTab === 'gallery' ? styles.tabActive : ''}`} onClick={() => setActiveTab('gallery')}>
                     Galeria de Fotos
                     <span className={styles.tabCount}>{galleryImages.length}</span>
                   </button>
@@ -236,10 +224,12 @@ export default function FalecidoPage() {
 
               <div className={styles.tabContent}>
               {activeTab === 'bio' ? (
-                <section className={styles.bioSection} role="tabpanel">
+                <section className={styles.bioSection} id="memorial-bio-panel" role="tabpanel" aria-labelledby="memorial-bio-tab">
                   <div className={`${styles.bioTextWrap} ${shouldCollapseBio && !bioExpanded ? styles.bioCollapsed : ''}`}>
-                    <h2 className={styles.contentTitle}>Biografia</h2>
-                    <p className={styles.bioText}>{bioText}</p>
+                    <h2 id="memorial-bio-heading" className={styles.contentTitle}>Biografia</h2>
+                    {bioText
+                      ? <p className={styles.bioText}>{bioText}</p>
+                      : <p className={styles.emptyBio}>A biografia ainda não foi adicionada.</p>}
                   </div>
                   {shouldCollapseBio && (
                     <button type="button" className={styles.readMore} onClick={() => setBioExpanded((expanded) => !expanded)}>
@@ -258,9 +248,9 @@ export default function FalecidoPage() {
                   )}
                 </section>
               ) : (
-                <section className={styles.gallerySection} role="tabpanel">
+                <section className={styles.gallerySection} id="memorial-gallery-panel" role="tabpanel" aria-labelledby="memorial-gallery-tab">
                   <div className={styles.galleryHeader}>
-                    <h2 className={styles.contentTitle}>Galeria de fotos</h2>
+                    <h2 id="memorial-gallery-heading" className={styles.contentTitle}>Galeria de fotos</h2>
                     {galleryImages.length > 0 && <span>{galleryImages.length} {galleryImages.length === 1 ? 'foto' : 'fotos'}</span>}
                   </div>
                   {galleryImages.length > 0 ? (

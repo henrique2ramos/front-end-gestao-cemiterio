@@ -166,6 +166,8 @@
 
 .section { margin-top: 16px; padding: 20px 22px; border: 1px solid #e1e8f0; border-radius: 14px; background: #fff; box-shadow: 0 2px 8px rgba(18, 52, 90, 0.025); }
 .section h4 { margin: 0 0 11px; color: #12345b; font-size: 0.9rem; }
+.section .galleryTitle { display: flex; align-items: baseline; gap: 8px; }
+.galleryTitle span { color: #778394; font-size: 0.78rem; font-weight: 500; }
 .section p { margin: 0; color: #536273; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
 
 .gallery { display: flex; flex-wrap: wrap; gap: 10px; }
