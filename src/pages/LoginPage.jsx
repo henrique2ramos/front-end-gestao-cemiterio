@@ -107,7 +107,7 @@ export default function LoginPage({ onLogin }) {
                   id="email"
                   name="email"
                   type="email"
-                  placeholder="emil"
+                  placeholder="email"
                   value={formData.email}
                   onChange={handleChange}
                   onKeyDown={handleKeyDown}
