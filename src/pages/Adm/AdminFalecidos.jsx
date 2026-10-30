@@ -16,7 +16,7 @@ import CopyLinkButton from '../../components/CopyLinkButton';
 import FalecidoFormModal from '../../components/FalecidoFormModal';
 import FalecidoDetailsModal from '../../components/FalecidoDetailsModal';
 import QrImageDownloadButtons from '../../components/QrImageDownloadButtons';
-import { getPageItems } from './../../data/adminPagination';
+import { formatDataAdmin, getPageItems } from './../../data/adminPagination';
 import styles from './AdminFalecidos.module.css';
 import personPlaceholder from '../../assets/person-placeholder.svg';
 
@@ -505,7 +505,7 @@ export default function AdminFalecidos({ onLogout }) {
                                                         <div className={styles.personInfo}>
                                                             <span className={styles.name}>{falecido.nome}</span>
                                                             <span className={styles.dateCell}>
-                                                                {falecido.dataNascimento || '—'} — {falecido.dataMorte || '—'}
+                                                                {formatDataAdmin(falecido.dataNascimento)} — {formatDataAdmin(falecido.dataMorte)}
                                                             </span>
                                                         </div>
                                                         </div>

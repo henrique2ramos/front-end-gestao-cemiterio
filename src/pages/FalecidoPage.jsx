@@ -166,7 +166,11 @@ export default function FalecidoPage() {
       : [];
   const profileImage = resolveImageUrl(falecido.imagem) || personPlaceholder;
   const openProfileImage = () => setImageViewer({ images: [{ src: profileImage, caption: falecido.nome }], index: 0 });
-  const whatsappMessage = `Memorial de ${falecido.nome || 'uma pessoa querida'}: ${window.location.href}`;
+  // A URL versionada força o WhatsApp a buscar a prévia sem biografia em vez
+  // de reutilizar os metadados antigos que ele pode ter guardado em cache.
+  const whatsappMemorialUrl = new URL(window.location.href);
+  whatsappMemorialUrl.searchParams.set('preview', 'v2');
+  const whatsappMessage = `Memorial de ${falecido.nome || 'uma pessoa querida'}: ${whatsappMemorialUrl.href}`;
   const whatsappShareUrl = `https://wa.me/?text=${encodeURIComponent(whatsappMessage)}`;
   const nascimento = falecido.dataNascimento || falecido.anoNascimento;
   const falecimento = falecido.dataMorte || falecido.anoMorte;

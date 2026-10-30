@@ -31,7 +31,7 @@ function formatPeriodo(nascimento, morte) {
     const n = isDataDesconhecida(nascimento);
     const m = isDataDesconhecida(morte);
     if (n && m) return 'Datas não informadas';
-    return `${n ? '—' : nascimento} — ${m ? '—' : morte}`;
+    return `${n ? 'Não informada' : nascimento} — ${m ? 'Não informada' : morte}`;
 }
 
 export default function AdminDashboard({ onLogout }) {

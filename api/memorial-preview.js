@@ -21,7 +21,8 @@ export default async function handler(request, response) {
   const host = request.headers['x-forwarded-host'] || request.headers.host || '';
   const protocol = request.headers['x-forwarded-proto'] || 'https';
   const siteOrigin = `${protocol}://${host}`;
-  const canonicalUrl = `${siteOrigin}/falecidos/${encodeURIComponent(id)}`;
+  const previewVersion = String(request.query?.preview || '').trim();
+  const canonicalUrl = `${siteOrigin}/falecidos/${encodeURIComponent(id)}${previewVersion ? `?preview=${encodeURIComponent(previewVersion)}` : ''}`;
   const runtimeEnv = globalThis.process?.env || {};
   const apiBaseValue = runtimeEnv.VITE_API_URL || runtimeEnv.API_BASE_URL || '';
 

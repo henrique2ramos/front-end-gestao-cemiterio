@@ -29,3 +29,5 @@ export function getPageItems(current, total) {
 
 
 export const isDataDesconhecida = (d) => !d || d === '10/10/1000';
+
+export const formatDataAdmin = (date) => (isDataDesconhecida(date) ? 'Não informada' : date);

@@ -2,6 +2,7 @@
 import { useEffect, useRef } from 'react';
 import Spinner from '../../components/Spinner';
 import personPlaceholder from '../../assets/person-placeholder.svg';
+import { formatDataAdmin } from '../../data/adminPagination';
 import styles from './AdminQuadrasLotes.module.css';
 
 export default function AdminLotes({
@@ -249,7 +250,7 @@ export default function AdminLotes({
                                         </span>
                                         <span className={styles.lotPersonText}>
                                             <strong>{falecido.nome}</strong>
-                                            <span>{falecido.dataNascimento || '—'} — {falecido.dataMorte || '—'}</span>
+                                            <span>{formatDataAdmin(falecido.dataNascimento)} — {formatDataAdmin(falecido.dataMorte)}</span>
                                         </span>
                                     </button>
                                     <div className={styles.lotPersonActions}>
