@@ -213,16 +213,16 @@ export default function FalecidoPage() {
                 <div className={`${styles.metadata} ${styles.metadataHasAge}`}>
                   <div className={`${styles.metaItem} ${!nascimento ? styles.metaItemMissing : ''}`}>
                     <span className={styles.metaLabel}>Nascimento</span>
-                    <span className={styles.metaValue} title={!nascimento ? 'Data não informada' : undefined}>{displayDate(nascimento)}</span>
+                    <span className={styles.metaValue} title={!nascimento ? 'Data não informada' : undefined}>{nascimento ? displayDate(nascimento) : 'N\u00e3o informada'}</span>
                   </div>
                   <div className={`${styles.metaItem} ${!falecimento ? styles.metaItemMissing : ''}`}>
                     <span className={styles.metaLabel}>Falecimento</span>
-                    <span className={styles.metaValue} title={!falecimento ? 'Data não informada' : undefined}>{displayDate(falecimento)}</span>
+                    <span className={styles.metaValue} title={!falecimento ? 'Data não informada' : undefined}>{falecimento ? displayDate(falecimento) : 'N\u00e3o informada'}</span>
                   </div>
                   <div className={`${styles.metaItem} ${idadeFalecido === null ? styles.metaItemMissing : ''}`}>
                     <span className={styles.metaLabel}>Idade</span>
                     <span className={styles.metaValue} title={idadeFalecido === null ? 'Idade não informada' : undefined}>
-                      {idadeFalecido !== null ? `${idadeFalecido} anos` : '—'}
+                      {idadeFalecido !== null ? `${idadeFalecido} anos` : 'N\u00e3o informada'}
                     </span>
                   </div>
                   {falecido.localizacao && (

@@ -26,7 +26,7 @@ export default async function handler(request, response) {
   const apiBaseValue = runtimeEnv.VITE_API_URL || runtimeEnv.API_BASE_URL || '';
 
   let name = 'Memorial Digital Pirpirituba';
-  let description = 'Conheça este memorial no Sistema de Gestão de Cemitério de Pirpirituba.';
+  let description = 'Acesse o memorial digital desta pessoa em Pirpirituba.';
   let image = `${siteOrigin}/favicon.svg`;
 
   if (id && apiBaseValue) {
@@ -41,9 +41,7 @@ export default async function handler(request, response) {
       if (apiResponse.ok) {
         const record = unwrapRecord(await apiResponse.json());
         name = String(record?.nome || name);
-        const bio = String(record?.biografia || record?.descricao || '').replace(/\s+/g, ' ').trim();
-        const location = String(record?.localizacao || '').trim();
-        description = [bio || `Conheça o memorial de ${name}.`, location].filter(Boolean).join(' · ').slice(0, 280);
+        description = `Acesse o memorial digital de ${name} em Pirpirituba.`;
         image = resolvePublicImage(record?.imagem, apiBase, siteOrigin);
       }
     } catch (error) {
