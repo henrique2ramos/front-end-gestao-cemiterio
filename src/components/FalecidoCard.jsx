@@ -14,7 +14,11 @@ export default function FalecidoCard({
   const [imageFailed, setImageFailed] = useState(false);
   const isPlaceholderImage = image === personPlaceholder || /person-placeholder|imagem-indisponivel/i.test(image || '');
   const hasImage = image && !imageFailed && !isPlaceholderImage;
-  const formatCardDate = (date) => (!date || date === '10/10/1000' ? 'Não informada' : date);
+  const nascimento = falecido.dataNascimento || falecido.anoNascimento;
+  const falecimento = falecido.dataMorte || falecido.anoMorte;
+  const isUnknownDate = (date) => !date || date === '10/10/1000';
+  const formatCardDate = (date) => (isUnknownDate(date) ? 'Não informada' : date);
+  const hasUnknownDate = isUnknownDate(nascimento) || isUnknownDate(falecimento);
 
   return (
     <Link
@@ -38,8 +42,8 @@ export default function FalecidoCard({
       <div className={styles.content}>
         <h3 className={`${styles.name} ${compactName ? styles.nameCompact : ''}`}>{falecido.nome}</h3>
 
-        <p className={styles.dates}>
-          {formatCardDate(falecido.dataNascimento || falecido.anoNascimento)} — {formatCardDate(falecido.dataMorte || falecido.anoMorte)}
+        <p className={`${styles.dates} ${hasUnknownDate ? styles.datesCompact : ''}`}>
+          {formatCardDate(nascimento)} — {formatCardDate(falecimento)}
         </p>
 
         <div className={styles.metaData}>
