@@ -505,9 +505,6 @@ export default function MapPage() {
                                                                     Nascimento: {falecido.dataNascimento || falecido.anoNascimento || '—'}
                                                                     {' · Falecimento: '}{falecido.dataMorte || falecido.anoMorte || '—'}
                                                                 </small>
-                                                                {falecido.descricao && (
-                                                                    <small className={styles.deceasedDescription}>{falecido.descricao}</small>
-                                                                )}
                                                             </span>
                                                             <ChevronRight size={17} aria-hidden="true" />
                                                         </Link>

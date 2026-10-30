@@ -729,13 +729,6 @@
     line-height: 1.4;
 }
 
-.deceasedInfo .deceasedDescription {
-    display: -webkit-box;
-    overflow: hidden;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-}
-
 @media (max-width: 1024px) {
     .layout {
         grid-template-columns: 1fr;
