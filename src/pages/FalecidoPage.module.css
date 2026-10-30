@@ -515,12 +515,12 @@
   .profileBackNav { top: 18px; left: 18px; }
   .memorialLeaf { display: none; }
 
-  .photoWrapper { width: 154px; height: 154px; }
+  .photoWrapper { width: 168px; height: 168px; }
   .infoWrapper { width: 100%; min-width: 0; flex: 0 1 auto; align-items: center; }
   .name {
     width: 100%;
     margin-bottom: 12px;
-    font-size: clamp(1.55rem, 6.2vw, 1.85rem);
+    font-size: clamp(1.62rem, 6.5vw, 1.95rem);
     overflow-wrap: anywhere;
     text-align: center;
   }
