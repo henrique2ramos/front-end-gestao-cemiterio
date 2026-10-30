@@ -1,16 +1,18 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import { ChevronLeft,ChevronRight, X, Map, Quote, Share2 } from 'lucide-react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { ChevronLeft, ChevronRight, Map, Quote, Share2, MessageCircle, Copy } from 'lucide-react';
 import { fetchFalecidoById, resolveImageUrl } from '../lib/api';
 import styles from './FalecidoPage.module.css';
 import Button from '../components/Button';
 import personPlaceholder from '../assets/person-placeholder.svg';
 import ramoFloral from '../assets/ramo_floral.png';
+import MemorialImageViewer from '../components/MemorialImageViewer';
 
 const displayDate = (value) => {
-  if (!value) return '—';
-  const iso = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
-  return iso ? `${iso[3]}/${iso[2]}/${iso[1]}` : value;
+  const normalized = String(value || '').trim();
+  if (!normalized) return '—';
+  const iso = normalized.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return iso ? `${iso[3]}/${iso[2]}/${iso[1]}` : normalized;
 };
 
 const dateParts = (value) => {
@@ -42,17 +44,25 @@ export default function FalecidoPage() {
   const { id } = useParams();
   const [falecido, setFalecido] = useState(null);
   const [activeTab, setActiveTab] = useState('bio');
-  const [lightboxIndex, setLightboxIndex] = useState(null);
+  const [imageViewer, setImageViewer] = useState(null);
   const [bioExpanded, setBioExpanded] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
+  const [shareMenuOpen, setShareMenuOpen] = useState(false);
+  const shareMenuRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const handleBack = () => {
     if (window.history.length > 1) navigate(-1);
     else navigate('/');
   };
 
+  const closeImageViewer = useCallback(() => setImageViewer(null), []);
+  const navigateImageViewer = useCallback((index) => {
+    setImageViewer((current) => current ? { ...current, index } : current);
+  }, []);
+
   const handleShare = async () => {
     const url = window.location.href;
+    setShareMenuOpen(false);
     try {
       if (navigator.share) await navigator.share({ title: falecido?.nome || 'Memorial', url });
       else {
@@ -64,6 +74,33 @@ export default function FalecidoPage() {
       if (error?.name !== 'AbortError') console.error('Não foi possível compartilhar o memorial:', error);
     }
   };
+
+  const handleCopyMemorialLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setShareMenuOpen(false);
+      setShareCopied(true);
+      window.setTimeout(() => setShareCopied(false), 1800);
+    } catch (error) {
+      console.error('NÃ£o foi possÃ­vel copiar o link do memorial:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (!shareMenuOpen) return undefined;
+    const closeOnOutsideClick = (event) => {
+      if (!shareMenuRef.current?.contains(event.target)) setShareMenuOpen(false);
+    };
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') setShareMenuOpen(false);
+    };
+    document.addEventListener('pointerdown', closeOnOutsideClick);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsideClick);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [shareMenuOpen]);
 
   useEffect(() => {
     async function loadFalecido() {
@@ -127,6 +164,12 @@ export default function FalecidoPage() {
     : falecido.imagem
       ? [{ src: resolveImageUrl(falecido.imagem), caption: falecido.nome }]
       : [];
+  const profileImage = resolveImageUrl(falecido.imagem) || personPlaceholder;
+  const openProfileImage = () => setImageViewer({ images: [{ src: profileImage, caption: falecido.nome }], index: 0 });
+  const whatsappMessage = `Memorial de ${falecido.nome || 'uma pessoa querida'}: ${window.location.href}`;
+  const whatsappShareUrl = `https://wa.me/?text=${encodeURIComponent(whatsappMessage)}`;
+  const nascimento = falecido.dataNascimento || falecido.anoNascimento;
+  const falecimento = falecido.dataMorte || falecido.anoMorte;
   const nomeComComplemento = String(falecido.nome || '').match(/^(.*?)\s*(\([^()]*\))\s*$/);
   const bioText = falecido.biografia || '';
   const shouldCollapseBio = bioText.length > 300;
@@ -149,14 +192,14 @@ export default function FalecidoPage() {
                   Voltar
                 </button>
               </div>
-              <div className={styles.photoWrapper}>
+              <button type="button" className={styles.photoWrapper} onClick={openProfileImage} aria-label={`Ampliar foto de ${falecido.nome}`}>
                 <img
-                  src={resolveImageUrl(falecido.imagem) || personPlaceholder}
+                  src={profileImage}
                   alt={falecido.nome}
                   className={styles.photo}
                   onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = personPlaceholder; }}
                 />
-              </div>
+              </button>
 
               <div className={styles.infoWrapper}>
                 <h1 className={styles.name}>
@@ -167,21 +210,21 @@ export default function FalecidoPage() {
                   </> : falecido.nome}
                 </h1>
 
-                <div className={`${styles.metadata} ${idadeFalecido !== null ? styles.metadataHasAge : ''}`}>
-                  <div className={styles.metaItem}>
+                <div className={`${styles.metadata} ${styles.metadataHasAge}`}>
+                  <div className={`${styles.metaItem} ${!nascimento ? styles.metaItemMissing : ''}`}>
                     <span className={styles.metaLabel}>Nascimento</span>
-                    <span className={styles.metaValue}>{displayDate(falecido.dataNascimento || falecido.anoNascimento)}</span>
+                    <span className={styles.metaValue} title={!nascimento ? 'Data não informada' : undefined}>{displayDate(nascimento)}</span>
                   </div>
-                  <div className={styles.metaItem}>
+                  <div className={`${styles.metaItem} ${!falecimento ? styles.metaItemMissing : ''}`}>
                     <span className={styles.metaLabel}>Falecimento</span>
-                    <span className={styles.metaValue}>{displayDate(falecido.dataMorte || falecido.anoMorte)}</span>
+                    <span className={styles.metaValue} title={!falecimento ? 'Data não informada' : undefined}>{displayDate(falecimento)}</span>
                   </div>
-                  {idadeFalecido !== null && (
-                    <div className={styles.metaItem}>
-                      <span className={styles.metaLabel}>Idade</span>
-                      <span className={styles.metaValue}>{idadeFalecido} anos</span>
-                    </div>
-                  )}
+                  <div className={`${styles.metaItem} ${idadeFalecido === null ? styles.metaItemMissing : ''}`}>
+                    <span className={styles.metaLabel}>Idade</span>
+                    <span className={styles.metaValue} title={idadeFalecido === null ? 'Idade não informada' : undefined}>
+                      {idadeFalecido !== null ? `${idadeFalecido} anos` : '—'}
+                    </span>
+                  </div>
                   {falecido.localizacao && (
                     <div className={`${styles.metaItem} ${styles.metaLocation}`}>
                       <span className={styles.metaLabel}>Localização</span>
@@ -200,10 +243,28 @@ export default function FalecidoPage() {
                   >
                     Ver no mapa
                   </Button>
-                  <button type="button" className={styles.shareButton} onClick={handleShare}>
-                    <Share2 size={16} />
-                    {shareCopied ? 'Link copiado' : 'Compartilhar'}
-                  </button>
+                  <div className={styles.shareMenuWrapper} ref={shareMenuRef}>
+                    <button type="button" className={styles.shareButton} onClick={() => setShareMenuOpen((open) => !open)} aria-haspopup="menu" aria-expanded={shareMenuOpen}>
+                      <Share2 size={16} />
+                      {shareCopied ? 'Link copiado' : 'Compartilhar'}
+                    </button>
+                    {shareMenuOpen && (
+                      <div className={styles.shareMenu} role="menu" aria-label="Opções de compartilhamento">
+                        <a className={styles.whatsappShare} href={whatsappShareUrl} target="_blank" rel="noreferrer" role="menuitem" onClick={() => setShareMenuOpen(false)}>
+                          <MessageCircle size={17} aria-hidden="true" />
+                          WhatsApp
+                        </a>
+                        <button type="button" role="menuitem" onClick={handleShare}>
+                          <Share2 size={16} aria-hidden="true" />
+                          Outros aplicativos
+                        </button>
+                        <button type="button" role="menuitem" onClick={handleCopyMemorialLink}>
+                          <Copy size={16} aria-hidden="true" />
+                          Copiar link
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -259,7 +320,7 @@ export default function FalecidoPage() {
                         <button
                           key={i}
                           className={styles.galleryThumb}
-                          onClick={() => setLightboxIndex(i)}
+                          onClick={() => setImageViewer({ images: galleryImages, index: i })}
                           aria-label={`Abrir ${img.caption}`}
                         >
                           <img src={img.src || personPlaceholder} alt={img.caption} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = personPlaceholder; }} />
@@ -282,29 +343,13 @@ export default function FalecidoPage() {
       </div>
 
       
-      {lightboxIndex !== null && galleryImages.length > 0 && (
-        <div className={styles.lightbox} onClick={() => setLightboxIndex(null)}>
-          <button className={styles.lightboxClose} onClick={() => setLightboxIndex(null)}>
-            <X size={24} />
-          </button>
-          <button
-            className={`${styles.lightboxNav} ${styles.lightboxPrev}`}
-            onClick={(e) => { e.stopPropagation(); setLightboxIndex((lightboxIndex - 1 + galleryImages.length) % galleryImages.length); }}
-          >
-            ‹
-          </button>
-          <div className={styles.lightboxInner} onClick={(e) => e.stopPropagation()}>
-            <img src={galleryImages[lightboxIndex].src || personPlaceholder} alt={galleryImages[lightboxIndex].caption} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = personPlaceholder; }} />
-            <p>{galleryImages[lightboxIndex].caption}</p>
-            <span>{lightboxIndex + 1} / {galleryImages.length}</span>
-          </div>
-          <button
-            className={`${styles.lightboxNav} ${styles.lightboxNext}`}
-            onClick={(e) => { e.stopPropagation(); setLightboxIndex((lightboxIndex + 1) % galleryImages.length); }}
-          >
-            ›
-          </button>
-        </div>
+      {imageViewer && (
+        <MemorialImageViewer
+          images={imageViewer.images}
+          index={imageViewer.index}
+          onNavigate={navigateImageViewer}
+          onClose={closeImageViewer}
+        />
       )}
     </div>
   );

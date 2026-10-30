@@ -1,6 +1,19 @@
 {
   "rewrites": [
     {
+      "source": "/falecidos/:id",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": {
+            "re": "(?i)(WhatsApp|facebookexternalhit|Facebot|Twitterbot|TelegramBot|LinkedInBot)"
+          }
+        }
+      ],
+      "destination": "/api/memorial-preview?id=:id"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

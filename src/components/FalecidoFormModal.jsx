@@ -86,9 +86,9 @@ export default function FalecidoFormModal({
                                     ['dataMorte', 'Data de Falecimento', datePickerRefs.death]
                                 ].map(([name, label, ref]) => (
                                     <div className={styles.formGroup} key={name}>
-                                        <label>{label}{required}</label>
-                                        <div className={styles.dateInputWrap}>
-                                            <input className={styles.dateText} type="text" name={name} required={requiredFields} pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}" title="Use o formato dd/mm/aaaa" placeholder="dd/mm/aaaa" inputMode="numeric" value={formData[name]} onChange={onInputChange} />
+                                    <label>{label}</label>
+                                    <div className={styles.dateInputWrap}>
+                                            <input className={styles.dateText} type="text" name={name} pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}" title="Use o formato dd/mm/aaaa" placeholder="dd/mm/aaaa" inputMode="numeric" value={formData[name]} onChange={onInputChange} />
                                             <button type="button" className={styles.datePickerButton} aria-label={`Abrir calendário para ${label.toLowerCase()}`} onClick={() => openCalendar(ref)}><CalendarDays size={18} /></button>
                                             <input ref={ref} className={styles.nativeDatePicker} type="date" aria-label={`Selecionar ${label.toLowerCase()} no calendário`} tabIndex={-1} value={dateToInput(formData[name])} onChange={(event) => setFormData((current) => ({ ...current, [name]: formatDate(event.target.value) }))} />
                                         </div>
@@ -105,6 +105,16 @@ export default function FalecidoFormModal({
                                     <AutocompleteInput name="lote" value={formData.lote} options={loteOptions} placeholder="Digite ou selecione o lote" ariaLabel="Lote" required={requiredFields} onChange={onLoteChange} />
                                 </div>
                             </div>
+                            <div className={styles.formGroup}>
+                                <label htmlFor="tipo-estrutura">Tipo de estrutura funerária</label>
+                                <select id="tipo-estrutura" name="tipoEstrutura" value={formData.tipoEstrutura || ''} onChange={onInputChange}>
+                                    <option value="">Selecione (opcional)</option>
+                                    <option value="Túmulo">Túmulo</option>
+                                    <option value="Cova">Cova</option>
+                                    <option value="Carneira">Carneira</option>
+                                    <option value="Outro">Outro</option>
+                                </select>
+                            </div>
                                 <div className={styles.formGroup}>
                                 <label>Categoria (Tipo){required}</label>
                                 <select name="tipo" required={requiredFields} value={formData.tipo} onChange={onInputChange}>
@@ -116,16 +126,34 @@ export default function FalecidoFormModal({
                         <div className={styles.formCol}>
                             <h3 className={styles.sectionTitle}>Biografia e Detalhes</h3>
                             <div className={styles.formGroup}>
-                                <label>Breve Descrição</label>
-                                <textarea name="descricao" rows="2" placeholder="Uma frase curta que resuma a pessoa..." value={formData.descricao} onChange={onInputChange} />
-                                <small className={styles.inputHelp}>Opcional. Se ficar em branco, a descrição não será exibida.</small>
-                            </div>
-                            <div className={styles.formGroup}>
                                 <label>Biografia Completa</label>
-                                <textarea name="biografia" rows="5" placeholder="Escreva a história completa do falecido aqui..." value={formData.biografia} onChange={onInputChange} />
+                                <textarea name="biografia" rows="6" placeholder="Escreva a história completa do falecido aqui..." value={formData.biografia} onChange={onInputChange} />
                                 <small className={styles.inputHelp}>Opcional. Se não houver informação, o memorial mostrará “Biografia não informada”.</small>
                             </div>
+                            <div className={styles.formGroup}>
+                                <label>Observações</label>
+                                <textarea name="observacoes" rows="6" placeholder="Anotações sobre a pessoa ou o lote..." value={formData.observacoes ?? formData.descricao ?? ''} onChange={onInputChange} />
+                                <small className={styles.inputHelp}>Opcional. Informação administrativa, não exibida no memorial público.</small>
+                            </div>
                         </div>
+
+                        <section className={`${styles.formCol} ${styles.responsibleSection}`}>
+                            <h3 className={styles.sectionTitle}>Dados do responsável</h3>
+                            <div className={styles.responsibleFields}>
+                                <div className={`${styles.formGroup} ${styles.responsibleName}`}>
+                                    <label htmlFor="responsavel-nome">Nome completo</label>
+                                    <input id="responsavel-nome" type="text" name="responsavelNome" value={formData.responsavelNome || ''} onChange={onInputChange} />
+                                </div>
+                                <div className={styles.formGroup}>
+                                    <label htmlFor="responsavel-parentesco">Parentesco ou vínculo</label>
+                                    <input id="responsavel-parentesco" type="text" name="responsavelParentesco" value={formData.responsavelParentesco || ''} onChange={onInputChange} />
+                                </div>
+                                <div className={styles.formGroup}>
+                                    <label htmlFor="responsavel-telefone">Telefone</label>
+                                    <input id="responsavel-telefone" type="tel" name="responsavelTelefone" value={formData.responsavelTelefone || ''} onChange={onInputChange} />
+                                </div>
+                            </div>
+                        </section>
 
                         <section className={`${styles.formCol} ${styles.imageSection}`}>
                             <h3 className={styles.sectionTitle}>Imagens</h3>

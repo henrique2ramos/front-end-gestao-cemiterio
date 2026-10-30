@@ -63,12 +63,17 @@
 .close:hover { background: #f1f5f9; color: #1e293b; }
 
 .body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
   overflow-y: auto;
   padding: 24px 28px 28px;
   scrollbar-width: thin;
   overscroll-behavior: contain;
   background: #f7f9fc;
 }
+
+.photoOpen .body { overflow: hidden; }
 
 .headerTitleGroup {
   display: flex;
@@ -103,7 +108,7 @@
 
 .profile {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 24px;
   padding: 22px;
   border: 1px solid #e1e8f0;
@@ -122,6 +127,22 @@
   box-shadow: 0 3px 12px rgba(15, 23, 42, 0.12);
 }
 
+.photoButton {
+  display: block;
+  width: 128px;
+  height: 128px;
+  flex: 0 0 128px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  cursor: zoom-in;
+}
+.photoButton .photo { width: 100%; height: 100%; }
+.photoButton:focus-visible,
+.galleryPhotoButton:focus-visible { outline: 3px solid #6aa6e8; outline-offset: 3px; }
+
 .photoFallback {
   display: grid;
   width: 128px;
@@ -137,8 +158,9 @@
   text-align: center;
 }
 
-.profileInfo { min-width: 0; }
-.profileInfo h3 { margin: 0 0 10px; color: #12345b; font-size: 1.5rem; line-height: 1.2; overflow-wrap: anywhere; }
+.profileInfo { min-width: 0; flex: 1; }
+.profileHeading { display: flex; min-width: 0; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.profileInfo h3 { margin: 0; color: #12345b; font-size: 1.5rem; line-height: 1.2; overflow-wrap: anywhere; }
 
 .badge {
   display: inline-flex;
@@ -153,25 +175,75 @@
 
 .metadata {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px 18px;
   margin-top: 14px;
-  color: #536273;
-  font-size: 0.88rem;
 }
 
-.metadata span { display: flex; min-width: 0; align-items: flex-start; gap: 8px; line-height: 1.45; }
-.metadata span:last-child { grid-column: 1 / -1; }
-.metadata svg { flex: 0 0 auto; color: #64748b; }
+.metadata > div { display: grid; min-width: 0; gap: 3px; }
+.metadata span,
+.profileLocation span { color: #778394; font-size: 0.74rem; font-weight: 600; }
+.metadata strong,
+.profileLocation strong { color: #334155; font-size: 0.88rem; font-weight: 600; overflow-wrap: anywhere; }
 
-.section { margin-top: 16px; padding: 20px 22px; border: 1px solid #e1e8f0; border-radius: 14px; background: #fff; box-shadow: 0 2px 8px rgba(18, 52, 90, 0.025); }
+.profileLocation {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px 18px;
+  margin-top: 14px;
+  padding-top: 13px;
+  border-top: 1px solid #e8edf3;
+}
+.profileLocation > div { display: grid; min-width: 0; gap: 3px; }
+
+.detailsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.section { min-width: 0; margin: 0; padding: 18px 20px; border: 1px solid #e1e8f0; border-radius: 14px; background: #fff; box-shadow: 0 2px 8px rgba(18, 52, 90, 0.025); }
 .section h4 { margin: 0 0 11px; color: #12345b; font-size: 0.9rem; }
 .section .galleryTitle { display: flex; align-items: baseline; gap: 8px; }
 .galleryTitle span { color: #778394; font-size: 0.78rem; font-weight: 500; }
 .section p { margin: 0; color: #536273; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
 
+.bioCollapsed { position: relative; max-height: 12.8em; overflow: hidden; }
+.bioCollapsed::after { position: absolute; right: 0; bottom: 0; left: 0; height: 2.5em; background: linear-gradient(transparent, #fff); content: ''; pointer-events: none; }
+.biographySection > h4 { margin-bottom: 16px; text-align: left; }
+.readMore { display: flex; width: 100%; align-items: center; justify-content: center; gap: 6px; margin: 20px 0 0; padding: 14px 0 0; border: 0; border-top: 1px solid #e8edf3; background: transparent; color: #1565c0; font: inherit; font-weight: 700; cursor: pointer; }
+.readMore svg { transform: rotate(90deg); transition: transform 160ms ease; }
+.readMore .readMoreExpanded { transform: rotate(-90deg); }
+
+.detailList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 18px;
+  margin: 0;
+}
+
+.detailList > div { min-width: 0; }
+.detailList dt { margin-bottom: 4px; color: #778394; font-size: 0.76rem; font-weight: 600; }
+.detailList dd { margin: 0; color: #334155; font-size: 0.9rem; line-height: 1.45; overflow-wrap: anywhere; }
+.responsibleSection .detailList { gap: 0 20px; }
+.responsibleSection .detailList > div { padding: 11px 0; }
+.responsibleSection .detailList > div:first-child { grid-column: 1 / -1; border-bottom: 1px solid #e8edf3; }
+.responsibleSection .detailList > div:last-child { padding-left: 20px; border-left: 1px solid #e8edf3; }
+.observationsSection p { color: #536273; }
+.biographySection .bioTextWrap { min-width: 0; }
+.gallerySection { width: 100%; box-sizing: border-box; }
+
 .gallery { display: flex; flex-wrap: wrap; gap: 10px; }
-.gallery img { width: 120px; height: 120px; border: 1px solid #dce5ef; border-radius: 11px; background: #f8fafc; object-fit: cover; }
+.galleryPhotoButton { width: 120px; height: 120px; padding: 0; overflow: hidden; border: 1px solid #dce5ef; border-radius: 11px; background: #f8fafc; cursor: zoom-in; }
+.galleryPhotoButton img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 160ms ease; }
+.galleryPhotoButton:hover img { transform: scale(1.04); }
+.photoViewer { position: fixed; z-index: 1400; inset: 0; display: grid; place-items: center; overflow: hidden; padding: 64px 24px 24px; background: rgba(10, 20, 34, 0.88); overscroll-behavior: contain; touch-action: none; }
+.photoViewerImageButton { display: grid; max-width: 100%; max-height: 100%; place-items: center; padding: 0; border: 0; background: transparent; cursor: zoom-in; }
+.photoViewerImageButton img { display: block; width: min(72vw, 760px); height: min(68vh, 560px); object-fit: contain; transition: width 180ms ease, height 180ms ease; }
+.photoViewerZoomed .photoViewerImageButton { cursor: zoom-out; }
+.photoViewerZoomed .photoViewerImageButton img { width: min(90vw, 1100px); height: min(84vh, 900px); }
+.photoViewerClose { position: absolute; top: max(16px, env(safe-area-inset-top)); right: max(16px, env(safe-area-inset-right)); display: grid; width: 40px; height: 40px; place-items: center; border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 50%; background: rgba(255, 255, 255, 0.12); color: #fff; cursor: pointer; }
+.photoViewerClose:hover { background: rgba(255, 255, 255, 0.22); }
 .emptyGallery { color: #64748b; }
 
 @media (max-width: 560px) {
@@ -180,13 +252,21 @@
   .header, .body { padding: 18px; }
   .headerTitleGroup { gap: 8px; }
   .memorialLink { min-height: 34px; padding: 0 10px; font-size: 0.82rem; }
-  .profile { align-items: flex-start; gap: 14px; padding: 16px; }
+  .profile { align-items: flex-start; flex-direction: column; gap: 14px; padding: 16px; }
+  .photoButton { width: 84px; height: 84px; flex-basis: 84px; border-radius: 12px; }
   .photo { width: 84px; height: 84px; flex-basis: 84px; border-radius: 12px; }
   .photoFallback { width: 84px; height: 84px; flex-basis: 84px; border-radius: 12px; }
   .profileInfo h3 { font-size: 1.12rem; }
-  .metadata { font-size: 0.8rem; }
-  .metadata { grid-template-columns: 1fr; }
-  .metadata span:last-child { grid-column: auto; }
+  .metadata { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .metadata strong,
+  .profileLocation strong { font-size: 0.78rem; }
+  .profileLocation { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .profileLocation > div:last-child { grid-column: 1 / -1; }
+  .detailsGrid { gap: 12px; }
+  .detailList { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 14px; }
+  .responsibleSection .detailList { gap: 0 12px; }
+  .responsibleSection .detailList > div:last-child { padding-left: 12px; }
   .section { padding: 17px 16px; }
-  .gallery img { width: 96px; height: 96px; }
+  .galleryPhotoButton { width: 96px; height: 96px; }
+  .photoViewer { padding: 58px 12px 16px; }
 }

@@ -203,7 +203,8 @@ export default function AdminQuadrasLotes({ onLogout }) {
     const [formData, setFormData] = useState({
         nome: '', dataNascimento: '', dataMorte: '',
         setor: '', lote: '',
-        descricao: '', biografia: '', imagem: '', tipo: 'historica'
+        descricao: '', observacoes: '', biografia: '', imagem: '', tipo: 'historica', tipoEstrutura: '',
+        responsavelNome: '', responsavelParentesco: '', responsavelTelefone: ''
     });
 
     const normalizeFalecidosFromApi = (items) => items.map((item) => {
@@ -215,6 +216,7 @@ export default function AdminQuadrasLotes({ onLogout }) {
             imagem: resolveOnce(item.imagem) || galeria[0] || personPlaceholder,
             galeria,
             descricao: item.descricao || '',
+            observacoes: item.observacoes || item.observacao || item.descricao || '',
             dataNascimento: item.dataNascimento || '',
             dataMorte: item.dataMorte || '',
         };
@@ -472,11 +474,17 @@ export default function AdminQuadrasLotes({ onLogout }) {
             const form = new FormData();
             form.append('nome', formData.nome);
             form.append('biografia', formData.biografia || '');
-            form.append('descricao', formData.descricao || '');
+            const observacoes = formData.observacoes ?? formData.descricao ?? '';
+            form.append('descricao', observacoes);
+            form.append('observacoes', observacoes);
             form.append('dataNascimento', formatarData(formData.dataNascimento));
             form.append('dataMorte', formatarData(formData.dataMorte));
             form.append('localizacao', localizacao);
             form.append('tipo', formData.tipo || 'historica');
+            form.append('tipoEstrutura', formData.tipoEstrutura || '');
+            form.append('responsavelNome', formData.responsavelNome || '');
+            form.append('responsavelParentesco', formData.responsavelParentesco || '');
+            form.append('responsavelTelefone', formData.responsavelTelefone || '');
 
             if (selectedImageFile) {
                 form.append('imagem', selectedImageFile);
@@ -497,11 +505,16 @@ export default function AdminQuadrasLotes({ onLogout }) {
                 : {
                     nome: formData.nome,
                     biografia: formData.biografia || '',
-                    descricao: formData.descricao || '',
-                    dataNascimento: formatarData(formData.dataNascimento),
-                    dataMorte: formatarData(formData.dataMorte),
+                    descricao: formData.observacoes ?? formData.descricao ?? '',
+                    observacoes: formData.observacoes ?? formData.descricao ?? '',
+                    dataNascimento: formatarData(formData.dataNascimento) || null,
+                    dataMorte: formatarData(formData.dataMorte) || null,
                     localizacao,
                     tipo: formData.tipo || 'historica',
+                    tipoEstrutura: formData.tipoEstrutura || '',
+                    responsavelNome: formData.responsavelNome || '',
+                    responsavelParentesco: formData.responsavelParentesco || '',
+                    responsavelTelefone: formData.responsavelTelefone || '',
                     ...(imageRemoved ? { imagem: '' } : imagemAlterada ? { imagem: formData.imagem.trim() } : {}),
                 };
 
@@ -617,7 +630,12 @@ export default function AdminQuadrasLotes({ onLogout }) {
         }
         setSelectedQuadra(setor || null);
         setSelectedLote(lote || null);
-        setFormData({ ...falecido, setor, lote });
+        setFormData({
+            nome: '', dataNascimento: '', dataMorte: '', setor: '', lote: '',
+            descricao: '', observacoes: '', biografia: '', imagem: '', tipo: 'historica', tipoEstrutura: '',
+            responsavelNome: '', responsavelParentesco: '', responsavelTelefone: '',
+            ...falecido, setor, lote,
+        });
         setSelectedImageFile(null);
         setImagePreview(falecido.imagem || '');
         setIsFormModalOpen(true);
@@ -625,7 +643,7 @@ export default function AdminQuadrasLotes({ onLogout }) {
 
     const openNewFalecidoModal = () => {
         pushModalHistory();
-        setFormData({ nome: '', dataNascimento: '', dataMorte: '', setor: selectedQuadra || '', lote: selectedLote || '', descricao: '', biografia: '', imagem: '', tipo: 'historica' });
+        setFormData({ nome: '', dataNascimento: '', dataMorte: '', setor: selectedQuadra || '', lote: selectedLote || '', descricao: '', observacoes: '', biografia: '', imagem: '', tipo: 'historica', tipoEstrutura: '', responsavelNome: '', responsavelParentesco: '', responsavelTelefone: '' });
         setSelectedFalecido(null);
         setSelectedImageFile(null);
         setImageRemoved(false);
@@ -653,7 +671,8 @@ export default function AdminQuadrasLotes({ onLogout }) {
         setFormData({
             nome: '', dataNascimento: '', dataMorte: '',
             setor: selectedQuadra || '', lote: '',
-            descricao: '', biografia: '', imagem: '', tipo: 'historica'
+            descricao: '', observacoes: '', biografia: '', imagem: '', tipo: 'historica', tipoEstrutura: '',
+            responsavelNome: '', responsavelParentesco: '', responsavelTelefone: ''
         });
         setIsFormModalOpen(false);
         closeModalHistory();

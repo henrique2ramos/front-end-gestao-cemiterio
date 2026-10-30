@@ -23,7 +23,8 @@ import personPlaceholder from '../../assets/person-placeholder.svg';
 const EMPTY_FORM = {
     nome: '', dataNascimento: '', dataMorte: '',
     setor: '', lote: '',
-    descricao: '', biografia: '', tipo: 'historica'
+    descricao: '', observacoes: '', biografia: '', tipo: 'historica', tipoEstrutura: '',
+    responsavelNome: '', responsavelParentesco: '', responsavelTelefone: ''
 };
 
 const getToken = () => localStorage.getItem('memorialAdminToken') || '';
@@ -99,6 +100,7 @@ export default function AdminFalecidos({ onLogout }) {
             imagem: resolveOnce(item.imagem) || galeria[0] || personPlaceholder,
             galeria,
             descricao: item.descricao || '',
+            observacoes: item.observacoes || item.observacao || item.descricao || '',
             dataNascimento: item.dataNascimento || '',
             dataMorte: item.dataMorte || '',
         };
@@ -224,11 +226,17 @@ export default function AdminFalecidos({ onLogout }) {
             const form = new FormData();
             form.append('nome', formData.nome || '');
             form.append('biografia', formData.biografia || '');
-            form.append('descricao', formData.descricao || '');
+            const observacoes = formData.observacoes ?? formData.descricao ?? '';
+            form.append('descricao', observacoes);
+            form.append('observacoes', observacoes);
             form.append('dataNascimento', formData.dataNascimento || '');
             form.append('dataMorte', formData.dataMorte || '');
             form.append('localizacao', localizacao);
             form.append('tipo', formData.tipo || 'historica');
+            form.append('tipoEstrutura', formData.tipoEstrutura || '');
+            form.append('responsavelNome', formData.responsavelNome || '');
+            form.append('responsavelParentesco', formData.responsavelParentesco || '');
+            form.append('responsavelTelefone', formData.responsavelTelefone || '');
 
             if (selectedImageFile) form.append('imagem', selectedImageFile);
             else if (imageRemoved) form.append('imagem', '');
@@ -239,11 +247,16 @@ export default function AdminFalecidos({ onLogout }) {
                 : {
                     nome: formData.nome || '',
                     biografia: formData.biografia || '',
-                    descricao: formData.descricao || '',
-                    dataNascimento: formData.dataNascimento || '',
-                    dataMorte: formData.dataMorte || '',
+                    descricao: formData.observacoes ?? formData.descricao ?? '',
+                    observacoes: formData.observacoes ?? formData.descricao ?? '',
+                    dataNascimento: formData.dataNascimento || null,
+                    dataMorte: formData.dataMorte || null,
                     localizacao,
                     tipo: formData.tipo || 'historica',
+                    tipoEstrutura: formData.tipoEstrutura || '',
+                    responsavelNome: formData.responsavelNome || '',
+                    responsavelParentesco: formData.responsavelParentesco || '',
+                    responsavelTelefone: formData.responsavelTelefone || '',
                 };
 
             if (selectedFalecido) {
@@ -348,7 +361,7 @@ export default function AdminFalecidos({ onLogout }) {
             if (s) setor = s[1].trim();
             if (l) lote = l[1].trim();
         }
-        setFormData({ ...falecido, setor, lote });
+        setFormData({ ...EMPTY_FORM, ...falecido, setor, lote });
         setSelectedImageFile(null);
         setImagePreview(falecido.imagem || '');
         setIsFormModalOpen(true);

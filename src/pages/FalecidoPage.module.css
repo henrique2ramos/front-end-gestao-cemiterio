@@ -118,17 +118,22 @@
 }
 
 .photoWrapper {
+  display: block;
   position: relative;
   z-index: 1;
   flex-shrink: 0;
-  width: 250px;
-  height: 250px;
+  width: clamp(190px, 17vw, 230px);
+  height: clamp(190px, 17vw, 230px);
   border-radius: 50%;
   box-shadow: 0 8px 22px rgba(0, 34, 68, 0.14);
   background: #f4f7f9;
   overflow: hidden;
   border: 3px solid #ffd283;
+  padding: 0;
+  cursor: zoom-in;
 }
+
+.photoWrapper:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
 
 .photo {
   width: 100%;
@@ -246,6 +251,15 @@
 }
 .shareButton:hover { border-color: #ffffff; background: rgba(255, 255, 255, 0.12); }
 
+.shareMenuWrapper { position: relative; display: inline-flex; }
+.shareMenu { position: absolute; z-index: 10; right: 0; bottom: calc(100% + 8px); display: grid; width: max-content; min-width: 210px; gap: 3px; padding: 6px; border: 1px solid #dbe4ef; border-radius: 10px; background: #fff; box-shadow: 0 8px 24px rgba(13, 39, 70, 0.18); text-align: left; }
+.shareMenu > a,
+.shareMenu > button { display: flex; min-height: 40px; align-items: center; gap: 10px; padding: 0 10px; border: 0; border-radius: 7px; background: transparent; color: #29415e; font: inherit; font-size: 0.88rem; font-weight: 500; text-align: left; text-decoration: none; cursor: pointer; }
+.shareMenu > a:hover,
+.shareMenu > button:hover { background: #f1f5f9; }
+.shareMenu > .whatsappShare { color: #16834a; font-weight: 650; }
+.shareMenu > .whatsappShare:hover { background: #eef9f2; }
+
 .actionButtons .mapButton {
   border-color: #ffffff;
   background: #ffffff;
@@ -320,11 +334,11 @@
 }
 .bioTextWrap { position: relative; }
 .bioTextWrap .contentTitle { margin-bottom: 12px; color: #1565c0; text-align: center; }
-.bioTextWrap .bioText { margin-inline: auto; text-align: center; text-align-last: center; }
+.bioTextWrap .bioText { margin: 0; text-align: left; text-align-last: auto; }
 .bioCollapsed { max-height: 12.8em; overflow: hidden; }
 .bioCollapsed::after { position: absolute; right: 0; bottom: 0; left: 0; height: 2.5em; background: linear-gradient(transparent, rgba(255, 255, 255, 0.62)); content: ''; pointer-events: none; }
 .emptyBio { margin: 0; color: #66758a; font-size: 0.96rem; line-height: 1.7; text-align: center; }
-.readMore { display: inline-flex; align-items: center; gap: 6px; margin: 10px 0 0; padding: 0; border: 0; background: transparent; color: #1565c0; font: inherit; font-weight: 700; cursor: pointer; }
+.readMore { display: flex; width: 100%; align-items: center; justify-content: center; gap: 6px; margin: 20px 0 0; padding: 14px 0 0; border: 0; border-top: 1px solid #e8edf3; background: transparent; color: #1565c0; font: inherit; font-weight: 700; cursor: pointer; }
 .readMore svg { transform: rotate(90deg); transition: transform 160ms ease; }
 .readMore .readMoreExpanded { transform: rotate(-90deg); }
 .gallerySection {
@@ -459,100 +473,6 @@
   line-height: 1.6;
 }
 
-.lightbox {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: rgba(0, 20, 40, 0.95);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-.lightboxClose {
-  position: fixed;
-  
-  top: 24px;
-  right: 24px;
-  color: #111111;
-  background: #ffffff;
-  border-radius: 50%;
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  z-index: 10000;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-  transition: all 0.2s ease;
-  cursor: pointer;
-}
-
-.lightboxClose:hover {
-  background: #f0f0f0;
-  transform: scale(1.1);
-}
-
-.lightboxNav {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  color: white;
-  font-size: 3rem;
-  line-height: 1;
-  padding: 24px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  border: none;
-  z-index: 10000;
-  transition: background 0.2s;
-  cursor: pointer;
-}
-
-.lightboxNav:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.lightboxPrev {
-  left: 24px;
-}
-
-.lightboxNext {
-  right: 24px;
-}
-
-.lightboxInner {
-  max-width: 85vw;
-  max-height: 85vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  cursor: default;
-  z-index: 10000;
-}
-
-.lightboxInner img {
-  max-width: 100%;
-  max-height: 75vh;
-  object-fit: contain;
-  border-radius: 8px;
-}
-
-.lightboxInner p {
-  margin-top: 16px;
-  color: white;
-  font-size: 1.1rem;
-  text-align: center;
-}
-
-.lightboxInner span {
-  margin-top: 8px;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 0.9rem;
-}
-
 @media (max-width: 900px) {
   .profileHeader {
     flex-direction: column;
@@ -581,7 +501,7 @@
 }
 
 @media (max-width: 600px) {
-  .page { overflow-x: hidden; }
+  .page { width: 100%; max-width: 100%; overflow-x: clip; }
   .page,
   .container,
   .mainSection,
@@ -590,27 +510,28 @@
   .memorialSections { width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; }
   .memorialSections { min-height: clamp(300px, 36vh, 420px); margin-left: 0; }
   .container { padding: 0; }
-  .profileHeader { margin-left: 0; flex-direction: column; align-items: center; justify-content: flex-start; padding: 72px 18px 32px; gap: 18px; text-align: center; }
+  .profileHeader { margin-left: 0; flex-direction: column; align-items: center; justify-content: flex-start; padding: 58px 18px 26px; gap: 14px; text-align: center; }
   .profileBackNav { top: 18px; left: 18px; }
   .memorialLeaf { display: none; }
 
-  .photoWrapper { width: 164px; height: 164px; }
+  .photoWrapper { width: 154px; height: 154px; }
   .infoWrapper { width: 100%; min-width: 0; flex: 0 1 auto; align-items: center; }
   .name {
     width: 100%;
     margin-bottom: 12px;
-    font-size: clamp(1.45rem, 6vw, 1.75rem);
+    font-size: clamp(1.55rem, 6.2vw, 1.85rem);
     overflow-wrap: anywhere;
     text-align: center;
   }
 
   .breadcrumb { padding: 18px 18px 8px; font-size: 0.82rem; }
-  .metadata { display: grid; width: 100%; max-width: 340px; grid-template-columns: repeat(2, minmax(0, 1fr)); justify-content: center; gap: 8px 6px; margin-bottom: 14px; }
+  .metadata { display: grid; width: 100%; max-width: 390px; grid-template-columns: repeat(3, minmax(0, 1fr)); justify-content: center; gap: 8px 6px; margin-bottom: 12px; }
   .metadataHasAge { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .metaItem { display: flex; min-width: 0; min-height: 38px; flex-direction: column; align-items: center; justify-content: flex-start; gap: 1px; text-align: center; }
-  .metaLocation { grid-column: 1 / -1; min-height: 0; }
-  .metaLabel { font-size: 0.65rem; }
-  .metaValue { max-width: 100%; font-size: 0.92rem; text-align: center; overflow-wrap: anywhere; }
+  .metaItem { display: flex; min-width: 0; min-height: 34px; flex-direction: column; align-items: center; justify-content: flex-start; gap: 2px; text-align: center; }
+  .metaItemMissing .metaValue { color: rgba(255, 255, 255, 0.62); font-weight: 400; }
+  .metaLocation { grid-column: 1 / -1; min-height: 0; margin-top: 2px; padding-top: 8px; border-top: 1px solid rgba(255, 255, 255, 0.22); }
+  .metaLabel { color: rgba(255, 222, 165, 0.86); font-size: 0.6rem; letter-spacing: 0.07em; }
+  .metaValue { max-width: 100%; color: rgba(255, 255, 255, 0.92); font-size: 0.9rem; font-weight: 500; line-height: 1.3; text-align: center; overflow-wrap: anywhere; }
   .contentTitle { font-size: 1.55rem; }
   .galleryHeader { gap: 10px; margin-bottom: 12px; }
 
@@ -641,19 +562,23 @@
     width: 100%;
     min-width: 0;
     max-width: 100%;
+    min-height: 36px;
     white-space: normal;
-    padding-right: 12px;
-    padding-left: 12px;
+    padding: 7px 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
   }
 
-  .shareButton { padding-right: 16px; padding-left: 16px; }
-
-  .lightboxClose {
-    top: 16px;
-    right: 16px;
-    width: 44px;
-    height: 44px;
+  .actionButtons .mapButton {
+    border-color: #ffffff;
+    background: #ffffff;
+    color: #1565c0;
   }
+  .actionButtons .mapButton:hover { border-color: #eaf2fc; background: #eaf2fc; }
+  .shareButton { border-color: rgba(255, 255, 255, 0.82); color: #ffffff; }
+  .actionButtons > button svg { width: 14px; height: 14px; }
+  .shareMenuWrapper { width: 100%; }
+  .shareMenu { right: 0; left: 0; width: auto; min-width: 0; }
 
   .tabContent {
     width: 100%;
@@ -661,7 +586,7 @@
   }
 
   .tabNav { width: 100%; min-width: 0; justify-content: center; gap: clamp(16px, 7vw, 28px); }
-  .tabBtn { padding: 14px 0; font-size: 0.78rem; }
+  .tabBtn { padding: 12px 0; font-size: clamp(0.72rem, 3.3vw, 0.78rem); white-space: nowrap; }
 
   .tributeBox {
     flex-direction: column;
@@ -682,20 +607,4 @@
 
 
   .thumbOverlay { padding: 10px; font-size: 0.78rem; }
-
-  .lightboxNav {
-    font-size: 2rem;
-    padding: 16px;
-  }
-
-  .lightboxPrev {
-    left: 10px;
-  }
-
-  .lightboxNext {
-    right: 10px;
-  }
-
-  .lightboxInner { max-width: calc(100vw - 32px); }
-  .lightboxInner img { max-width: 100%; max-height: 68vh; }
 }

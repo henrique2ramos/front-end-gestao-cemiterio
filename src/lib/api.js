@@ -1,6 +1,21 @@
 import { normalizeFalecidoNames, normalizeFalecidoPayload } from './falecidoName';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
+const ADMINISTRATIVE_DECEASED_FIELDS = [
+  'tipoEstrutura', 'responsavelNome', 'responsavelParentesco', 'responsavelTelefone', 'responsavelEmail',
+];
+
+function removeFalecidoAdministrativeFields(value) {
+  if (Array.isArray(value)) return value.map(removeFalecidoAdministrativeFields);
+  if (!value || typeof value !== 'object') return value;
+
+  const sanitized = { ...value };
+  ADMINISTRATIVE_DECEASED_FIELDS.forEach((field) => delete sanitized[field]);
+  Object.keys(sanitized).forEach((key) => {
+    sanitized[key] = removeFalecidoAdministrativeFields(sanitized[key]);
+  });
+  return sanitized;
+}
 
 export function resolveImageUrl(value) {
   if (!value) return '';
@@ -73,8 +88,10 @@ export async function fetchFalecidos({ page, limit } = {}) {
   return [];
 }
 
-export async function fetchFalecidoById(id) {
-  return normalizeFalecidoNames(await request(`/api/falecidos/${id}`));
+export async function fetchFalecidoById(id, { includeAdministrative = false } = {}) {
+  const record = normalizeFalecidoNames(await request(`/api/falecidos/${id}`));
+  if (includeAdministrative || !record || typeof record !== 'object') return record;
+  return removeFalecidoAdministrativeFields(record);
 }
 
 export async function fetchFalecidosPorLote(loteId) {
