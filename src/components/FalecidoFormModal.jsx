@@ -67,17 +67,23 @@ export default function FalecidoFormModal({
         <div className={styles.overlay} onClick={onClose}>
             <div className={styles.content} onClick={(event) => event.stopPropagation()}>
                 <div className={styles.header}>
-                    <h2 className={styles.title}>{selectedFalecido ? 'Editar Falecido' : 'Novo Falecido'}</h2>
+                    <div className={styles.headerText}>
+                        <h2 className={styles.title}>{selectedFalecido ? 'Editar informações do falecido' : 'Cadastro de falecido'}</h2>
+                    </div>
                     <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="Fechar">
                         <X size={24} />
                     </button>
                 </div>
                 <div className={styles.body}>
                     <form onSubmit={onSubmit} className={styles.formGrid}>
+                        <div className={styles.formNotice}>
+                            <strong>Campos com * são obrigatórios no sistema.</strong>
+                            <span>As datas de nascimento e falecimento são opcionais. Se não souber, deixe em branco.</span>
+                        </div>
                         <div className={styles.formCol}>
-                            <h3 className={styles.sectionTitle}>Dados Pessoais e Localização</h3>
+                            <h3 className={styles.sectionTitle}><span>1.</span> Identificação</h3>
                             <div className={styles.formGroup}>
-                                <label>Nome Completo{required}</label>
+                                <label>Nome completo{required}</label>
                                 <input type="text" name="nome" placeholder="Ex: Maria Aparecida" required value={formData.nome} onChange={onInputChange} />
                             </div>
                             <div className={styles.formRow}>
@@ -86,7 +92,7 @@ export default function FalecidoFormModal({
                                     ['dataMorte', 'Data de Falecimento', datePickerRefs.death]
                                 ].map(([name, label, ref]) => (
                                     <div className={styles.formGroup} key={name}>
-                                    <label>{label}</label>
+                                    <label>{label} <span className={styles.optionalLabel}>(opcional)</span></label>
                                     <div className={styles.dateInputWrap}>
                                             <input className={styles.dateText} type="text" name={name} pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}" title="Use o formato dd/mm/aaaa" placeholder="dd/mm/aaaa" inputMode="numeric" value={formData[name]} onChange={onInputChange} />
                                             <button type="button" className={styles.datePickerButton} aria-label={`Abrir calendário para ${label.toLowerCase()}`} onClick={() => openCalendar(ref)}><CalendarDays size={18} /></button>
@@ -95,50 +101,60 @@ export default function FalecidoFormModal({
                                     </div>
                                 ))}
                             </div>
-                            <div className={styles.formRow}>
                             <div className={styles.formGroup}>
+                                <label>Categoria{required} <span className={styles.optionalLabel}>marque uma opção</span></label>
+                                <div className={styles.categoryChoices} role="radiogroup" aria-label="Categoria do memorial">
+                                    <label className={styles.categoryChoice}>
+                                        <input type="radio" name="tipo" value="historica" checked={formData.tipo === 'historica'} required={requiredFields} onChange={onInputChange} />
+                                        Personalidade histórica
+                                    </label>
+                                    <label className={styles.categoryChoice}>
+                                        <input type="radio" name="tipo" value="recente" checked={formData.tipo === 'recente'} required={requiredFields} onChange={onInputChange} />
+                                        Falecido recente
+                                    </label>
+                                </div>
+                            </div>
+                            <h3 className={`${styles.sectionTitle} ${styles.locationSectionTitle}`}><span>2.</span> Localização no cemitério</h3>
+                            <div className={styles.locationFields}>
+                                <div className={styles.formGroup}>
                                     <label>Quadra{required}</label>
                                     <AutocompleteInput name="setor" value={formData.setor} options={quadraOptions} placeholder="Digite ou selecione a quadra" ariaLabel="Quadra" required={requiredFields} onChange={onQuadraChange} />
                                 </div>
-                            <div className={styles.formGroup}>
+                                <div className={styles.formGroup}>
                                     <label>Lote{required}</label>
                                     <AutocompleteInput name="lote" value={formData.lote} options={loteOptions} placeholder="Digite ou selecione o lote" ariaLabel="Lote" required={requiredFields} onChange={onLoteChange} />
                                 </div>
-                            </div>
-                            <div className={styles.formGroup}>
-                                <label htmlFor="tipo-estrutura">Tipo de estrutura funerária</label>
-                                <select id="tipo-estrutura" name="tipoEstrutura" value={formData.tipoEstrutura || ''} onChange={onInputChange}>
-                                    <option value="">Selecione (opcional)</option>
-                                    <option value="Túmulo">Túmulo</option>
-                                    <option value="Cova">Cova</option>
-                                    <option value="Carneira">Carneira</option>
-                                    <option value="Outro">Outro</option>
-                                </select>
-                            </div>
                                 <div className={styles.formGroup}>
-                                <label>Categoria (Tipo){required}</label>
-                                <select name="tipo" required={requiredFields} value={formData.tipo} onChange={onInputChange}>
-                                    <option value="historica">Personalidade Histórica</option>
-                                    <option value="recente">Falecido Recente</option>
-                                </select>
+                                    <label htmlFor="tipo-estrutura">Tipo de estrutura funerária</label>
+                                    <select id="tipo-estrutura" name="tipoEstrutura" value={formData.tipoEstrutura || ''} onChange={onInputChange}>
+                                        <option value="">Selecione (opcional)</option>
+                                        <option value="Túmulo">Túmulo</option>
+                                        <option value="Cova">Cova</option>
+                                        <option value="Carneira">Carneira</option>
+                                        <option value="Outro">Outro</option>
+                                    </select>
+                                </div>
                             </div>
+
                         </div>
                         <div className={styles.formCol}>
-                            <h3 className={styles.sectionTitle}>Biografia e Detalhes</h3>
+                            <h3 className={styles.sectionTitle}><span>3.</span> Biografia</h3>
                             <div className={styles.formGroup}>
                                 <label>Biografia Completa</label>
-                                <textarea name="biografia" rows="6" placeholder="Escreva a história completa do falecido aqui..." value={formData.biografia} onChange={onInputChange} />
+                                <textarea name="biografia" rows="8" placeholder="Escreva a história completa do falecido aqui..." value={formData.biografia} onChange={onInputChange} />
                                 <small className={styles.inputHelp}>Opcional. Se não houver informação, o memorial mostrará “Biografia não informada”.</small>
                             </div>
+                            <h3 className={styles.sectionTitle}><span>4.</span> Observações</h3>
                             <div className={styles.formGroup}>
                                 <label>Observações</label>
-                                <textarea name="observacoes" rows="6" placeholder="Anotações sobre a pessoa ou o lote..." value={formData.observacoes ?? formData.descricao ?? ''} onChange={onInputChange} />
+                                <textarea name="observacoes" rows="5" placeholder="Anotações sobre a pessoa ou o lote..." value={formData.observacoes ?? formData.descricao ?? ''} onChange={onInputChange} />
                                 <small className={styles.inputHelp}>Opcional. Informação administrativa, não exibida no memorial público.</small>
                             </div>
                         </div>
 
+                        <div className={styles.mediaAndResponsible}>
                         <section className={`${styles.formCol} ${styles.responsibleSection}`}>
-                            <h3 className={styles.sectionTitle}>Dados do responsável</h3>
+                            <h3 className={styles.sectionTitle}><span>5.</span> Dados do responsável</h3>
                             <div className={styles.responsibleFields}>
                                 <div className={`${styles.formGroup} ${styles.responsibleName}`}>
                                     <label htmlFor="responsavel-nome">Nome completo</label>
@@ -156,7 +172,7 @@ export default function FalecidoFormModal({
                         </section>
 
                         <section className={`${styles.formCol} ${styles.imageSection}`}>
-                            <h3 className={styles.sectionTitle}>Imagens</h3>
+                            <h3 className={styles.sectionTitle}><span>6.</span> Imagens</h3>
                             <div className={styles.imageFields}>
                                 <div className={styles.formGroup}>
                                 <label>Imagem de Perfil</label>
@@ -200,6 +216,7 @@ export default function FalecidoFormModal({
                                 </div>
                             </div>
                         </section>
+                        </div>
                         <div className={styles.actions}>
                             <button type="button" className={styles.cancelBtn} onClick={onClose}>Cancelar</button>
                             <button type="submit" className={styles.saveBtn}>Salvar Registro</button>

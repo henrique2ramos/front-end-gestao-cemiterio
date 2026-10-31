@@ -196,7 +196,7 @@ export default function FalecidoPage() {
                   Voltar
                 </button>
               </div>
-              <button type="button" className={styles.photoWrapper} onClick={openProfileImage} aria-label={`Ampliar foto de ${falecido.nome}`}>
+              <button type="button" className={styles.photoWrapper} onClick={(event) => { event.preventDefault(); event.stopPropagation(); openProfileImage(); }} aria-label={`Ampliar foto de ${falecido.nome}`}>
                 <img
                   src={profileImage}
                   alt={falecido.nome}

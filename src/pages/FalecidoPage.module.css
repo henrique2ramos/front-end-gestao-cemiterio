@@ -511,16 +511,16 @@
   .memorialSections { width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; }
   .memorialSections { min-height: clamp(300px, 36vh, 420px); margin-left: 0; }
   .container { padding: 0; }
-  .profileHeader { margin-left: 0; flex-direction: column; align-items: center; justify-content: flex-start; padding: 58px 18px 26px; gap: 14px; text-align: center; }
+  .profileHeader { margin-left: 0; flex-direction: column; align-items: center; justify-content: flex-start; padding: 48px 18px 26px; gap: 14px; text-align: center; }
   .profileBackNav { top: 18px; left: 18px; }
   .memorialLeaf { display: none; }
 
-  .photoWrapper { width: 168px; height: 168px; }
+  .photoWrapper { width: 176px; height: 176px; }
   .infoWrapper { width: 100%; min-width: 0; flex: 0 1 auto; align-items: center; }
   .name {
     width: 100%;
     margin-bottom: 12px;
-    font-size: clamp(1.62rem, 6.5vw, 1.95rem);
+    font-size: clamp(1.72rem, 6.8vw, 2.05rem);
     overflow-wrap: anywhere;
     text-align: center;
   }

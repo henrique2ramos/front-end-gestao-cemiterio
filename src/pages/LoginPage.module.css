@@ -345,3 +345,14 @@
 .submitButton:hover {
   background: #0d477e;
 }
+
+.modalOverlay { background: rgba(15, 23, 42, 0.5); }
+.modalCard {
+  border: 1px solid #e5ebf2;
+  border-top: 3px solid #d8b45e;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.16);
+}
+.modalButton { border-radius: 6px; background: #1765b8; box-shadow: none; }
+.modalButton:hover { background: #0d477e; }

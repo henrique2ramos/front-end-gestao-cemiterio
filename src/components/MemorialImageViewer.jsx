@@ -215,6 +215,18 @@ export default function MemorialImageViewer({ images, index, onNavigate, onClose
     applyZoom(scaleRef.current + (event.deltaY < 0 ? 0.2 : -0.2));
   };
 
+  const handleStageClick = (event) => {
+    event.stopPropagation();
+    if (gestureRef.current.moved) return;
+
+    const bounds = imageRef.current?.getBoundingClientRect();
+    const clickedOnImage = bounds
+      && event.clientX >= bounds.left && event.clientX <= bounds.right
+      && event.clientY >= bounds.top && event.clientY <= bounds.bottom;
+
+    if (!clickedOnImage) requestClose();
+  };
+
   if (!activeImage) return null;
 
   return (
@@ -231,10 +243,10 @@ export default function MemorialImageViewer({ images, index, onNavigate, onClose
 
       <div className={styles.zoomControls} onClick={(event) => event.stopPropagation()}>
         <button type="button" onClick={() => applyZoom(scaleRef.current + 0.5)} aria-label="Aumentar zoom" disabled={scale >= MAX_ZOOM}>
-          <ZoomIn size={18} /><span>+</span>
+          <ZoomIn size={18} />
         </button>
         <button type="button" onClick={() => applyZoom(scaleRef.current - 0.5)} aria-label="Diminuir zoom" disabled={scale <= MIN_ZOOM}>
-          <ZoomOut size={18} /><span>−</span>
+          <ZoomOut size={18} />
         </button>
         <button type="button" onClick={resetZoom} aria-label="Restaurar zoom" disabled={scale === MIN_ZOOM}>
           <RotateCcw size={17} />
@@ -255,7 +267,7 @@ export default function MemorialImageViewer({ images, index, onNavigate, onClose
       <div
         ref={stageRef}
         className={`${styles.stage} ${scale > 1 ? styles.stageZoomed : ''}`}
-        onClick={(event) => event.stopPropagation()}
+        onClick={handleStageClick}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
@@ -273,7 +285,7 @@ export default function MemorialImageViewer({ images, index, onNavigate, onClose
           style={{
             width: fitSize.width ? `${fitSize.width}px` : undefined,
             height: fitSize.height ? `${fitSize.height}px` : undefined,
-            transform: `translate(-50%, -50%) translate3d(${position.x}px, ${position.y}px, 0) scale(${scale})`,
+            transform: `translate(-50%, -50%) translate3d(${position.x}px, ${position.y}px, 0) scale(${scale > MIN_ZOOM ? scale * 1.004 : scale})`,
           }}
         />
       </div>

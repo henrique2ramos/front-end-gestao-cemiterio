@@ -729,6 +729,16 @@
     line-height: 1.4;
 }
 
+.deceasedDates {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.deceasedDates span + span::before {
+    content: ' · ';
+    white-space: pre;
+}
+
 @media (max-width: 1024px) {
     .layout {
         grid-template-columns: 1fr;
@@ -789,4 +799,11 @@
         min-width: 0;
         line-height: 1.4;
     }
+
+    .deceasedDates {
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .deceasedDates span + span::before { content: none; }
 }

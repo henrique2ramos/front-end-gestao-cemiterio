@@ -42,12 +42,13 @@
   height: auto;
   object-fit: contain;
   transform-origin: center;
-  transition: transform 120ms ease-out;
+  transition: none;
+  border: 0;
+  outline: 0;
+  box-shadow: none;
   pointer-events: none;
   user-select: none;
 }
-
-.stageZoomed .image { transition: none; }
 
 .closeButton,
 .zoomControls button,
@@ -81,15 +82,16 @@
 .zoomControls {
   position: absolute;
   z-index: 2;
-  top: 20px;
-  left: 22px;
+  top: 18px;
+  right: 74px;
   display: flex;
   gap: 8px;
 }
 
-.zoomControls button { min-width: 42px; height: 42px; gap: 4px; border-radius: 8px; }
+.zoomControls button { width: 44px; height: 44px; padding: 0; border-radius: 50%; }
 .zoomControls button:disabled { opacity: 0.4; cursor: default; }
-.zoomControls button span { font-size: 0.78rem; }
+.zoomControls button:focus:not(:focus-visible) { outline: none; }
+.zoomControls button:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 
 .navButton {
   position: absolute;

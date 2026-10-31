@@ -417,6 +417,15 @@
     .previewCard p { font-size: 0.6rem; }
     .previewCard svg { width: min(70px, 36%); }
 }
+
+/* Acabamento do formulário aplicado também aos diálogos do seletor. */
+.exportModalOverlay { background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); }
+.exportModal {
+    border: 1px solid #e5ebf2;
+    border-radius: 12px;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.16);
+}
+.exportModal { border-top: 3px solid #d8b45e; }
 .filterSearch,
 .loteSearchControl { border-color: #c6dcf3; color: #0866c6; }
 .locationFilters label { color: #37638f; }

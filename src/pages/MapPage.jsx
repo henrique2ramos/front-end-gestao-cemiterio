@@ -501,9 +501,9 @@ export default function MapPage() {
                                                             />
                                                             <span className={styles.deceasedInfo}>
                                                                 <strong>{falecido.nome}</strong>
-                                                                <small>
-                                                                    Nascimento: {falecido.dataNascimento || falecido.anoNascimento || '—'}
-                                                                    {' · Falecimento: '}{falecido.dataMorte || falecido.anoMorte || '—'}
+                                                                <small className={styles.deceasedDates}>
+                                                                    <span>Nascimento: {falecido.dataNascimento || falecido.anoNascimento || '—'}</span>
+                                                                    <span>Falecimento: {falecido.dataMorte || falecido.anoMorte || '—'}</span>
                                                                 </small>
                                                             </span>
                                                             <ChevronRight size={17} aria-hidden="true" />

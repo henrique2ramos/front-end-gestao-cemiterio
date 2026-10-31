@@ -184,75 +184,87 @@ export default function FalecidoDetailsModal({ falecido, onClose }) {
         </header>
 
         <div className={styles.body}>
-          <div className={styles.profile}>
-            {possuiImagem ? (
-              <button type="button" className={styles.photoButton} onClick={() => openPhoto({ src: imagem, alt: record.nome || 'Foto do falecido' })} aria-label={`Ampliar foto de ${record.nome || 'falecido'}`}>
-                <img
-                  className={styles.photo}
-                  src={imagem}
-                  alt={record.nome || 'Foto do falecido'}
-                  onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = personPlaceholder; }}
-                />
-              </button>
-            ) : (
-              <div className={styles.photoFallback} role="img" aria-label="Foto não informada">Foto não informada</div>
-            )}
-            <div className={styles.profileInfo}>
-              <div className={styles.profileHeading}>
-                <h3>{record.nome || 'Nome não informado'}</h3>
-                <span className={`${styles.badge} ${record.tipo === 'recente' ? styles.recent : styles.historical}`}>
-                  {record.tipo === 'recente' ? 'Falecido recente' : 'Personalidade histórica'}
-                </span>
-              </div>
-              <div className={styles.metadata}>
-                <div><span>Nascimento</span><strong>{record.dataNascimento || record.anoNascimento || 'Não informado'}</strong></div>
-                <div><span>Falecimento</span><strong>{record.dataMorte || record.anoMorte || 'Não informado'}</strong></div>
-                <div><span>Idade</span><strong>{idadeLabel}</strong></div>
-              </div>
-              <div className={styles.profileLocation}>
-                <div><span>Quadra</span><strong>{quadra || 'Não informada'}</strong></div>
-                <div><span>Lote</span><strong>{lote || 'Não informado'}</strong></div>
-                <div><span>Tipo de estrutura</span><strong>{record.tipoEstrutura || 'Não informado'}</strong></div>
-              </div>
-            </div>
-          </div>
-
           <div className={styles.detailsGrid}>
-            <section className={`${styles.section} ${styles.responsibleSection}`}>
-              <h4>Dados do responsável</h4>
-              <dl className={styles.detailList}>
-                <div><dt>Nome</dt><dd>{record.responsavelNome || 'Não informado'}</dd></div>
-                <div><dt>Parentesco ou vínculo</dt><dd>{record.responsavelParentesco || 'Não informado'}</dd></div>
-                <div><dt>Telefone</dt><dd>{record.responsavelTelefone || 'Não informado'}</dd></div>
-              </dl>
-            </section>
-
-            <section className={`${styles.section} ${styles.biographySection}`}>
-              <h4>Biografia</h4>
-              <div className={`${styles.bioTextWrap} ${shouldCollapseBio && !bioExpanded ? styles.bioCollapsed : ''}`}>
-                <p>{biografia}</p>
+            <section className={`${styles.section} ${styles.identificationSection}`}>
+              <h4><span>1.</span> Identificação</h4>
+              <div className={styles.identityTopRow}>
+                <div className={styles.identityPhotoField}>
+                  <span className={styles.imageFieldLabel}>Imagem de perfil</span>
+                  {possuiImagem ? (
+                    <button type="button" className={styles.photoButton} onClick={() => openPhoto({ src: imagem, alt: record.nome || 'Foto do falecido' })} aria-label={`Ampliar foto de ${record.nome || 'falecido'}`}>
+                      <img
+                        src={imagem}
+                        alt={record.nome || 'Foto do falecido'}
+                        onLoad={(event) => {
+                          const image = event.currentTarget;
+                          image.classList.toggle(styles.portraitPhoto, image.naturalHeight > image.naturalWidth);
+                          image.classList.toggle(styles.landscapePhoto, image.naturalWidth > image.naturalHeight);
+                        }}
+                        onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = personPlaceholder; }}
+                      />
+                    </button>
+                  ) : <div className={styles.photoFallback}>Foto não informada</div>}
+                </div>
+                <div className={styles.identityData}>
+                  <div className={`${styles.recordField} ${styles.identityNameField}`}>
+                    <span>Nome completo</span>
+                    <strong>{record.nome || 'Não informado'}</strong>
+                  </div>
+                  <div className={`${styles.metadata} ${styles.identityDates}`}>
+                    <div className={styles.recordField}><span>Data de nascimento</span><strong>{record.dataNascimento || record.anoNascimento || 'Não informado'}</strong></div>
+                    <div className={styles.recordField}><span>Data de falecimento</span><strong>{record.dataMorte || record.anoMorte || 'Não informado'}</strong></div>
+                  </div>
+                  <div className={`${styles.metadata} ${styles.identityCategory}`}>
+                    <div className={styles.recordField}><span>Idade</span><strong>{idadeLabel}</strong></div>
+                    <div className={styles.recordField}><span>Categoria</span><strong>{record.tipo === 'recente' ? 'Falecido recente' : 'Personalidade histórica'}</strong></div>
+                  </div>
+                </div>
               </div>
-              {shouldCollapseBio && (
-                <button type="button" className={styles.readMore} onClick={() => setBioExpanded((expanded) => !expanded)}>
-                  {bioExpanded ? 'Recolher biografia' : 'Ler biografia completa'}
-                  <ChevronRight size={17} className={bioExpanded ? styles.readMoreExpanded : ''} />
-                </button>
-              )}
             </section>
-
+            <section className={`${styles.section} ${styles.locationSection}`}>
+              <h4><span>2.</span> Localização no cemitério</h4>
+              <div className={styles.profileLocation}>
+                <div className={styles.recordField}><span>Quadra</span><strong>{quadra || 'Não informada'}</strong></div>
+                <div className={styles.recordField}><span>Lote</span><strong>{lote || 'Não informado'}</strong></div>
+                <div className={styles.recordField}><span>Tipo de estrutura funerária</span><strong>{record.tipoEstrutura || 'Não informado'}</strong></div>
+              </div>
+            </section>
+            <section className={`${styles.section} ${styles.biographySection}`}>
+              <h4><span>3.</span> Biografia</h4>
+              <div className={styles.biographyBox}>
+                <div className={`${styles.biographyText} ${shouldCollapseBio && !bioExpanded ? styles.bioCollapsed : ''}`}>
+                  <p>{biografia || 'Biografia não informada.'}</p>
+                </div>
+                {shouldCollapseBio && (
+                  <button type="button" className={styles.readMore} onClick={() => setBioExpanded((expanded) => !expanded)}>
+                    {bioExpanded ? 'Recolher biografia' : 'Ler biografia completa'}
+                    <ChevronRight size={17} className={bioExpanded ? styles.readMoreExpanded : ''} />
+                  </button>
+                )}
+              </div>
+            </section>
             <section className={`${styles.section} ${styles.observationsSection}`}>
-              <h4>Observações</h4>
-              <p>{observacoes || 'Nenhuma observação informada.'}</p>
+              <h4><span>4.</span> Observações</h4>
+              <div className={styles.recordText}>
+                <p>{observacoes || 'Nenhuma observação informada.'}</p>
+              </div>
+            </section>
+            <section className={`${styles.section} ${styles.responsibleSection}`}>
+              <h4><span>5.</span> Dados do responsável</h4>
+              <div className={styles.responsibleFields}>
+                <div className={`${styles.recordField} ${styles.responsibleName}`}><span>Nome completo</span><strong>{record.responsavelNome || 'Não informado'}</strong></div>
+                <div className={styles.recordField}><span>Parentesco ou vínculo</span><strong>{record.responsavelParentesco || 'Não informado'}</strong></div>
+                <div className={styles.recordField}><span>Telefone</span><strong>{record.responsavelTelefone || 'Não informado'}</strong></div>
+              </div>
             </section>
           </div>
 
-          <section className={`${styles.section} ${styles.gallerySection}`}>
-            <h4 className={styles.galleryTitle}>
-              Galeria de fotos
-              <span>{galeria.length} {galeria.length === 1 ? 'foto' : 'fotos'}</span>
-            </h4>
-            {galeria.length > 0 ? (
-              <div className={styles.gallery}>
+            <section className={`${styles.section} ${styles.gallerySection}`}>
+              <h4><span className={styles.sectionNumber}>6.</span> Imagens</h4>
+              <div className={styles.galleryRecordField}>
+                  <span className={styles.imageFieldLabel}>Fotos da galeria ({galeria.length})</span>
+                  {galeria.length > 0 ? (
+                    <div className={styles.gallery}>
                 {galeria.map((src, index) => (
                   <button
                     key={`${src}-${index}`}
@@ -268,13 +280,14 @@ export default function FalecidoDetailsModal({ falecido, onClose }) {
                     />
                   </button>
                 ))}
+                    </div>
+                  ) : loadingFullRecord ? (
+                    <p className={styles.emptyGallery}>Carregando fotos...</p>
+                  ) : (
+                    <p className={styles.emptyGallery}>Nenhuma foto adicionada à galeria.</p>
+                  )}
               </div>
-            ) : loadingFullRecord ? (
-              <p className={styles.emptyGallery}>Carregando fotos...</p>
-            ) : (
-              <p className={styles.emptyGallery}>Nenhuma foto adicionada à galeria.</p>
-            )}
-          </section>
+            </section>
         </div>
       </section>
       {selectedPhoto && (
