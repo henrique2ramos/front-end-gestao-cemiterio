@@ -77,14 +77,13 @@
 
 .dates {
   font-size: 0.85rem;
-  color: #dbb612;
+  color: #ffd283;
   font-weight: 600;
   margin-bottom: 12px;
   letter-spacing: 0.1em;
 }
 
 .datesCompact {
-  /* Preserve the original date typography; only prevent a second line. */
   white-space: nowrap;
 }
 
