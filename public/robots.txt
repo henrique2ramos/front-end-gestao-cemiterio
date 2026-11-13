@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://front-end-gestao-cemiterio.vercel.app/sitemap.xml
